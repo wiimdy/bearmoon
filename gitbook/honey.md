@@ -4,7 +4,7 @@ icon: honey-pot
 
 # PoL 보안 가이드라인: 오라클 및 HONEY
 
-### 위협 1: 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직을 통해 프로토콜 및 사용자 피해
+### 위협 1: 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직
 
 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직(단일 소스 의존, 비대칭 처리 등)을 통해 HONEY 토큰의 민팅/리딤 과정에서 프로토콜 손실 또는 사용자 피해가 발생할 수 있다.
 
@@ -20,35 +20,56 @@ icon: honey-pot
 
 #### Best Practice
 
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 568-578)
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 155-162)
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 164-176)
+위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)&#x20;
+
+```solidity
+function isPegged(address asset) public view returns (bool) {
+    if (!priceOracle.priceAvailable(asset)) return false;
+    IPriceOracle.Data memory data = priceOracle.getPriceUnsafe(asset);
+    if (data.publishTime < block.timestamp - priceFeedMaxDelay) return false;
+    return (1e18 - lowerPegOffsets[asset] <= data.price) && (data.price <= 1e18 + upperPegOffsets[asset]);
+}
+```
+
+위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)&#x20;
+
+```solidity
+function setMaxFeedDelay(uint256 maxTolerance) external {
+    _checkRole(MANAGER_ROLE);
+    if (maxTolerance > MAX_PRICE_FEED_DELAY_TOLERANCE) {
+        AmountOutOfRange.selector.revertWith();
+    }
+    priceFeedMaxDelay = maxTolerance;
+    emit MaxFeedDelaySet(maxTolerance);
+}
+```
+
+`커스텀 코드` :
 
 ```solidity
 contract MultiOracleSystem {
     struct OracleData {
         address oracle;
         uint256 weight;
-        uint256 maxDeviation;
+        bool isActive;
     }
     
     mapping(address => OracleData[]) public assetOracles;
-    uint256 public constant MAX_PRICE_DEVIATION = 0.05e18; // 5%
     
     function getAggregatedPrice(address asset) external view returns (uint256) {
         OracleData[] memory oracles = assetOracles[asset];
-        uint256[] memory prices = new uint256[](oracles.length);
+        uint256 totalWeight = 0;
+        uint256 weightedSum = 0;
         
         for (uint256 i = 0; i < oracles.length; i++) {
-            prices[i] = IPriceOracle(oracles[i].oracle).getPrice(asset).price;
+            if (oracles[i].isActive) {
+                uint256 price = IPriceOracle(oracles[i].oracle).getPrice(asset);
+                weightedSum += price * oracles[i].weight;
+                totalWeight += oracles[i].weight;
+            }
         }
         
-        return _calculateMedian(prices);
-    }
-    
-    function _calculateMedian(uint256[] memory prices) internal pure returns (uint256) {
-        // 중앙값 계산 로직
-        return prices[prices.length / 2];
+        return totalWeight > 0 ? weightedSum / totalWeight : 0;
     }
 }
 ```
@@ -67,36 +88,36 @@ contract MultiOracleSystem {
 
 #### Best Practice
 
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 525-555)
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 147-153)
+* 위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
+
+```solidity
+function isBasketModeEnabled(bool isMint) public view returns (bool) {
+    if (forcedBasketMode) return true;
+    
+    for (uint256 i = 0; i < registeredAssets.length; i++) {
+        address asset = registeredAssets[i];
+        if (isBadCollateralAsset[asset] || vaults[asset].paused()) continue;
+        if (isMint && !isPegged(asset)) return true;
+    }
+    return false;
+}
+```
+
+`커스텀 코드` :&#x20;
 
 ```solidity
 contract TimeBasedDepegDetection {
     struct DepegRecord {
         uint256 startTime;
-        uint256 duration;
         bool isActive;
     }
     
     mapping(address => DepegRecord) public depegRecords;
     uint256 public constant MIN_DEPEG_DURATION = 1 hours;
-    uint256 public constant DEPEG_THRESHOLD = 0.005e18; // 0.5%
     
-    function checkDepegStatus(address asset) external view returns (bool) {
+    function checkSustainedDepeg(address asset) external view returns (bool) {
         DepegRecord memory record = depegRecords[asset];
-        if (!record.isActive) return false;
-        
-        return block.timestamp >= record.startTime + MIN_DEPEG_DURATION;
-    }
-    
-    function updateDepegStatus(address asset, uint256 price) external {
-        bool isDepegged = price < (1e18 - DEPEG_THRESHOLD) || price > (1e18 + DEPEG_THRESHOLD);
-        
-        if (isDepegged && !depegRecords[asset].isActive) {
-            depegRecords[asset] = DepegRecord(block.timestamp, 0, true);
-        } else if (!isDepegged) {
-            depegRecords[asset].isActive = false;
-        }
+        return record.isActive && block.timestamp >= record.startTime + MIN_DEPEG_DURATION;
     }
 }
 ```
@@ -114,8 +135,29 @@ Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환
 
 #### Best Practice
 
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 557-561)
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactoryReader.sol` (라인 213-235)
+* 위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L664-L693)&#x20;
+
+```solidity
+function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) internal view returns (uint256[] memory weights) {
+    weights = new uint256[](registeredAssets.length);
+    uint256 sum = 0;
+    
+    for (uint256 i = 0; i < registeredAssets.length; i++) {
+        if (filterBadCollaterals && isBadCollateralAsset[registeredAssets[i]]) continue;
+        if (filterPausedCollateral && vaults[registeredAssets[i]].paused()) continue;
+        
+        weights[i] = _getSharesWithoutFees(registeredAssets[i]);
+        sum += weights[i];
+    }
+    
+    if (sum == 0) return weights;
+    for (uint256 i = 0; i < registeredAssets.length; i++) {
+        weights[i] = weights[i] * 1e18 / sum;
+    }
+}
+```
+
+`커스텀 코드` :
 
 ```solidity
 contract TWAPBasedWeights {
@@ -134,13 +176,12 @@ contract TWAPBasedWeights {
         
         if (timeElapsed > 0) {
             data.cumulativePrice += currentPrice * timeElapsed;
-            data.twapPrice = data.cumulativePrice / TWAP_PERIOD;
+            if (timeElapsed >= TWAP_PERIOD) {
+                data.twapPrice = data.cumulativePrice / TWAP_PERIOD;
+                data.cumulativePrice = 0;
+            }
             data.lastUpdateTime = block.timestamp;
         }
-    }
-    
-    function getStableWeight(address asset) external view returns (uint256) {
-        return twapData[asset].twapPrice;
     }
 }
 ```
@@ -159,8 +200,29 @@ contract TWAPBasedWeights {
 
 #### Best Practice
 
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 376-420)
-* 위치: `BERA_CORE/contracts/src/honey/HoneyFactoryReader.sol` (라인 85-105)
+* 위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L368-L418)&#x20;
+
+```solidity
+function redeem(address asset, uint256 honeyAmount, address receiver, bool expectBasketMode) 
+    external whenNotPaused returns (uint256 redeemedAssets) {
+    _checkRegisteredAsset(asset);
+    
+    bool basketMode = isBasketModeEnabled(false);
+    if (basketMode != expectBasketMode) {
+        UnexpectedBasketModeStatus.selector.revertWith();
+    }
+    
+    if (!basketMode) {
+        _checkGoodCollateralAsset(asset);
+        redeemedAssets = _redeem(asset, honeyAmount, receiver);
+    } else {
+        uint256[] memory weights = _getWeights(false, true);
+        // Basket 모드 상환 로직
+    }
+}
+```
+
+`커스텀 코드` :
 
 ```solidity
 contract RedeemWarningSystem {
@@ -168,32 +230,28 @@ contract RedeemWarningSystem {
         bool hasDepeggedAssets;
         uint256 estimatedLoss;
         address[] depeggedAssets;
-        uint256[] depeggedPrices;
     }
     
-    mapping(address => bool) public userAcknowledged;
-    
-    function getRedeemWarning(uint256 honeyAmount) external view returns (RedeemWarning memory warning) {
-        // Basket 모드에서 디페깅된 자산 확인
+    function getRedeemWarning(uint256 honeyAmount) external view returns (RedeemWarning memory) {
         address[] memory assets = getRegisteredAssets();
+        uint256 depeggedCount = 0;
+        uint256 totalLoss = 0;
         
         for (uint256 i = 0; i < assets.length; i++) {
             if (!isPegged(assets[i])) {
-                warning.hasDepeggedAssets = true;
-                warning.depeggedAssets[i] = assets[i];
-                warning.depeggedPrices[i] = getPrice(assets[i]);
+                depeggedCount++;
+                totalLoss += calculateLoss(assets[i], honeyAmount);
             }
         }
         
-        if (warning.hasDepeggedAssets) {
-            warning.estimatedLoss = calculateEstimatedLoss(honeyAmount);
-        }
+        return RedeemWarning(depeggedCount > 0, totalLoss, assets);
     }
     
     function acknowledgeRisk(uint256 honeyAmount) external {
-        userAcknowledged[msg.sender] = true;
+        // 사용자 위험 인지 확인
+        emit RiskAcknowledged(msg.sender, honeyAmount);
     }
-}
+} 
 ```
 
 \
