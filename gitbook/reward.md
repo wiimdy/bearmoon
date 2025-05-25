@@ -4,13 +4,13 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-### 위협 7: 권한 없는 사용자의 Incentive token 조작 및 사용
+### 위협 7: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
 #### 가이드라인
 
-> * incentive token whitelist 관리 시 `maxIncentiveTokensCount` 제한 및 중복 등록 방지
-> * incentive rate 설정 시 MIN/MAX 범위 검증 및 manager 권한 제한
-> * ERC20 토큰 회수 시 incentive token 및 staked token을 제외하고 전송
+> * 인센티브 토큰 화이트리스트 관리 시 `maxIncentiveTokensCount` 제한 및 중복 등록 방지
+> * incentive rate 설정 시 MIN/MAX 범위 검증 및 매니저 권한 제한
+> * ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송
 
 #### Best Practice&#x20;
 
@@ -54,7 +54,7 @@ function whitelistIncentiveToken(
 > * 초기 설정 매개변수들의 합리적 범위 검증
 > * genesis deposits root 설정 등 초기 상태의 무결성 보장
 > * 초기화 함수의 멱등성 보장 및 재초기화 방지 메커니즘
-> * critical parameter 변경을 위한 rollback 메커니즘
+> * critical parameter 변경을 위한 롤백 메커니즘
 
 #### Best Practice&#x20;
 
@@ -109,7 +109,7 @@ bytes32 public genesisDepositsRoot;
 #### 가이드라인
 
 > * BGT redeem 시 컨트랙트 잔액 검증 및 충분한 native token 보유량 확보
-> * burnExceedingReserves 함수를 통한 초과 reserves 관리 및 적절한 버퍼 유지
+> * `burnExceedingReserves` 함수를 통한 초과 reserves 관리 및 적절한 버퍼 유지
 > * BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
 
 #### Best Practice&#x20;
@@ -185,7 +185,7 @@ function _notifyRewardAmount(uint256 reward)
 #### 가이드라인
 
 > * 각 함수 및 중요 데이터에 대해 명확한 역할(Owner, Admin, User 등)을 정의, 역할에 따른 접근 권한을 엄격히 부여
-> * onlyOwner, onlyRole 등의 modifier를 명확히 사용&#x20;
+> * `onlyOwner`, `onlyRole` 등의 modifier를 명확히 사용&#x20;
 > * 관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅
 
 #### Best Practice&#x20;
@@ -226,7 +226,7 @@ function getReward(
 
 ***
 
-### 위협 12: 재진입(Re-entrancy) 공격을 통해 보상 중복 청구
+### 위협 12: 재진입 공격을 통해 보상 중복 청구
 
 #### 가이드라인
 
@@ -269,7 +269,7 @@ function _getReward(address account, address recipient)
 
 #### 가이드라인
 
-> * 여러 종류  Reward vault에게 나눠 주도록 강제(실제 Berachain 정책 반영)
+> * 여러 종류  Reward vault에게 나눠 주도록 강제
 > * Operator/Validator reward allocation 변경 시 투명한 로그 기록 및 모니터링
 > * 담합 의심 시 거버넌스/커뮤니티 신고 및 감사 프로세스 마련
 > * vault별 TVL, APR, 유동성 집중도 실시간 대시보드 제공
@@ -306,7 +306,7 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 #### 가이드라인
 
-> * 악의적인 distributor 변경이 즉각 반영되는 것을 방지하기 위한 Timelock 등의 추가 보안 절차 반영 필요
+> * 악의적인 distributor 변경이 즉각 반영되는 것을 방지하기 위한 타임락 등의 추가 보안 절차 반영 필요
 > * 변경시 다중 서명 거버넌스 (3명 중 2/3 승인) 필요
 
 ***
@@ -324,13 +324,13 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ***
 
-### 위협 16: Incentive token이 고갈된 뒤에 추가 공급을 하지 않으면 벨리데이터의 Boost Reward 감소
+### 위협 16: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 벨리데이터의 Boost Reward 감소
 
 #### 가이드라인
 
-> * RewardVault 내의 Incentive token 최소 보유량을 제한
-> * Validator의 경우 BGT를 분배할 reward vault를 선택할때 Incentive token이 충분히 남아있는지 확인
-> * Reward vault에 incentive가 얼마나 남았는지 확인하는 대시보드 제작
+> * RewardVault 내의 인센티브 토큰 최소 보유량을 제한
+> * 벨리데이터의 경우 BGT를 분배할 reward vault를 선택할때 인센티브 토큰이 충분히 남아있는지 확인
+> * Reward vault에 인센티브 토큰 얼마나 남았는지 확인하는 대시보드 제작
 
 ***
 
@@ -394,11 +394,11 @@ T-19. | 위협 |&#x20;
 \
 
 
-1\. removeIncentiveToken 함수의 호출 조건에 제한 로직 추가 (예: 해당 토큰이 현재 활성 보상 분배 중인 경우 제거 불가)
+1\. `removeIncentiveToken` 함수의 호출 조건에 제한 로직 추가&#x20;
 
-2\. Incentive Token 제거 또는 교체는 거버넌스 승인을 요구하도록 설계
+2\. 인센티브 토큰 제거 또는 교체는 거버넌스 승인을 요구하도록 설계
 
-3\. Incentive Token 제거 전, 해당 Vault의 남은 분배량 및 종료 일정 공지
+3\. 인센티브 토큰 제거 전, 해당 Vault의 남은 분배량 및 종료 일정 공지
 
 4\. 토큰 제거 시 이벤트 로그 기록 필수 및 대시보드 상 실시간 반영
 
@@ -420,7 +420,7 @@ claimFees() 프론트러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
 \| 가이드라인 |&#x20;
 
-1\. claimFees() 호출 시 프론트러닝 방지를 위해 수수료 계산 기준이 되는 블록 넘버/타임스탬프를 내부 저장하고 호출자 기준으로 고정하여 외부 간섭 방지 or 클레임 대상 사용자 주소 명시 필드 활용
+1\. `claimFees()` 호출 시 프론트러닝 방지를 위해 수수료 계산 기준이 되는 블록 넘버/타임스탬프를 내부 저장하고 호출자 기준으로 고정하여 외부 간섭 방지 or 클레임 대상 사용자 주소 명시 필드 활용
 
 2\. $HONEY 등 Fee Token 잔고가 급변할 경우 이상 징후 탐지 및 임시 정지 로직(safeguard) 활성화
 
@@ -453,7 +453,7 @@ dApp 프로토콜의 Fee Token 송금 누락에 따른 사용자 보상 실패&#
 
 2\. 일정 기간 동안 수수료 송금이 누락된 dApp은 해당 vualt의 인센티브 대상에서 제외하거나 거버넌스를 통해 보상 삭감/정지 등의 제재가 가능하도록 설계
 
-3\. claimFees() 호출 시, payoutAmount가 200 HONEY(=1%) 이하일 경우 명확한 revert 사유 및 UI 피드백 제공
+3\. `claimFees()` 호출 시, payoutAmount가 200 HONEY(=1%) 이하일 경우 명확한 revert 사유 및 UI 피드백 제공
 
 \
 
@@ -564,7 +564,7 @@ T-24. | 위협 |&#x20;
 
 T-25. | 위협 |&#x20;
 
-Validator operator의 incentive 분배 직전 queue 조작을 통한 commission 탈취 및 사용자 분배 손실
+Validator operator의 인센티브 분배 직전 queue 조작을 통한 commission 탈취 및 사용자 분배 손실
 
 \| 가이드라인 |\
 1\. 인센티브 분배 로그 분석을 통한 현황 추적\
