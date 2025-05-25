@@ -16,7 +16,7 @@ T-7. | 위협 |&#x20;
 
 3\. ERC20 토큰 회수 시 incentive token 및 staked token을 제외하고 전송
 
-4\. vault별 incentive 분배 한도 설정
+4\. reward vault별 incentive 분배 한도 설정
 
 \| Best Practice |
 
@@ -26,7 +26,6 @@ contracts/src/pol/rewards/RewardVault.sol
 * MAX\_INCENTIVE\_RATE 상한선 설정
 * recoverERC20에서 incentive token과 staked token 회수 방지
 
-\
 
 
 T-8. | 위협 |&#x20;

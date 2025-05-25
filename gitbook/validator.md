@@ -12,7 +12,7 @@ T-1. | 위협 |
 
 1\. 밸리데이터 관련 중요 정보 변경은 DAO 거버넌스 또는 다중 서명을 통해서만 가능하도록 설계
 
-2\. BGT 관련 admin 함수들은 onlyOwner modifier를 통해 거버넌스가 설정한 owner만 실행 가능하도록 제한
+2\. BGT 관련 admin 함수들은 `onlyOwner` modifier를 통해 거버넌스가 설정한 owner만 실행 가능하도록 제한
 
 3\. 세분화된 권한 관리 및 최소 권한 원칙 적용
 
@@ -43,7 +43,7 @@ T-2. | 위협 |
 
 4\. totalBoosts, userBoosts, boostees 간의 관계를 유지하고 검증
 
-5\. 모든 상태 변경 후 `invariantCheck modifier` 를 통한 자동 검증 수행
+5\. 모든 상태 변경 후 `invariantCheck` modifier 를 통한 자동 검증 수행
 
 6\. 스테이킹 수량 계산 시 정밀도를 고려한 반올림 정책 일관성 유지
 
@@ -56,7 +56,7 @@ contracts/src/pol/BGT.sol
 
 contracts/src/base/StakingRewards.sol
 
-* \_stake에서 totalSupply 오버플로우 검증
+* `_stake`에서 totalSupply 오버플로우 검증
 
 T-4. | 위협 |
 
@@ -78,7 +78,7 @@ operator의 reward allocation 설정 미흡
 
 contracts/src/pol/BGTStaker.sol
 
-* onlyFeeCollector modifier로 보상 알림 권한 제한
+* `onlyFeeCollector` modifier로 보상 알림 권한 제한
 * BGTStaker의 stake/withdraw를 BGT 컨트랙트만 호출 가능하도록 제한
 * recoverERC20에서 reward token 회수 방지로 보상 안정성 확보
 
@@ -102,7 +102,7 @@ contracts/src/pol/BGT.sol
 
 * queueDropBoost와 dropBoost를 통한 2단계 출금 프로세스
 * drop boost 시 시간 지연 조건 체크로 급작스러운 출금 방지
-* redeem 함수를 통한 BGT → native token 교환 출구 제공
+* `redeem` 함수를 통한 BGT → native token 교환 출구 제공
 
 T-6. | 위협 |
 

@@ -1,8 +1,6 @@
 # Berachain PoL 개요
 
-### 2.1. PoL 개념 <a href="#id-2.1.-pol" id="id-2.1.-pol"></a>
-
-**PoL(Proof of Liquidity)**&#xC740; 기존 PoS(Proof of Stake)과 달리 **생태계에 실질적 유동성을 공급**하는 베라체인의 새로운 합의 알고리즘입니다.
+\*\*PoL(Proof of Liquidity)\*\*은 기존 PoS(Proof of Stake)과 달리 **생태계에 실질적 유동성을 공급**하는 베라체인의 새로운 합의 알고리즘입니다.
 
 PoS의 경우에는 네이티브 토큰을 스테이킹함으로써 보상을 얻는 구조입니다.\
 반면 **PoL**에서는 사용자가 단순히 보유하는 것을 넘어서 베라체인 생태계(DEX, Lending Protocol)에 유동성을 공급하여 얻은 $BGT를 스테이킹하여 네트워크에 기여합니다.
@@ -37,9 +35,11 @@ PoS가 ‘**자산 보유 = 기여**’라는 가정에 기반했다면, PoL은 
 2. **검증자** → $BERA 스테이킹 → 블록생성(블록 생성 보상) → Vault에 보상 분배 → Incentive token 보상
 3. **프로토콜(dApp)** → 유동성 제공 받음 → Incentive token 제공
 
-<img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXfy1MozUQWRbd6kqUC0P8WH53Fgn1jlYTSMCNJ4rS9QDBGOhgs4tytH7ApcH68kUa_eNKbJbzGLWmu0rac-JgKhtZTr7__Fb4MS_qfFDzBBpP9A9AveYfM-q3kdXX37d7BA-PXi?key=7ZElynTgjGxKnNt3-SZQLA" alt="" data-size="original">
+<figure><img src=".gitbook/assets/unnamed.png" alt=""><figcaption></figcaption></figure>
 
 결과적으로 플라이휠이 정상적으로 동작할 때 다음과 같은 선순환 구조를 형성합니다.
+
+<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 이는 결과적으로 베라체인 네트워크 전체의 성장과 안정성을 촉진합니다.
 
@@ -51,6 +51,8 @@ PoL은 다음과 같은 특성을 지닙니다.
 
 하지만, PoL은 완전하진 않습니다.\
 정상적인 플라이휠이 돈다면 모두에게 이득이 되는 구조로 이어지지만 유동성 기반 합의 알고리즘인 만큼 유동성이 줄어들어 역플라이휠이 돈다면 생태계 전체가 불안정해질 수 있다는 단점이 존재합니다.
+
+<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 또한 유동성 집중, $BGT 독점, 중앙화 리스크 등의 문제도 존재합니다.
 
