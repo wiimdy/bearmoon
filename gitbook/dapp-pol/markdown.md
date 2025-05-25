@@ -12,12 +12,12 @@ icon: plane-arrival
 
 #### Best Practice
 
+[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+
 ```solidity
 require(params.MCR <= BERABORROW_CORE.CCR() && params.MCR >= 1.1e18, "MCR cannot be > CCR or < 110%");
 MCR = params.MCR;
 ```
-
-[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ***
 
@@ -106,7 +106,7 @@ if (totalSupply() == 0) revert ZeroTotalSupply(); // convertToShares will return
 function flashFee(address token, uint256 amount) public view returns (uint256) {
         require(token == address(this), "ERC20FlashMint: wrong token");
         return _flashFee(amount);
-    }
+}
 ```
 
 ***
