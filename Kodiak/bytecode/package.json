@@ -1,0 +1,12 @@
+{
+  "name": "kodiak-contracts",
+  "version": "1.0.0",
+  "description": "Kodiak Protocol Contract Code Fetcher",
+  "main": "getContracts.js",
+  "scripts": {
+    "start": "node getContracts.js"
+  },
+  "dependencies": {
+    "ethers": "^5.7.2"
+  }
+} 

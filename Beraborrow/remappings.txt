@@ -1,0 +1,11 @@
+openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
+openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/
+solady/=lib/solady/src/
+solmate/=lib/solmate/src/
+forge-std/=lib/forge-std/src/
+@openzeppelin/=lib/openzeppelin-contracts/
+@openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/
+@berachain/=lib/contracts/src/
+
+@solady/=lib/solady/src/
+@solmate/=lib/solmate/src/

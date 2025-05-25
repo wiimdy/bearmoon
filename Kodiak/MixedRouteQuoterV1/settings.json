@@ -1,0 +1,50 @@
+{
+	"remappings": [
+		"forge-std/=lib/forge-std/src/",
+		"@uniswap/lib/=lib/solidity-lib/",
+		"@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+		"base64-sol/=lib/base64/",
+		"@kodiak-finance/v3-periphery/contracts/=src/pools/v3-periphery/",
+		"@kodiak-finance/v2-periphery/contracts/=src/pools/v2-periphery/",
+		"@kodiak-finance/v2-core/contracts/=lib/v2-core/contracts/",
+		"@kodiak-finance/v3-core/contracts/libraries/=lib/v3-core/contracts/libraries/",
+		"@kodiak-finance/v3-core/contracts/interfaces/=lib/@kodiak-finance/v3-core/contracts/interfaces/",
+		"@openzeppelin-8/contracts/=lib/openzeppelin-contracts-new/contracts/",
+		"base64/=lib/base64/",
+		"ds-test/=lib/forge-std/lib/ds-test/src/",
+		"erc4626-tests/=lib/openzeppelin-contracts-new/lib/erc4626-tests/",
+		"openzeppelin-contracts-new/=lib/openzeppelin-contracts-new/",
+		"openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+		"openzeppelin/=lib/openzeppelin-contracts-new/contracts/",
+		"solidity-lib/=lib/solidity-lib/contracts/",
+		"v2-core/=lib/v2-core/contracts/",
+		"v3-core/=lib/v3-core/",
+		"@kodiak-finance/v3-periphery/contracts/=src/pools/v3-periphery/",
+		"@kodiak-finance/v2-periphery/contracts/=src/pools/v2-periphery/",
+		"@kodiak-finance/v2-core/contracts/=lib/v2-core/contracts/",
+		"@kodiak-finance/v3-core/contracts/libraries/=lib/v3-core/contracts/libraries/"
+	],
+	"optimizer": {
+		"enabled": true,
+		"runs": 200
+	},
+	"metadata": {
+		"useLiteralContent": false,
+		"bytecodeHash": "ipfs"
+	},
+	"outputSelection": {
+		"*": {
+			"*": [
+				"evm.bytecode",
+				"evm.deployedBytecode",
+				"devdoc",
+				"userdoc",
+				"metadata",
+				"abi"
+			]
+		}
+	},
+	"evmVersion": "istanbul",
+	"viaIR": false,
+	"libraries": {}
+}

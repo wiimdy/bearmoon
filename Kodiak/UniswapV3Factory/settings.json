@@ -1,0 +1,29 @@
+{
+	"remappings": [
+		"forge-std/=lib/forge-std/src/",
+		"@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"
+	],
+	"optimizer": {
+		"enabled": true,
+		"runs": 100
+	},
+	"metadata": {
+		"useLiteralContent": false,
+		"bytecodeHash": "ipfs"
+	},
+	"outputSelection": {
+		"*": {
+			"*": [
+				"evm.bytecode",
+				"evm.deployedBytecode",
+				"devdoc",
+				"userdoc",
+				"metadata",
+				"abi"
+			]
+		}
+	},
+	"evmVersion": "istanbul",
+	"viaIR": false,
+	"libraries": {}
+}

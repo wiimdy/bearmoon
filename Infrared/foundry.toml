@@ -1,0 +1,67 @@
+[profile.default]
+ignored_error_codes = [1878, 5574, 3860]
+evm_version = 'cancun'
+solc = '0.8.26'
+cache = true
+force = false
+optimizer = true
+optimizer_runs = 1
+verbosity = 1
+via_ir = false
+fuzz = { runs = 1_000 }
+test = 'tests'
+remappings = [
+    '@forge-std/=lib/forge-std/src/',
+    '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
+    '@openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
+    '@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
+    '@solmate/=lib/solmate/src/',
+    'solady/src/=lib/solady/src/',
+    'solady/test/=lib/solady/test/',
+    '@berachain/=lib/contracts/src/',
+    '@prb/=lib/prb-test/src/',
+]
+fs_permissions = [{ access = "read", path = "./" }]
+
+[profile.ci]
+fuzz = { runs = 256 }
+verbosity = 4
+remappings = [
+    '@forge-std/=lib/forge-std/src/',
+    '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
+    '@openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
+    '@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
+    '@solmate/=lib/solmate/src/',
+    'solady/src/=lib/solady/src/',
+    'solady/test/=lib/solady/test/',
+    '@berachain/=lib/contracts/src/',
+    '@prb/=lib/prb-test/src/',
+]
+
+[profile.production]
+optimizer = true
+via_ir = true
+optimizer_runs = 200
+
+[profile.production.optimizer_details]
+constantOptimizer = true
+yul = true
+
+[profile.production.optimizer_details.yulDetails]
+stackAllocation = true
+
+[rpc_endpoints]
+local = "${RPC_URL_LOCAL}"
+devnet = "${RPC_URL_DEVNET}"
+testnet = "${RPC_URL_TESTNET}"
+mainnet = "${RPC_URL_MAINNET}"
+
+# [etherscan]
+# goerli = { key = "${ETHERSCAN_KEY}", url = "https://api-goerli.etherscan.io/api" }
+# mainnet = { key = "${ETHERSCAN_KEY}" }
+[fmt]
+line_length = 80
+int_types = "long"
+
+[doc]
+title = "Infrared Smart Contract Documentation"

@@ -1,0 +1,35 @@
+{
+	"remappings": [
+		"@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+		"ds-test/=lib/forge-std/lib/ds-test/src/",
+		"erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+		"forge-std/=lib/forge-std/src/",
+		"openzeppelin-contracts/=lib/openzeppelin-contracts/",
+		"openzeppelin/=lib/openzeppelin-contracts/contracts/",
+		"solady/=lib/solady/src/"
+	],
+	"optimizer": {
+		"enabled": true,
+		"runs": 200
+	},
+	"metadata": {
+		"useLiteralContent": false,
+		"bytecodeHash": "ipfs",
+		"appendCBOR": true
+	},
+	"outputSelection": {
+		"*": {
+			"*": [
+				"evm.bytecode",
+				"evm.deployedBytecode",
+				"devdoc",
+				"userdoc",
+				"metadata",
+				"abi"
+			]
+		}
+	},
+	"evmVersion": "paris",
+	"viaIR": false,
+	"libraries": {}
+}

@@ -1,0 +1,41 @@
+name: Create Engine Artifact
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build --sizes
+        id: build
+
+      - name: Create input json
+        run: forge v --show-standard-json-input 0x0000000000000000000000000000000000000000 src/SphereXEngine.sol:SphereXEngine > out/engine_standard_input.json
+
+      - name: Create artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-artifact
+          path: |
+            out/SphereXEngine.sol
+            out/engine_standard_input.json

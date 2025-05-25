@@ -1,0 +1,65 @@
+{
+	"remappings": [
+		"forge-std/=lib/forge-std/src/",
+		"@uniswap/lib/=lib/solidity-lib/",
+		"@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+		"base64-sol/=lib/base64/",
+		"@kodiak-finance/v3-periphery/contracts/=src/pools/v3-periphery/",
+		"@kodiak-finance/v2-periphery/contracts/=src/pools/v2-periphery/",
+		"@kodiak-finance/v2-core/contracts/=lib/v2-core/contracts/",
+		"@kodiak-finance/v3-core/contracts/libraries/=lib/v3-core/contracts/libraries/",
+		"@kodiak-finance/v3-core/contracts/interfaces/=lib/@kodiak-finance/v3-core/contracts/interfaces/",
+		"@openzeppelin-8/contracts/=lib/openzeppelin-contracts-new/contracts/",
+		"base64/=lib/base64/",
+		"ds-test/=lib/forge-std/lib/ds-test/src/",
+		"erc4626-tests/=lib/openzeppelin-contracts-new/lib/erc4626-tests/",
+		"openzeppelin-contracts-new/=lib/openzeppelin-contracts-new/",
+		"openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+		"openzeppelin/=lib/openzeppelin-contracts-new/contracts/",
+		"solidity-lib/=lib/solidity-lib/contracts/",
+		"v2-core/=lib/v2-core/contracts/",
+		"v3-core/=lib/v3-core/",
+		"@kodiak-finance/v3-periphery/contracts/=src/pools/v3-periphery/",
+		"@kodiak-finance/v2-periphery/contracts/=src/pools/v2-periphery/",
+		"@kodiak-finance/v2-core/contracts/=lib/v2-core/contracts/",
+		"@kodiak-finance/v3-core/contracts/libraries/=lib/v3-core/contracts/libraries/",
+		"@openzeppelin/contracts-upgradeable/=lib/kodiak-core/lib/openzeppelin-contracts-upgradeable/contracts/",
+		"@uniswap/v2-core/=lib/kodiak-core/lib/v2-core/",
+		"@uniswap/v2-periphery/=lib/kodiak-core/lib/v2-periphery/",
+		"@uniswap/v3-core/=lib/kodiak-core/lib/v3-core/",
+		"@uniswap/v3-periphery/=lib/kodiak-core/lib/v3-periphery/",
+		"create3-factory/=lib/kodiak-core/lib/create3-factory/",
+		"kodiak-core/=lib/kodiak-core/",
+		"local/=lib/kodiak-core/src/",
+		"openzeppelin-contracts-upgradeable/=lib/kodiak-core/lib/openzeppelin-contracts-upgradeable/contracts/",
+		"oz-8-upgradeable/=lib/oz-8-upgradeable/contracts/",
+		"oz-8/=lib/oz-8/contracts/",
+		"solmate/=lib/solmate/src/",
+		"v2-periphery/=lib/v2-periphery/contracts/",
+		"v3-periphery/=lib/v3-periphery/contracts/"
+	],
+	"optimizer": {
+		"enabled": true,
+		"runs": 200
+	},
+	"metadata": {
+		"useLiteralContent": false,
+		"bytecodeHash": "ipfs",
+		"appendCBOR": true
+	},
+	"outputSelection": {
+		"*": {
+			"*": [
+				"evm.bytecode",
+				"evm.deployedBytecode",
+				"devdoc",
+				"userdoc",
+				"metadata",
+				"abi"
+			]
+		}
+	},
+	"evmVersion": "paris",
+	"viaIR": false,
+	"libraries": {}
+}
