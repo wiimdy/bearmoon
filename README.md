@@ -4,5 +4,6 @@
 - Bex
 - Infrared
 - Kodiak
+- Core
 
 Ver. 25.05.25
