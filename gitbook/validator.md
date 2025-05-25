@@ -17,6 +17,8 @@ icon: user-check
 
 #### Best Practice&#x20;
 
+[BeaconDeposit.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BGTFeeDeployer.sol#L5)
+
 ```solidity
 // contracts/src/pol/BeaconDeposit.sol
 
@@ -42,8 +44,6 @@ function acceptOperatorChange(bytes calldata pubkey) external {
     delete queuedOperator[pubkey];
     emit OperatorUpdated(pubkey, newOperator, oldOperator);
 }
-BGTStaker의 stake/withdraw를 BGT 컨트랙트만 호출 가능하도록 제한
-recoverERC20에서 reward token 회수 방지로 보상 안정성 확보
 ```
 
 ***
