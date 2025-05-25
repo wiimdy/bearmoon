@@ -4,240 +4,351 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-T-7. | 위협 |&#x20;
+### 위협 7: 권한 없는 사용자의 Incentive token 조작 및 사용
+
+#### 가이드라인
+
+> * incentive token whitelist 관리 시 `maxIncentiveTokensCount` 제한 및 중복 등록 방지
+> * incentive rate 설정 시 MIN/MAX 범위 검증 및 manager 권한 제한
+> * ERC20 토큰 회수 시 incentive token 및 staked token을 제외하고 전송
+
+#### Best Practice&#x20;
+
+```solidity
+// contracts/src/pol/rewards/RewardVault.sol
+function reverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
+    //recoverERC20에서 incentive token과 staked token 회수 방지
+    if (tokenAddress == address(stakeToken)) CannotRecoverStakingToken.selector.revertWith();
+
+    // ...
+}
+
+function whitelistIncentiveToken(
+    address token,
+    uint256 minIncentiveRate,
+    address manager
+)
+    external
+    onlyFactoryOwner
+{
+    // ...
+    // MAX_INCENTIVE_RATE 상한선 설정
+    if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
+
+    // ...
+    // whitelistedTokens.length == maxIncentiveTokensCount 제한 체크
+    if (whitelistedTokens.length == maxIncentiveTokensCount || incentive.minIncentiveRate != 0) {
+        TokenAlreadyWhitelistedOrLimitReached.selector.revertWith();
+    }
+    // ...
+}
+```
+
+***
+
+### 위협 8: 컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류
+
+#### 가이드라인
+
+> * 모든 컨트랙트 초기화 시 zero address 검증 및 필수 매개변수 검증
+> * 초기 설정 매개변수들의 합리적 범위 검증
+> * genesis deposits root 설정 등 초기 상태의 무결성 보장
+> * 초기화 함수의 멱등성 보장 및 재초기화 방지 메커니즘
+> * critical parameter 변경을 위한 rollback 메커니즘
+
+#### Best Practice&#x20;
+
+```solidity
+// contracts/src/pol/rewards/BlockRewardController.sol
+function initialize(
+    address _bgt,
+    address _distributor,
+    address _beaconDepositContract,
+    address _governance
+)
+    external
+    initializer
+{
+    // initialize에서 모든 주소 매개변수 설정 검증
+    // _governance 주소에 대한 검증
+    __Ownable_init(_governance);
+    __UUPSUpgradeable_init();
+    // _bgt 주소에 대한 검증
+    bgt = BGT(_bgt);
+    emit SetDistributor(_distributor);
+    // _distributor 주소에 대한 검증
+    distributor = _distributor;
+    // _beaconDepositContract 주소에 대한 검증
+    beaconDepositContract = IBeaconDeposit(_beaconDepositContract);
+}
+```
+
+```solidity
+// contracts/src/pol/BGT.sol
+function initialize(address _owner) external initializer {
+    // initialize에서 boost delay를 BOOST_MAX_BLOCK_DELAY로 설정
+    // ...
+    activateBoostDelay = BOOST_MAX_BLOCK_DELAY;
+    dropBoostDelay = BOOST_MAX_BLOCK_DELAY;
+}
+```
+
+```solidity
+// contracts/src/pol/BeaconDeposit.sol
+// genesisDepositsRoot 설정으로 초기 상태 정의
+
+/// @dev The hash tree root of the genesis deposits.
+/// @dev Should be set in deployment (predeploy state or constructor).
+bytes32 public genesisDepositsRoot;
+```
+
+***
+
+### 위협 9: BGT redeem 시 Native token 부족으로 인한 유동성 위기
+
+#### 가이드라인
+
+> * BGT redeem 시 컨트랙트 잔액 검증 및 충분한 native token 보유량 확보
+> * burnExceedingReserves 함수를 통한 초과 reserves 관리 및 적절한 버퍼 유지
+> * BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
+
+#### Best Practice&#x20;
+
+```solidity
+// contracts/src/pol/BGT.sol
+
+function redeem(
+    address receiver,
+    uint256 amount
+)
+    external
+    invariantCheck
+    // redeem 함수에서 checkUnboostedBalance modifier로 사용자 잔액 검증
+    checkUnboostedBalance(msg.sender, amount)
+{
+    // ...
+}
+
+function burnExceedingReserves() external {
+    // ...
+    // HISTORY_BUFFER_LENGTH * br.getMaxBGTPerBlock()로 잠재적 민팅량 계산
+    uint256 potentialMintableBGT = HISTORY_BUFFER_LENGTH * br.getMaxBGTPerBlock();
+    // ...
+    // 현재 reserves와 outstanding amount 비교
+    if (currentReservesAmount <= outstandingRequiredAmount) return;
+    // ...
+}
+
+// invariantCheck modifier를 통한 컨트랙트 상태 일관성 검증
+/// @notice check the invariant of the contract after the write operation
+modifier invariantCheck() {
+    /// Run the method.
+    _;
+
+    /// Ensure that the contract is in a valid state after the write operation.
+    _invariantCheck();
+}
+
+function _invariantCheck() private view {
+    if (address(this).balance < totalSupply()) InvariantCheckFailed.selector.revertWith();
+}
+```
+
+***
+
+### 위협 10: 보상 분배 로직 오류로 인한 특정 사용자에게 과도한 보상 지급 또는 보상 누락
+
+#### 가이드라인
+
+> * 95% 코드 커버리지, Fuzz 테스트, 100명 이상 사용자 시뮬레이션 등 구체적 수치 제시
+> * Python/JavaScript 기반 오프체인 검증 시스템 구현 방안
+
+#### Best Practice&#x20;
+
+```solidity
+// contracts/src/pol/rewards/StakingRewards.sol
+// -> contracts/base/StakingRewards.sol
+function _notifyRewardAmount(uint256 reward)
+    internal
+    virtual
+    // 보상이 추가 될 경우 rewardRate 계산
+    _updateReward(address(0))
+{
+    // ...
+}
+```
+
+***
+
+### 위협 11: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
+
+#### 가이드라인
+
+> * 각 함수 및 중요 데이터에 대해 명확한 역할(Owner, Admin, User 등)을 정의, 역할에 따른 접근 권한을 엄격히 부여
+> * onlyOwner, onlyRole 등의 modifier를 명확히 사용&#x20;
+> * 관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅
+
+#### Best Practice&#x20;
+
+```solidity
+// contracts/src/pol/rewards/RewardVault.sol
+function addIncentive(
+    address token,
+    uint256 amount,
+    uint256 incentiveRate
+)
+    external
+    nonReentrant
+    onlyWhitelistedToken(token)
+{
+    // ...
+    // incentive rate 변동은 manager 권한만 가능
+    if (msg.sender != manager) NotIncentiveManager.selector.revertWith();
+    // ...
+}
+```
+
+```solidity
+// contracts/src/pol/rewards/RewardVault.sol
+function getReward(
+    address account,
+    address recipient
+)
+    external
+    nonReentrant
+    // reward 수령은 사용자 혹은 사용자가 설정한 operator만 실행 가능
+    onlyOperatorOrUser(account)
+    returns (uint256)
+{
+    // ...
+}
+```
+
+***
+
+### 위협 12: 재진입(Re-entrancy) 공격을 통해 보상 중복 청구
+
+#### 가이드라인
+
+> * 체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수
+> * nonReentrant 가드 사용
+
+#### Best Practice&#x20;
+
+```solidity
+// contracts/src/pol/rewards/RewardVault.sol
+function getReward(
+    address account,
+    address recipient
+)
+    external
+    // nonReentrant 가드 사용
+    nonReentrant
 
-권한 없는 사용자의 Incentive token 조작 및 사용
 
-\| 가이드라인 |
+```
 
-1\. incentive token whitelist 관리 시 maxIncentiveTokensCount 제한 및 중복 등록 방지
+```solidity
+// contracts/src/base/StakingRewards.sol
+function _getReward(address account, address recipient)
+    internal
+    virtual
+    updateReward(account) 
+    returns (uint256)
+{
+    // ...
+    // unclaimed된 보상을 초기화 하고 trasnfer 진행
+    uint256 reward = info.unclaimedReward; // get the rewards owed to the account
+    // ...
+}
+```
 
-2\. incentive rate 설정 시 MIN/MAX 범위 검증 및 manager 권한 제한
+***
 
-3\. ERC20 토큰 회수 시 incentive token 및 staked token을 제외하고 전송
+### 위협 13: Operator들이 담합하여 특정 reward vault에만 BGT 보상을 집중, 유동성 쏠림 및 타 프로토콜 유동성 고갈
 
-4\. reward vault별 incentive 분배 한도 설정
+#### 가이드라인
 
-\| Best Practice |
+> * 여러 종류  Reward vault에게 나눠 주도록 강제(실제 Berachain 정책 반영)
+> * Operator/Validator reward allocation 변경 시 투명한 로그 기록 및 모니터링
+> * 담합 의심 시 거버넌스/커뮤니티 신고 및 감사 프로세스 마련
+> * vault별 TVL, APR, 유동성 집중도 실시간 대시보드 제공
 
-contracts/src/pol/rewards/RewardVault.sol
+#### Best Practice&#x20;
 
-* whitelistedTokens.length == maxIncentiveTokensCount 제한 체크
-* MAX\_INCENTIVE\_RATE 상한선 설정
-* recoverERC20에서 incentive token과 staked token 회수 방지
+```solidity
+// contracts/src/pol/rewards/Berachef.sol
+function _validateWeights(Weight[] calldata weights) internal view {
+    // reward vault당 최대 30% 까지 할당 가능
+    if (weights.length > maxNumWeightsPerRewardAllocation) {
+        TooManyWeights.selector.revertWith();
+    }
+    
+    // 중복 vault 체크
+    _checkForDuplicateReceivers(valPubkey, weights);
+    // ...
+}
+```
 
+***
 
+### 위협 14: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
 
-T-8. | 위협 |&#x20;
+#### 가이드라인
 
-컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류&#x20;
+> * 보상 수령 대상 및 금액의 정확성을 교차 검증하는 로직 추가
+> * 최소 수량 or 최대 수량 설정으로 나눗셈 연산 오류 방지
+> * 사용자 유리한 반올림 정책
 
-\| 가이드라인 |
+***
 
-1\. 모든 컨트랙트 초기화 시 zero address 검증 및 필수 매개변수 검증
+### 위협 15: Reward Vault Factory Owner가 악의적인 distributor 생성 시 사용자 보상 시스템 문제 발생
 
-2\. 초기 설정 매개변수들의 합리적 범위 검증
+#### 가이드라인
 
-3\. genesis deposits root 설정 등 초기 상태의 무결성 보장
+> * 악의적인 distributor 변경이 즉각 반영되는 것을 방지하기 위한 Timelock 등의 추가 보안 절차 반영 필요
+> * 변경시 다중 서명 거버넌스 (3명 중 2/3 승인) 필요
 
-4\. 초기화 함수의 멱등성 보장 및 재초기화 방지 메커니즘
+***
 
-5\. critical parameter 변경을 위한 rollback 메커니즘
+### 위협 :&#x20;
 
-\| Best Practice |
+#### 가이드라인
 
-contracts/src/pol/rewards/BlockRewardController.sol
+> *
 
-* initialize에서 모든 주소 매개변수 설정 검증
+#### Best Practice&#x20;
 
-contracts/src/pol/BGT.sol
+```solidity
+```
 
-* initialize에서 boost delay를 BOOST\_MAX\_BLOCK\_DELAY로 설정
+***
 
-contracts/src/pol/BeaconDeposit.sol
+### 위협 16: Incentive token이 고갈된 뒤에 추가 공급을 하지 않으면 벨리데이터의 Boost Reward 감소
 
-* genesisDepositsRoot 설정으로 초기 상태 정의
+#### 가이드라인
 
-\
+> * RewardVault 내의 Incentive token 최소 보유량을 제한
+> * Validator의 경우 BGT를 분배할 reward vault를 선택할때 Incentive token이 충분히 남아있는지 확인
+> * Reward vault에 incentive가 얼마나 남았는지 확인하는 대시보드 제작
 
+***
 
-T-9. | 위협 |&#x20;
+위협 17:&#x20;
 
-BGT redeem 시 Native token 부족으로 인한 유동성 위기
+#### 가이드라인
 
-\| 가이드라인 |
+> *
 
-1\. BGT redeem 시 컨트랙트 잔액 검증 및 충분한 native token 보유량 확보
+#### Best Practice&#x20;
 
-2\. burnExceedingReserves 함수를 통한 초과 reserves 관리 및 적절한 버퍼 유지
+```solidity
+```
 
-3\. BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
+***
 
-\| Best Practice |
 
-contracts/src/pol/BGT.sol
 
-* redeem 함수에서 checkUnboostedBalance modifier로 사용자 잔액 검증
-* burnExceedingReserves에서 현재 reserves와 outstanding amount 비교
-* HISTORY\_BUFFER\_LENGTH \* br.getMaxBGTPerBlock()로 잠재적 민팅량 계산
-* invariantCheck modifier를 통한 컨트랙트 상태 일관성 검증
-
-\
-
-
-T-10. | 위협 |&#x20;
-
-보상 분배 로직 오류로 인한 특정 사용자에게 과도한 보상 지급 또는 보상 누락&#x20;
-
-\
-
-
-\| 가이드라인 |&#x20;
-
-1\. 95% 코드 커버리지, Fuzz 테스트, 100명 이상 사용자 시뮬레이션 등 구체적 수치 제시
-
-2\. Python/JavaScript 기반 오프체인 검증 시스템 구현 방안
-
-\
-
-
-\| Best Practice |&#x20;
-
-contracts/src/pol/rewards/StakingRewards.sol:\_notifyRewardAmount&#x20;
-
-보상이 추가 될 경우 rewardRate 계산
-
-\
-
-
-T-11. | 위협 |&#x20;
-
-잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
-
-\| 가이드라인 |&#x20;
-
-1\. 각 함수 및 중요 데이터에 대해 명확한 역할(Owner, Admin, User 등)을 정의, 역할에 따른 접근 권한을 엄격히 부여
-
-2\. onlyOwner, onlyRole 등의 modifier를 명확히 사용&#x20;
-
-3\. 관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅
-
-\
-\
-
-
-\| Best Practice |&#x20;
-
-contracts/src/pol/rewards/StakingRewards.sol:addIncentive
-
-* incentive rate 변동은 manager 권한만 가능
-
-contracts/src/pol/rewards/RewardVault.sol:getReward
-
-* reward 수령은 사용자 혹은 사용자가 설정한 operator만 실행 가능
-
-\
-
-
-T-12. | 위협 |&#x20;
-
-재진입(Re-entrancy) 공격을 통해 보상 중복 청구
-
-\| 가이드라인 |&#x20;
-
-1\. 체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수
-
-2\. nonReentrant 가드 사용.
-
-\
-\
-
-
-\| Best Practice |&#x20;
-
-contracts/src/pol/rewards/RewardVault.sol:getReward
-
-* nonReentrant 가드 사용
-* unclaimed된 보상을 초기화 하고 trasnfer 진행
-
-\
-
-
-T-13. | 위협 |
-
-Operator들이 담합하여 특정 reward vault에만 BGT 보상을 집중, 유동성 쏠림 및 타 프로토콜 유동성 고갈
-
-\| 가이드라인 |&#x20;
-
-1\. 여러 종류  Reward vault에게 나눠 주도록 강제(실제 Berachain 정책 반영)
-
-2\. Operator/Validator reward allocation 변경 시 투명한 로그 기록 및 모니터링
-
-3\. 담합 의심 시 거버넌스/커뮤니티 신고 및 감사 프로세스 마련
-
-4\. vault별 TVL, APR, 유동성 집중도 실시간 대시보드 제공
-
-\
-
-
-\| Best Practice |&#x20;
-
-contracts/src/pol/rewards/Berachef.sol: \_validateWeights
-
-* 중복 vault 체크, reward vault당 최대 30% 까지 할당 가능
-
-\
-
-
-T-14. | 위협 |&#x20;
-
-보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
-
-\| 가이드라인 |&#x20;
-
-1\. 보상 수령 대상 및 금액의 정확성을 교차 검증하는 로직 추가
-
-2\. 최소 수량 or 최대 수량 설정으로 나눗셈 연산 오류 방지
-
-3\. 사용자 유리한 반올림 정책
-
-\
-\
-
-
-\| Best Practice |&#x20;
-
-\
-\
-
-
-T-15. | 위협 |&#x20;
-
-Reward Vault Factory Owner가 악의적인 distributor 생성 시 사용자 보상 시스템 문제 발생
-
-\| 가이드라인 |&#x20;
-
-1\. 악의적인 distributor 변경이 즉각 반영되는 것을 방지하기 위한 Timelock 등의 추가 보안 절차 반영 필요
-
-2\. 변경시 다중 서명 거버넌스 (3명 중 2/3 승인) 필요
-
-\
-
-
-T-16. | 위협 |&#x20;
-
-Incentive token이 고갈된 뒤에 추가 공급을 하지 않으면 벨리데이터의 Boost Reward 감소
-
-\| 가이드라인 |&#x20;
-
-1\. RewardVault 내의 Incentive token 최소 보유량을 제한
-
-2\. Validator의 경우 BGT를 분배할 reward vault를 선택할때 Incentive token이 충분히 남아있는지 확인
-
-3\. Reward vault에 incentive가 얼마나 남았는지 확인하는 대시보드 제작
-
-\
-\
 
 
 T-17. | 위협 |
