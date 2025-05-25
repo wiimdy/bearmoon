@@ -20,8 +20,37 @@ icon: honey-pot
 
 #### Best Practice
 
-```
-// Some code
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 568-578)
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 155-162)
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 164-176)
+
+```solidity
+contract MultiOracleSystem {
+    struct OracleData {
+        address oracle;
+        uint256 weight;
+        uint256 maxDeviation;
+    }
+    
+    mapping(address => OracleData[]) public assetOracles;
+    uint256 public constant MAX_PRICE_DEVIATION = 0.05e18; // 5%
+    
+    function getAggregatedPrice(address asset) external view returns (uint256) {
+        OracleData[] memory oracles = assetOracles[asset];
+        uint256[] memory prices = new uint256[](oracles.length);
+        
+        for (uint256 i = 0; i < oracles.length; i++) {
+            prices[i] = IPriceOracle(oracles[i].oracle).getPrice(asset).price;
+        }
+        
+        return _calculateMedian(prices);
+    }
+    
+    function _calculateMedian(uint256[] memory prices) internal pure returns (uint256) {
+        // 중앙값 계산 로직
+        return prices[prices.length / 2];
+    }
+}
 ```
 
 ***
@@ -38,8 +67,38 @@ icon: honey-pot
 
 #### Best Practice
 
-```
-// Some code
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 525-555)
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 147-153)
+
+```solidity
+contract TimeBasedDepegDetection {
+    struct DepegRecord {
+        uint256 startTime;
+        uint256 duration;
+        bool isActive;
+    }
+    
+    mapping(address => DepegRecord) public depegRecords;
+    uint256 public constant MIN_DEPEG_DURATION = 1 hours;
+    uint256 public constant DEPEG_THRESHOLD = 0.005e18; // 0.5%
+    
+    function checkDepegStatus(address asset) external view returns (bool) {
+        DepegRecord memory record = depegRecords[asset];
+        if (!record.isActive) return false;
+        
+        return block.timestamp >= record.startTime + MIN_DEPEG_DURATION;
+    }
+    
+    function updateDepegStatus(address asset, uint256 price) external {
+        bool isDepegged = price < (1e18 - DEPEG_THRESHOLD) || price > (1e18 + DEPEG_THRESHOLD);
+        
+        if (isDepegged && !depegRecords[asset].isActive) {
+            depegRecords[asset] = DepegRecord(block.timestamp, 0, true);
+        } else if (!isDepegged) {
+            depegRecords[asset].isActive = false;
+        }
+    }
+}
 ```
 
 ***
@@ -55,8 +114,35 @@ Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환
 
 #### Best Practice
 
-```
-// Some code
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 557-561)
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactoryReader.sol` (라인 213-235)
+
+```solidity
+contract TWAPBasedWeights {
+    struct TWAPData {
+        uint256 cumulativePrice;
+        uint256 lastUpdateTime;
+        uint256 twapPrice;
+    }
+    
+    mapping(address => TWAPData) public twapData;
+    uint256 public constant TWAP_PERIOD = 1 hours;
+    
+    function updateTWAP(address asset, uint256 currentPrice) external {
+        TWAPData storage data = twapData[asset];
+        uint256 timeElapsed = block.timestamp - data.lastUpdateTime;
+        
+        if (timeElapsed > 0) {
+            data.cumulativePrice += currentPrice * timeElapsed;
+            data.twapPrice = data.cumulativePrice / TWAP_PERIOD;
+            data.lastUpdateTime = block.timestamp;
+        }
+    }
+    
+    function getStableWeight(address asset) external view returns (uint256) {
+        return twapData[asset].twapPrice;
+    }
+}
 ```
 
 ***
@@ -73,8 +159,41 @@ Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환
 
 #### Best Practice
 
-```
-// Some code
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactory.sol` (라인 376-420)
+* 위치: `BERA_CORE/contracts/src/honey/HoneyFactoryReader.sol` (라인 85-105)
+
+```solidity
+contract RedeemWarningSystem {
+    struct RedeemWarning {
+        bool hasDepeggedAssets;
+        uint256 estimatedLoss;
+        address[] depeggedAssets;
+        uint256[] depeggedPrices;
+    }
+    
+    mapping(address => bool) public userAcknowledged;
+    
+    function getRedeemWarning(uint256 honeyAmount) external view returns (RedeemWarning memory warning) {
+        // Basket 모드에서 디페깅된 자산 확인
+        address[] memory assets = getRegisteredAssets();
+        
+        for (uint256 i = 0; i < assets.length; i++) {
+            if (!isPegged(assets[i])) {
+                warning.hasDepeggedAssets = true;
+                warning.depeggedAssets[i] = assets[i];
+                warning.depeggedPrices[i] = getPrice(assets[i]);
+            }
+        }
+        
+        if (warning.hasDepeggedAssets) {
+            warning.estimatedLoss = calculateEstimatedLoss(honeyAmount);
+        }
+    }
+    
+    function acknowledgeRisk(uint256 honeyAmount) external {
+        userAcknowledged[msg.sender] = true;
+    }
+}
 ```
 
 \
