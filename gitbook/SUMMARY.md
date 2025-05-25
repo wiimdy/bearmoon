@@ -1,7 +1,7 @@
 # Table of contents
 
-* [Introduction](README.md)
-* [Page](page.md)
+* [머릿말](README.md)
+* [Berachain PoL 개요](berachain-pol.md)
 
 ## Getting Started
 
