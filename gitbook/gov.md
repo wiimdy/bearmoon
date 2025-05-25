@@ -18,31 +18,16 @@ icon: square-poll-vertical
 
 #### Best Practice
 
+위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 75-85)
+
 ```solidity
 contract ComponentValidator {
+    enum ComponentStatus { PENDING, APPROVED, REJECTED }
     mapping(address => ComponentStatus) public componentStatus;
-    mapping(address => uint256) public maxAllocation;
     
-    enum ComponentStatus { PENDING, APPROVED, REJECTED, DEPRECATED }
-    
-    struct ValidationRequirement {
-        bool securityAudit;
-        bool economicReview;
-        bool technicalReview;
-        uint256 testnetDuration;
-    }
-    
-    function validateComponent(
-        address component,
-        ValidationRequirement memory requirements
-    ) external onlyValidator {
-        require(requirements.securityAudit, "Security audit required");
-        require(requirements.economicReview, "Economic review required");
-        require(requirements.technicalReview, "Technical review required");
-        require(requirements.testnetDuration >= 30 days, "Insufficient testnet period");
-        
+    function validateComponent(address component) external onlyValidator {
+        // 보안 감사, 경제적 검토, 기술적 검토 완료 후
         componentStatus[component] = ComponentStatus.APPROVED;
-        maxAllocation[component] = getInitialAllocation(); // 초기 제한된 할당
     }
 }
 ```
@@ -61,54 +46,24 @@ contract ComponentValidator {
 
 #### Best Practice
 
+위치: `BERA_CORE/contracts/src/gov/TimeLock.sol` (라인 17)
+
+위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 58-60)
+
 ```solidity
-// Some code
 contract TransparentGovernance {
-    struct Proposal {
-        bytes32 id;
-        address proposer;
-        string description;
-        uint256 votingDeadline;
-        ProposalStatus status;
-    }
-    
     struct RejectionRecord {
-        bytes32 proposalId;
-        address rejector;
+        uint256 proposalId;
         string reason;
         uint256 timestamp;
-        bool appealed;
     }
     
-    mapping(bytes32 => RejectionRecord) public rejections;
-    mapping(address => mapping(bytes32 => bool)) public conflictOfInterest;
+    mapping(uint256 => RejectionRecord) public rejections;
+    event ProposalRejected(uint256 indexed proposalId, string reason);
     
-    event ProposalRejected(bytes32 indexed proposalId, address rejector, string reason);
-    event AppealSubmitted(bytes32 indexed proposalId, address appellant);
-    
-    function rejectProposal(
-        bytes32 proposalId, 
-        string memory reason
-    ) external onlyGuardian {
-        require(bytes(reason).length > 0, "Rejection reason required");
-        
-        rejections[proposalId] = RejectionRecord({
-            proposalId: proposalId,
-            rejector: msg.sender,
-            reason: reason,
-            timestamp: block.timestamp,
-            appealed: false
-        });
-        
-        emit ProposalRejected(proposalId, msg.sender, reason);
-    }
-    
-    function submitAppeal(bytes32 proposalId) external {
-        require(rejections[proposalId].timestamp != 0, "Proposal not rejected");
-        require(!rejections[proposalId].appealed, "Already appealed");
-        
-        rejections[proposalId].appealed = true;
-        emit AppealSubmitted(proposalId, msg.sender);
+    function rejectProposal(uint256 proposalId, string memory reason) external onlyGuardian {
+        rejections[proposalId] = RejectionRecord(proposalId, reason, block.timestamp);
+        emit ProposalRejected(proposalId, reason);
     }
 }
 ```
@@ -127,55 +82,23 @@ contract TransparentGovernance {
 
 #### Best Practice
 
+위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 95-105)
+
+위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 67-72)
+
 ```solidity
-// Some code
 contract HybridGovernance {
     struct Vote {
-        address voter;
         uint256 weight;
         bool support;
-        uint256 timestamp;
-        bytes32 offChainProof; // IPFS hash 등
+        bytes32 offChainProof;
     }
     
-    mapping(bytes32 => mapping(address => Vote)) public votes;
-    mapping(bytes32 => uint256) public totalVotes;
-    mapping(bytes32 => uint256) public supportVotes;
-    
+    mapping(uint256 => mapping(address => Vote)) public votes;
     uint256 public constant QUORUM_THRESHOLD = 20e16; // 20%
-    uint256 public constant VOTING_PERIOD = 7 days;
     
-    event VoteCast(bytes32 indexed proposalId, address voter, bool support, uint256 weight);
-    
-    function castVote(
-        bytes32 proposalId,
-        bool support,
-        bytes32 offChainProof
-    ) external {
-        require(getBGTBalance(msg.sender) >= 10000e18, "Insufficient BGT");
-        require(votes[proposalId][msg.sender].timestamp == 0, "Already voted");
-        
-        uint256 weight = getBGTBalance(msg.sender);
-        
-        votes[proposalId][msg.sender] = Vote({
-            voter: msg.sender,
-            weight: weight,
-            support: support,
-            timestamp: block.timestamp,
-            offChainProof: offChainProof
-        });
-        
-        totalVotes[proposalId] += weight;
-        if (support) {
-            supportVotes[proposalId] += weight;
-        }
-        
-        emit VoteCast(proposalId, msg.sender, support, weight);
-    }
-    
-    function checkQuorum(bytes32 proposalId) external view returns (bool) {
-        uint256 totalBGT = getTotalBGTSupply();
-        return totalVotes[proposalId] >= (totalBGT * QUORUM_THRESHOLD) / 1e18;
+    function castVote(uint256 proposalId, bool support, bytes32 proof) external {
+        votes[proposalId][msg.sender] = Vote(getBGTBalance(msg.sender), support, proof);
     }
 }
 ```
@@ -194,54 +117,25 @@ contract HybridGovernance {
 
 #### Best Practice
 
+위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 29-35)
+
+위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 67)
+
 ```solidity
-// Some code
 contract ValidatorIndependence {
     struct ValidatorInfo {
-        address validator;
         uint256 foundationStake;
         uint256 communityStake;
         uint256 independenceScore;
-        bool isActive;
     }
     
     mapping(address => ValidatorInfo) public validators;
     uint256 public constant MAX_FOUNDATION_RATIO = 30e16; // 30%
     
-    event ValidatorRegistered(address validator, uint256 independenceScore);
-    event IndependenceScoreUpdated(address validator, uint256 newScore);
-    
-    function registerValidator(
-        address validator,
-        uint256 foundationStake,
-        uint256 communityStake
-    ) external onlyGovernance {
-        uint256 totalStake = foundationStake + communityStake;
-        require(totalStake > 0, "Invalid stake amounts");
-        
-        uint256 foundationRatio = (foundationStake * 1e18) / totalStake;
-        require(foundationRatio <= MAX_FOUNDATION_RATIO, "Excessive foundation dependency");
-        
-        uint256 independenceScore = calculateIndependenceScore(foundationStake, communityStake);
-        
-        validators[validator] = ValidatorInfo({
-            validator: validator,
-            foundationStake: foundationStake,
-            communityStake: communityStake,
-            independenceScore: independenceScore,
-            isActive: true
-        });
-        
-        emit ValidatorRegistered(validator, independenceScore);
-    }
-    
-    function calculateIndependenceScore(
-        uint256 foundationStake,
-        uint256 communityStake
-    ) internal pure returns (uint256) {
-        uint256 totalStake = foundationStake + communityStake;
-        uint256 communityRatio = (communityStake * 1e18) / totalStake;
-        return communityRatio; // 커뮤니티 스테이크 비율이 독립성 점수
+    function registerValidator(address validator, uint256 foundationStake, uint256 communityStake) external {
+        uint256 ratio = (foundationStake * 1e18) / (foundationStake + communityStake);
+        require(ratio <= MAX_FOUNDATION_RATIO, "Excessive foundation dependency");
+        validators[validator] = ValidatorInfo(foundationStake, communityStake, 1e18 - ratio);
     }
 }
 ```
@@ -260,57 +154,35 @@ contract ValidatorIndependence {
 
 #### Best Practice
 
+위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 95-105)
+
+위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 75-85)
+
 ```solidity
 contract QuadraticGovernance {
-    mapping(address => uint256) public bgtBalance;
-    mapping(bytes32 => mapping(address => uint256)) public quadraticVotes;
-    
+    mapping(uint256 => mapping(address => uint256)) public quadraticVotes;
     uint256 public constant MAX_CONCENTRATION = 15e16; // 15%
-    uint256 public constant CONCENTRATION_PENALTY = 50e16; // 50% 페널티
-    
-    event ConcentrationAlert(address entity, uint256 concentration);
-    event QuadraticVoteCast(bytes32 proposalId, address voter, uint256 quadraticWeight);
     
     function calculateQuadraticWeight(uint256 bgtAmount) public pure returns (uint256) {
-        // 제곱근 기반 투표권 계산
         return sqrt(bgtAmount);
     }
     
-    function castQuadraticVote(bytes32 proposalId, bool support) external {
-        uint256 bgtAmount = getBGTBalance(msg.sender);
-        require(bgtAmount >= 10000e18, "Insufficient BGT");
-        
-        uint256 quadraticWeight = calculateQuadraticWeight(bgtAmount);
-        
-        // 집중도가 높은 경우 페널티 적용
-        uint256 concentration = getConcentration(msg.sender);
-        if (concentration > MAX_CONCENTRATION) {
-            quadraticWeight = (quadraticWeight * (1e18 - CONCENTRATION_PENALTY)) / 1e18;
-            emit ConcentrationAlert(msg.sender, concentration);
+    function castQuadraticVote(uint256 proposalId, bool support) external {
+        uint256 weight = calculateQuadraticWeight(getBGTBalance(msg.sender));
+        if (getConcentration(msg.sender) > MAX_CONCENTRATION) {
+            weight = weight / 2; // 50% 페널티
         }
-        
-        quadraticVotes[proposalId][msg.sender] = quadraticWeight;
-        emit QuadraticVoteCast(proposalId, msg.sender, quadraticWeight);
-    }
-    
-    function getConcentration(address entity) public view returns (uint256) {
-        uint256 entityBGT = getBGTBalance(entity);
-        uint256 totalBGT = getTotalBGTSupply();
-        return (entityBGT * 1e18) / totalBGT;
+        quadraticVotes[proposalId][msg.sender] = weight;
     }
     
     function sqrt(uint256 x) internal pure returns (uint256) {
         if (x == 0) return 0;
         uint256 z = (x + 1) / 2;
         uint256 y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
-        }
+        while (z < y) { y = z; z = (x / z + z) / 2; }
         return y;
     }
 }
-
 ```
 
 ***
@@ -328,100 +200,34 @@ contract QuadraticGovernance {
 
 #### Best Practice
 
+위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 87-93)
+
+위치: `BERA_CORE/contracts/src/gov/TimeLock.sol`
+
 ```solidity
 contract ProposalValidator {
     struct ProposalReview {
-        bytes32 proposalId;
-        bool codeAudit;
-        bool parameterReview;
-        bool economicImpact;
+        uint256 proposalId;
+        bool reviewed;
         uint256 riskScore;
         uint256 reviewDeadline;
-        address[] reviewers;
     }
     
-    mapping(bytes32 => ProposalReview) public reviews;
-    mapping(bytes32 => bool) public emergencyPaused;
-    
+    mapping(uint256 => ProposalReview) public reviews;
+    mapping(uint256 => bool) public emergencyPaused;
     uint256 public constant MIN_REVIEW_PERIOD = 7 days;
-    uint256 public constant HIGH_RISK_THRESHOLD = 80;
     
-    event ProposalSubmitted(bytes32 indexed proposalId, uint256 reviewDeadline);
-    event EmergencyPause(bytes32 indexed proposalId, address guardian);
-    event ReviewCompleted(bytes32 indexed proposalId, uint256 riskScore);
-    
-    modifier requiresReview(bytes32 proposalId) {
-        ProposalReview memory review = reviews[proposalId];
-        require(review.codeAudit && review.parameterReview && review.economicImpact, "Incomplete review");
-        require(block.timestamp >= review.reviewDeadline, "Review period not completed");
-        require(!emergencyPaused[proposalId], "Proposal emergency paused");
-        _;
-    }
-    
-    function submitProposal(
-        bytes32 proposalId,
-        bytes memory code,
-        uint256[] memory parameters
-    ) external {
-        uint256 reviewDeadline = block.timestamp + MIN_REVIEW_PERIOD;
-        
+    function submitProposal(uint256 proposalId) external {
         reviews[proposalId] = ProposalReview({
             proposalId: proposalId,
-            codeAudit: false,
-            parameterReview: false,
-            economicImpact: false,
+            reviewed: false,
             riskScore: 0,
-            reviewDeadline: reviewDeadline,
-            reviewers: new address[](0)
+            reviewDeadline: block.timestamp + MIN_REVIEW_PERIOD
         });
-        
-        // 자동 위험 분석 시작
-        uint256 autoRiskScore = analyzeRisk(code, parameters);
-        if (autoRiskScore > HIGH_RISK_THRESHOLD) {
-            reviews[proposalId].reviewDeadline += 7 days; // 고위험 제안은 추가 검토 기간
-        }
-        
-        emit ProposalSubmitted(proposalId, reviewDeadline);
     }
     
-    function emergencyPauseProposal(bytes32 proposalId) external onlyGuardian {
+    function emergencyPauseProposal(uint256 proposalId) external onlyGuardian {
         emergencyPaused[proposalId] = true;
-        emit EmergencyPause(proposalId, msg.sender);
-    }
-    
-    function completeReview(
-        bytes32 proposalId,
-        bool codeAudit,
-        bool parameterReview,
-        bool economicImpact,
-        uint256 riskScore
-    ) external onlyReviewer {
-        ProposalReview storage review = reviews[proposalId];
-        review.codeAudit = codeAudit;
-        review.parameterReview = parameterReview;
-        review.economicImpact = economicImpact;
-        review.riskScore = riskScore;
-        
-        emit ReviewCompleted(proposalId, riskScore);
-    }
-    
-    function analyzeRisk(
-        bytes memory code,
-        uint256[] memory parameters
-    ) internal pure returns (uint256 riskScore) {
-        // 자동화된 위험 분석 로직
-        // 예: 코드 복잡도, 매개변수 변경 범위, 영향받는 함수 수 등을 분석
-        riskScore = 50; // 기본 위험도
-        
-        // 코드 분석
-        if (code.length > 10000) riskScore += 20; // 큰 코드 변경
-        
-        // 매개변수 분석
-        for (uint i = 0; i < parameters.length; i++) {
-            if (parameters[i] > 1e20) riskScore += 10; // 큰 매개변수 변경
-        }
-        
-        return riskScore > 100 ? 100 : riskScore;
     }
 }
 ```
@@ -441,11 +247,65 @@ contract ProposalValidator {
 
 #### Best Practice
 
+**위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol`**
+
+```solidity
+// 제안 상태 확인 - 사용자가 제안의 현재 상태를 추적할 수 있음
+function state(uint256 proposalId) public view returns (ProposalState)
+
+// 제안이 큐잉이 필요한지 확인 - 타임락 적용 여부 판단
+function proposalNeedsQueuing(uint256 proposalId) public view returns (bool)
+
+// 타임락 오퍼레이션 ID 조회 - 실행 예정 시간 추적 가능
+function getTimelockOperationId(uint256 proposalId) external view returns (bytes32 operationId)
 ```
-// Some code
+
+**위치: `BERA_CORE/contracts/src/gov/TimeLock.sol`**
+
+```solidity
+// 사용자 고지 시스템
+contract UserNotificationSystem {
+    struct ProposalNotification {
+        uint256 proposalId;
+        uint256 effectiveTime;
+        string description;
+        bool isHighImpact;
+    }
+    
+    mapping(uint256 => ProposalNotification) public notifications;
+    mapping(address => mapping(uint256 => bool)) public userAcknowledged;
+    
+    event ProposalQueued(uint256 indexed proposalId, uint256 effectiveTime);
+    event UserNotified(uint256 indexed proposalId, address indexed user);
+    
+    // 제안이 큐잉될 때 알림 생성
+    function notifyProposalQueued(
+        uint256 proposalId,
+        uint256 effectiveTime,
+        string memory description,
+        bool isHighImpact
+    ) external onlyGovernance {
+        notifications[proposalId] = ProposalNotification({
+            proposalId: proposalId,
+            effectiveTime: effectiveTime,
+            description: description,
+            isHighImpact: isHighImpact
+        });
+        
+        emit ProposalQueued(proposalId, effectiveTime);
+    }
+    
+    // 사용자가 알림 확인
+    function acknowledgeProposal(uint256 proposalId) external {
+        userAcknowledged[msg.sender][proposalId] = true;
+        emit UserNotified(proposalId, msg.sender);
+    }
+    
+    // 미확인 중요 제안 조회
+    function getUnacknowledgedHighImpactProposals(address user) 
+        external view returns (uint256[] memory) {
+        // 구현 로직
+    }
+} 
 ```
-
-***
-
-
 
