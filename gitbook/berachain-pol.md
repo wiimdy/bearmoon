@@ -1,3 +1,7 @@
+---
+icon: teddy-bear
+---
+
 # Berachain PoL 개요
 
 \*\*PoL(Proof of Liquidity)\*\*은 기존 PoS(Proof of Stake)과 달리 **생태계에 실질적 유동성을 공급**하는 베라체인의 새로운 합의 알고리즘입니다.
