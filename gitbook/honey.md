@@ -44,7 +44,7 @@ function setMaxFeedDelay(uint256 maxTolerance) external {
 }
 ```
 
-`커스텀 코드` :
+`커스텀 코드` : 여러 오라클에서 가격을 수집하여 가중 평균으로 최종 가격을 계산하는 다중 오라클 집계 시스템
 
 ```solidity
 contract MultiOracleSystem {
@@ -103,7 +103,7 @@ function isBasketModeEnabled(bool isMint) public view returns (bool) {
 }
 ```
 
-`커스텀 코드` :&#x20;
+`커스텀 코드` : 일시적인 가격 변동이 아닌 1시간 이상 지속되는 디페깅을 유효한 디페깅으로 인정하여 Basket 모드의 민감도를 낮추는 시간 기반 감지 시스템
 
 ```solidity
 contract TimeBasedDepegDetection {
@@ -157,7 +157,7 @@ function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) int
 }
 ```
 
-`커스텀 코드` :
+`커스텀 코드` : 1시간 동안의 시간 가중 평균 가격을 계산하여 단기적인 가격 조작을 방지하고 안정적인 가중치 결정을 위한 스무딩 시스템
 
 ```solidity
 contract TWAPBasedWeights {
@@ -222,7 +222,7 @@ function redeem(address asset, uint256 honeyAmount, address receiver, bool expec
 }
 ```
 
-`커스텀 코드` :
+`커스텀 코드` : 상환 전 디페깅된 자산 포함 여부와 예상 손실을 미리 계산하여 사용자에게 경고하고 위험 인지 확인을 받는 사전 고지 시스템
 
 ```solidity
 contract RedeemWarningSystem {
