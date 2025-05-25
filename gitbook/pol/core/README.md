@@ -7,14 +7,14 @@ PoL 메커니즘의 핵심 구성요소들(Validator, RewardVault, Incentive Dis
 [validator.md](validator.md)
 {% endcontent-ref %}
 
-{% content-ref url="../reward.md" %}
-[reward.md](../reward.md)
+{% content-ref url="reward.md" %}
+[reward.md](reward.md)
 {% endcontent-ref %}
 
-{% content-ref url="../honey.md" %}
-[honey.md](../honey.md)
+{% content-ref url="honey.md" %}
+[honey.md](honey.md)
 {% endcontent-ref %}
 
-{% content-ref url="../gov.md" %}
-[gov.md](../gov.md)
+{% content-ref url="gov.md" %}
+[gov.md](gov.md)
 {% endcontent-ref %}
