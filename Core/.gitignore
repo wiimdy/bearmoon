@@ -1,0 +1,29 @@
+# directories
+.venv
+__pycache__
+cache
+coverage
+node_modules
+out
+
+# files
+*.env*
+**/.envrc
+*.log
+.DS_Store
+.pnp.*
+lcov.info
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*-cover.txt
+bun.lockb
+
+# broadcasts
+!broadcast
+broadcast/*
+broadcast/*/31337/
+
+# IDE
+.idea
+.vscode
