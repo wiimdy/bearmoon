@@ -6,7 +6,7 @@ icon: square-poll-vertical
 
 
 
-### 위협1: 악성 컴포넌트 승인 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
+### 위협 1: 악성 컴포넌트 승인 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
 
 거버넌스를 통해 악의적인 보상 금고나 인센티브 토큰이 승인될 위험이 존재. 이를 통해 공격자가 자금을 탈취하거나 시스템 안정성을 해칠 수 있다.
 
@@ -49,7 +49,7 @@ contract ComponentValidator {
 
 ***
 
-### 위협2: 사익 충돌로 인한 거절 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
+### 위협 2: 사익 충돌로 인한 거절 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
 
 재단이나 가디언즈가 자신에게 불리한 제안을 거부하여 거버넌스가 공정하게 작동하지 않고 중앙화될 우려가 있다. 이는 커뮤니티의 정당한 의사결정을 방해하고 시스템의 탈중앙화를 훼손할 수 있다.
 
@@ -115,7 +115,7 @@ contract TransparentGovernance {
 
 ***
 
-### 위협3: On-chain Governance 로직 미구현 제한 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
+### 위협 3: On-chain Governance 로직 미구현 제한 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
 
 거버넌스가 아직 On-chain에 구현되지 않아 forum 기반 투표로 운영되며, 이로 인해 투표율(20%) 충족이 어렵고 의사결정 과정이 비효율적이거나 조작 가능할 수 있다.
 
@@ -182,14 +182,14 @@ contract HybridGovernance {
 
 ***
 
-### 위협4: 재단 후원 기반 Validator로 인한 중앙화 우려 <a href="#ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8" id="ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8"></a>
+### 위협 4: 재단 후원 기반 검증자로 인한 중앙화 우려 <a href="#ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8" id="ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8"></a>
 
-validator의 자산이 재단 물량일 경우 validator가 재단에 종속받는 구조가 되므로 거버넌스 투표가 재단에 의해 중앙화될 우려가 있다.
+검증자의 자산이 재단 물량일 경우 검증자가 재단에 종속받는 구조가 되므로 거버넌스 투표가 재단에 의해 중앙화될 우려가 있다.
 
 #### 가이드라인
 
-> * **Validator 운영에 필요한 자산의 출처를 다양화하고, 재단 의존도를 점진적으로 줄이는 계획 수립.**
-> * **각 validator의 운영 주체, 재단과의 관계를 투명하게 공개하여 커뮤니티가 정보에 기반한 선택을 할 수 있도록 함.**
+> * **검증자 운영에 필요한 자산의 출처를 다양화하고, 재단 의존도를 점진적으로 줄이는 계획 수립.**
+> * **각 검증자의 운영 주체, 재단과의 관계를 투명하게 공개하여 커뮤니티가 정보에 기반한 선택을 할 수 있도록 함.**
 > * **재단으로부터 물량을 받은 경우 비율을 공개하여 중앙화 우려를 해소해야함.**
 
 #### Best Practice
@@ -248,7 +248,7 @@ contract ValidatorIndependence {
 
 ***
 
-### 위협5: BGT 독점에 의한 Governance 조작 <a href="#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91" id="ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91"></a>
+### 위협 5: BGT 독점에 의한 거버넌스 조작 <a href="#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91" id="ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91"></a>
 
 대규모 프로토콜이 사용자를 독점할 경우 전체 BGT 중 20% 이상을 얻을 수 있고, 하나의 프로토콜이 BGT를 대량 보유할 경우 투표를 조작하여 프로토콜에 유리한 정책을 강제할 수 있다.
 
@@ -315,7 +315,7 @@ contract QuadraticGovernance {
 
 ***
 
-### 위협6: 거버넌스 제안 검증 미흡 <a href="#ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8" id="ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8"></a>
+### 위협 6: 거버넌스 제안 검증 미흡 <a href="#ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8" id="ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8"></a>
 
 악의적인 코드 변경이나 시스템에 해로운 매개변수 변경을 포함한 제안이 충분한 검토 없이 통과하여 시스템 전체에 심각한 피해를 초래할 수 있다.
 
@@ -428,7 +428,7 @@ contract ProposalValidator {
 
 ***
 
-### 위협7: 사용자 고지 부족으로 인한 신뢰도 저하 및 예상치 못한 피해 <a href="#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c" id="ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c"></a>
+### 위협 7: 사용자 고지 부족으로 인한 신뢰도 저하 및 예상치 못한 피해 <a href="#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c" id="ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c"></a>
 
 거버넌스 제안이 통과되어 시스템 변경이 이루어질 때 사용자들에게 충분한 사전 고지가 없을 경우에 사용자들이 변경사항을 인지하지 못해 예상치 못한 손실을 입거나 시스템에 대한 신뢰도가 저하될 수 있다. 특히 수수료 변경, 토큰 경제학 수정, 새로운 제약사항 도입 등은 사용자의 투자 전략과 자산 관리에 직접적인 영향을 미칠 수 있다.
 
