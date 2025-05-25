@@ -1,6 +1,7 @@
 # Table of contents
 
 * [머릿말](README.md)
+* [목차](undefined.md)
 * [Berachain PoL 개요](berachain-pol.md)
 
 ## PoL 메커니즘 보안 가이드라인
