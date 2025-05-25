@@ -6,10 +6,10 @@
 ## PoL 메커니즘 보안 가이드라인
 
 * [코어 컨트랙트](pol/core.md)
+* [PoL 보안 가이드라인: 벨리데이터](pol/validator.md)
 
 ***
 
-* [PoL 보안 가이드라인: 벨리데이터](validator.md)
 * [PoL 보안 가이드라인: 보상 분배](reward.md)
 * [PoL 보안 가이드라인: HONEY 컨트랙트](honey.md)
 * [PoL 보안 가이드라인: 거버넌스](gov.md)

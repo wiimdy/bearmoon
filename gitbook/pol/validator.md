@@ -4,26 +4,26 @@ icon: user-check
 
 # PoL 보안 가이드라인: 벨리데이터
 
-T-1. | 위협 |
+### 위협 1&#x20;
 
 권한 없는 주소에 의한 밸리데이터 등록/해제/정보 수정
 
-\| 가이드라인 |
+#### 가이드라인&#x20;
 
-1\. 밸리데이터 관련 중요 정보 변경은 DAO 거버넌스 또는 다중 서명을 통해서만 가능하도록 설계
+> * **밸리데이터 관련 중요 정보 변경은 DAO 거버넌스 또는 다중 서명을 통해서만 가능하도록 설계**
+> * **BGT 관련 admin 함수들은 `onlyOwner` modifier를 통해 거버넌스가 설정한 owner만 실행 가능하도록 제한**
+> * **세분화된 권한 관리 및 최소 권한 원칙 적용**
+> * **중요한 설정 변경 시 타임락 메커니즘 적용으로 급작스러운 변경 방지**
 
-2\. BGT 관련 admin 함수들은 `onlyOwner` modifier를 통해 거버넌스가 설정한 owner만 실행 가능하도록 제한
+#### Best Practice&#x20;
 
-3\. 세분화된 권한 관리 및 최소 권한 원칙 적용
+```solidity
+// contracts/src/pol/BGT.sol
+OwnableUpgradeable 적용으로 governance 전용 함수 보호  //애배배
+setMinter, setStaker 함수에서 onlyOwner 적용, zero address 검증 및 이벤트 발생
+```
 
-4\. 중요한 설정 변경 시 타임락 메커니즘 적용으로 급작스러운 변경 방지
-
-\| Best Practice |
-
-contracts/src/pol/BGT.sol
-
-* OwnableUpgradeable 적용으로 governance 전용 함수 보호
-* setMinter, setStaker 함수에서 `onlyOwner` 적용, zero address 검증 및 이벤트 발생
+***
 
 T-2. | 위협 |
 
