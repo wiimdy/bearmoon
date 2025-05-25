@@ -18,16 +18,31 @@ icon: square-poll-vertical
 
 #### Best Practice
 
-위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 75-85)
+위치 : [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
+
+```solidity
+function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
+    (uint256 againstVotes, uint256 forVotes,) = proposalVotes(proposalId);
+    uint256 threshold = (forVotes + againstVotes) * 51 / 100;
+    return forVotes >= threshold;
+}
+```
+
+`커스텀 코드`
 
 ```solidity
 contract ComponentValidator {
-    enum ComponentStatus { PENDING, APPROVED, REJECTED }
-    mapping(address => ComponentStatus) public componentStatus;
+    enum ValidationStage { TECHNICAL, ECONOMIC, SECURITY, APPROVED }
+    mapping(uint256 => ValidationStage) public proposalStage;
+    mapping(ValidationStage => mapping(address => bool)) public reviewers;
     
-    function validateComponent(address component) external onlyValidator {
-        // 보안 감사, 경제적 검토, 기술적 검토 완료 후
-        componentStatus[component] = ComponentStatus.APPROVED;
+    function approveStage(uint256 proposalId, ValidationStage stage) external {
+        require(reviewers[stage][msg.sender], "Unauthorized");
+        if (stage == ValidationStage.SECURITY) {
+            proposalStage[proposalId] = ValidationStage.APPROVED;
+        } else {
+            proposalStage[proposalId] = ValidationStage(uint(stage) + 1);
+        }
     }
 }
 ```
@@ -46,24 +61,30 @@ contract ComponentValidator {
 
 #### Best Practice
 
-위치: `BERA_CORE/contracts/src/gov/TimeLock.sol` (라인 17)
+위치 : [`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L56-L58)&#x20;
 
-위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 58-60)
+```solidity
+if (guardian != address(0)) {
+    timelock.grantRole(timelock.CANCELLER_ROLE(), guardian);
+}
+```
+
+`커스텀 코드`
 
 ```solidity
 contract TransparentGovernance {
     struct RejectionRecord {
-        uint256 proposalId;
         string reason;
+        address rejectedBy;
         uint256 timestamp;
     }
     
     mapping(uint256 => RejectionRecord) public rejections;
-    event ProposalRejected(uint256 indexed proposalId, string reason);
     
     function rejectProposal(uint256 proposalId, string memory reason) external onlyGuardian {
-        rejections[proposalId] = RejectionRecord(proposalId, reason, block.timestamp);
-        emit ProposalRejected(proposalId, reason);
+        require(bytes(reason).length > 0, "Reason required");
+        rejections[proposalId] = RejectionRecord(reason, msg.sender, block.timestamp);
+        emit ProposalRejected(proposalId, reason, msg.sender);
     }
 }
 ```
@@ -82,23 +103,51 @@ contract TransparentGovernance {
 
 #### Best Practice
 
-위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 95-105)
-
-위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 67-72)
+위치 : [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L110-L127)
 
 ```solidity
-contract HybridGovernance {
-    struct Vote {
-        uint256 weight;
-        bool support;
-        bytes32 offChainProof;
+function _countVote(
+    uint256 proposalId,
+    address account,
+    uint8 support,
+    uint256 totalWeight,
+    bytes memory params
+)
+    internal
+    override(GovernorUpgradeable, GovernorCountingSimpleUpgradeable)
+    returns (uint256)
+{
+    // Avoid off-chain issues.
+    if (totalWeight == 0) {
+        GovernorZeroVoteWeight.selector.revertWith();
     }
+
+    return GovernorCountingSimpleUpgradeable._countVote(proposalId, account, support, totalWeight, params);
+}
+```
+
+위치 : [`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L61-L66)&#x20;
+
+```solidity
+InitialGovernorParameters memory params = InitialGovernorParameters({
+    proposalThreshold: proposalThreshold * (10 ** IERC20Metadata(token).decimals()),
+    quorumNumeratorValue: quorumNumeratorValue,
+    votingDelay: uint48(votingDelay),
+    votingPeriod: uint32(votingPeriod)
+});
+```
+
+`커스텀 코드`
+
+```solidity
+contract ParticipationIncentive {
+    mapping(address => uint256) public participationRewards;
+    uint256 public constant VOTE_REWARD = 10e18;
     
-    mapping(uint256 => mapping(address => Vote)) public votes;
-    uint256 public constant QUORUM_THRESHOLD = 20e16; // 20%
-    
-    function castVote(uint256 proposalId, bool support, bytes32 proof) external {
-        votes[proposalId][msg.sender] = Vote(getBGTBalance(msg.sender), support, proof);
+    function castVoteWithReward(uint256 proposalId, bool support) external {
+        require(getBGTBalance(msg.sender) > 0, "No voting power");
+        participationRewards[msg.sender] += VOTE_REWARD;
+        emit VoteCast(proposalId, msg.sender, support);
     }
 }
 ```
@@ -117,9 +166,14 @@ contract HybridGovernance {
 
 #### Best Practice
 
-위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 29-35)
+위치 : [`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L42-L43)
 
-위치: `BERA_CORE/contracts/src/gov/GovDeployer.sol` (라인 67)
+```solidity
+// Check if the token implements ERC20Votes and ERC20 metadata
+_checkIfERC20Votes(token);
+```
+
+`커스텀 코드` :&#x20;
 
 ```solidity
 contract ValidatorIndependence {
@@ -154,33 +208,29 @@ contract ValidatorIndependence {
 
 #### Best Practice
 
-위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 95-105)
+위치 : [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
 
-위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 75-85)
+```solidity
+function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
+    (uint256 againstVotes, uint256 forVotes,) = proposalVotes(proposalId);
+    uint256 threshold = (forVotes + againstVotes) * 51 / 100;
+    return forVotes >= threshold;
+}
+```
+
+`커스텀 코드` :&#x20;
 
 ```solidity
 contract QuadraticGovernance {
-    mapping(uint256 => mapping(address => uint256)) public quadraticVotes;
-    uint256 public constant MAX_CONCENTRATION = 15e16; // 15%
-    
     function calculateQuadraticWeight(uint256 bgtAmount) public pure returns (uint256) {
         return sqrt(bgtAmount);
     }
     
     function castQuadraticVote(uint256 proposalId, bool support) external {
         uint256 weight = calculateQuadraticWeight(getBGTBalance(msg.sender));
-        if (getConcentration(msg.sender) > MAX_CONCENTRATION) {
-            weight = weight / 2; // 50% 페널티
-        }
-        quadraticVotes[proposalId][msg.sender] = weight;
-    }
-    
-    function sqrt(uint256 x) internal pure returns (uint256) {
-        if (x == 0) return 0;
-        uint256 z = (x + 1) / 2;
-        uint256 y = x;
-        while (z < y) { y = z; z = (x / z + z) / 2; }
-        return y;
+        uint256 concentration = getConcentration(msg.sender);
+        if (concentration > 15e16) weight = weight / 2; // 15% 이상 시 페널티
+        emit VoteCast(proposalId, msg.sender, support, weight);
     }
 }
 ```
@@ -200,30 +250,29 @@ contract QuadraticGovernance {
 
 #### Best Practice
 
-위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol` (라인 87-93)
+위치: [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L100-L108)&#x20;
 
-위치: `BERA_CORE/contracts/src/gov/TimeLock.sol`
+```solidity
+function getTimelockOperationId(uint256 proposalId) external view returns (bytes32 operationId) {
+    TimelockControllerUpgradeable timelock = TimelockControllerUpgradeable(payable(_executor()));
+    (address[] memory targets, uint256[] memory values, bytes[] memory calldatas, bytes32 descriptionHash) = proposalDetails(proposalId);
+    bytes32 salt = bytes20(address(this)) ^ descriptionHash;
+    operationId = timelock.hashOperationBatch(targets, values, calldatas, 0, salt);
+}
+```
+
+`커스텀 코드` :
 
 ```solidity
 contract ProposalValidator {
-    struct ProposalReview {
-        uint256 proposalId;
-        bool reviewed;
-        uint256 riskScore;
-        uint256 reviewDeadline;
-    }
-    
-    mapping(uint256 => ProposalReview) public reviews;
+    mapping(uint256 => uint256) public riskScores; // 0-100
     mapping(uint256 => bool) public emergencyPaused;
-    uint256 public constant MIN_REVIEW_PERIOD = 7 days;
     
-    function submitProposal(uint256 proposalId) external {
-        reviews[proposalId] = ProposalReview({
-            proposalId: proposalId,
-            reviewed: false,
-            riskScore: 0,
-            reviewDeadline: block.timestamp + MIN_REVIEW_PERIOD
-        });
+    function calculateRiskScore(bytes calldata proposalData) external pure returns (uint256) {
+        uint256 score = 0;
+        if (containsFinancialFunctions(proposalData)) score += 40;
+        if (containsAccessControlChanges(proposalData)) score += 30;
+        return score > 100 ? 100 : score;
     }
     
     function emergencyPauseProposal(uint256 proposalId) external onlyGuardian {
@@ -247,65 +296,37 @@ contract ProposalValidator {
 
 #### Best Practice
 
-**위치: `BERA_CORE/contracts/src/gov/BerachainGovernance.sol`**
+**위치:** [**`BerachainGovernance.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L134-L151)
 
 ```solidity
-// 제안 상태 확인 - 사용자가 제안의 현재 상태를 추적할 수 있음
-function state(uint256 proposalId) public view returns (ProposalState)
+function state(uint256 proposalId) public view override returns (ProposalState) {
+    return GovernorTimelockControlUpgradeable.state(proposalId);
+}
 
-// 제안이 큐잉이 필요한지 확인 - 타임락 적용 여부 판단
-function proposalNeedsQueuing(uint256 proposalId) public view returns (bool)
-
-// 타임락 오퍼레이션 ID 조회 - 실행 예정 시간 추적 가능
-function getTimelockOperationId(uint256 proposalId) external view returns (bytes32 operationId)
+function proposalNeedsQueuing(uint256 proposalId) public view override returns (bool) {
+    return GovernorTimelockControlUpgradeable.proposalNeedsQueuing(proposalId);
+}
 ```
 
-**위치: `BERA_CORE/contracts/src/gov/TimeLock.sol`**
+`커스텀 코드` :
 
 ```solidity
-// 사용자 고지 시스템
 contract UserNotificationSystem {
+    enum ImpactLevel { LOW, MEDIUM, HIGH, CRITICAL }
+    
     struct ProposalNotification {
-        uint256 proposalId;
         uint256 effectiveTime;
+        ImpactLevel impactLevel;
         string description;
-        bool isHighImpact;
     }
     
     mapping(uint256 => ProposalNotification) public notifications;
-    mapping(address => mapping(uint256 => bool)) public userAcknowledged;
     
-    event ProposalQueued(uint256 indexed proposalId, uint256 effectiveTime);
-    event UserNotified(uint256 indexed proposalId, address indexed user);
-    
-    // 제안이 큐잉될 때 알림 생성
-    function notifyProposalQueued(
-        uint256 proposalId,
-        uint256 effectiveTime,
-        string memory description,
-        bool isHighImpact
-    ) external onlyGovernance {
-        notifications[proposalId] = ProposalNotification({
-            proposalId: proposalId,
-            effectiveTime: effectiveTime,
-            description: description,
-            isHighImpact: isHighImpact
-        });
-        
-        emit ProposalQueued(proposalId, effectiveTime);
+    function queueNotification(uint256 proposalId, ImpactLevel impact, string memory description) external {
+        uint256 noticePeriod = impact >= ImpactLevel.HIGH ? 30 days : 14 days;
+        notifications[proposalId] = ProposalNotification(block.timestamp + noticePeriod, impact, description);
+        emit ProposalQueued(proposalId, impact);
     }
-    
-    // 사용자가 알림 확인
-    function acknowledgeProposal(uint256 proposalId) external {
-        userAcknowledged[msg.sender][proposalId] = true;
-        emit UserNotified(proposalId, msg.sender);
-    }
-    
-    // 미확인 중요 제안 조회
-    function getUnacknowledgedHighImpactProposals(address user) 
-        external view returns (uint256[] memory) {
-        // 구현 로직
-    }
-} 
+}
 ```
 
