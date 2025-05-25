@@ -4,13 +4,12 @@
 
 #### 참고 코드
 
-
-
 * [https://github.com/berachain/contracts](https://github.com/berachain/contracts)
 * [https://github.com/wiimdy/bearmoon](https://github.com/wiimdy/bearmoon)
-* [https://documentation.kodiak.finance/](https://documentation.kodiak.finance/)
 
 #### 참고 자료
 
+* [https://docs.berachain.com/developers](https://docs.berachain.com/developers/)
 * [https://infrared.finance/docs](https://infrared.finance/docs)
 * [https://beraborrow.gitbook.io/docs](https://beraborrow.gitbook.io/docs)
+* [https://documentation.kodiak.finance](https://documentation.kodiak.finance/)
