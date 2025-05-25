@@ -62,7 +62,7 @@ function setHoneyPriceInstability(bool _isUnstable) external onlyOwner {
     }
 }
 
-// 가이드라인 적용: $HONEY 가격 불안정 시 $NECT를 통한 1:1 가치 상환 제한
+// $HONEY 가격 불안정 시 $NECT를 통한 1:1 가치 상환 제한
 function repayDebtWithNect(uint256 _amountToRepay) external {
     address user = msg.sender;
     require(_amountToRepay > 0, "Repayment amount must be positive");
@@ -89,8 +89,8 @@ function repayDebtWithNect(uint256 _amountToRepay) external {
 #### Best Practice
 
 ```solidity
-  // Circuit Breaker 예시
-  function setSystemPause(bool _pause, string calldata _reason) external onlyOwner {
+// Circuit Breaker 예시
+function setSystemPause(bool _pause, string calldata _reason) external onlyOwner {
     if (_pause) {
         require(currentSystemStatus != SystemStatus.Paused, "System already paused");
         currentSystemStatus = SystemStatus.Paused;
