@@ -10,10 +10,10 @@ icon: user-check
 
 #### 가이드라인
 
-> * 운영자 변경 시 queue 메커니즘과 시간 지연을 통한 급작스러운 변경 방지
-> * 거버넌스 또는 신뢰할 수 있는 제3자를 통한 운영자 강제 변경/취소 메커니즘
-> * 운영자 변경 시 기존 staking 잔액에 대한 freeze 기간 설정 및 점진적 권한 이전
-> * 운영자 주소가 제로 주소로 적용되지 않도록 방지
+> * **운영자 변경 시 queue 메커니즘과 시간 지연을 통한 급작스러운 변경 방지**
+> * **거버넌스 또는 신뢰할 수 있는 제3자를 통한 운영자 강제 변경/취소 메커니즘**
+> * **운영자 변경 시 기존 staking 잔액에 대한 freeze 기간 설정 및 점진적 권한 이전**
+> * **운영자 주소가 제로 주소로 적용되지 않도록 방지**
 
 #### Best Practice&#x20;
 
@@ -52,9 +52,9 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 #### 가이드라인&#x20;
 
-> * 예치, 인출 로직 추가 및 검증, 거버넌스를 통해 조정 가능한 출금 제한 및 잠금 기간 설정
-> * queue 시스템을 통한 단계별 출금 프로세스 구현
-> * emergency withdrawal 기능 구현 시 penalty 메커니즘 적용
+> * **예치, 인출 로직 추가 및 검증, 거버넌스를 통해 조정 가능한 출금 제한 및 잠금 기간 설정**
+> * **queue 시스템을 통한 단계별 출금 프로세스 구현**
+> * **emergency withdrawal 기능 구현 시 penalty 메커니즘 적용**
 
 #### Best Practice&#x20;
 
@@ -96,10 +96,10 @@ function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentr
 
 #### 가이드 라인
 
-> * 동일 timestamp 중복 처리 방지 메커니즘 구현
-> * Beacon block root과 proposer index/pubkey의 암호학적 검증
-> * 보상 분배 시 totalRewardDistributed 추적으로 누락/중복 방지
-> * 블록 처리 상태를 기록하는 bitmap 또는 mapping을 통한 중복 처리 완전 차단
+> * **동일 timestamp 중복 처리 방지 메커니즘 구현**
+> * **Beacon block root과 proposer index/pubkey의 암호학적 검증**
+> * **보상 분배 시 totalRewardDistributed 추적으로 누락/중복 방지**
+> * **블록 처리 상태를 기록하는 bitmap 또는 mapping을 통한 중복 처리 완전 차단**
 
 #### Best Practice&#x20;
 

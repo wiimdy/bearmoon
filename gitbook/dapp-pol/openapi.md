@@ -20,68 +20,65 @@ layout:
 
 ### 위협 1: DEX 풀 불균형으로 LP 토큰 담보가치 급락 시 대출 대량 청산
 
+DEX 유동성 풀이 한쪽으로 치우치며 LP 토큰 가치가 폭락하자, 이를 담보로 한 대출들이 연쇄적으로 청산될 위험이 발생합니다. 실시간 위험 경고 및 지표 공유 시스템 부재 시 사용자는 대응 시간을 놓쳐 자산 손실을 입게 됩니다.
+
 #### 가이드라인
 
-> * Dex 풀의 불균형 발생 시 LP 토큰을 담보로 하는 Lending에 경고 시스템 제작
-> * Dex-Lending 프로토콜 간 실시간 위험 지표 공유
+> * **Dex 풀의 불균형 발생 시 LP 토큰을 담보로 하는 Lending에 경고 시스템 제작**
+> * **Dex-Lending 프로토콜 간 실시간 위험 지표 공유**
 
 #### Best Practice&#x20;
 
 ```solidity
-// contracts/src/pol/BeaconDeposit.sol
-
-// 첫 deposit시 operator가 zero address인지 검증
-function deposit( ...
-if (_operatorByPubKey[pubkey] == address(0)) {
-    if (operator == address(0)) {
-        ZeroOperatorOnFirstDeposit.selector.revertWith();
+// LP 토큰의 건정성을 확인하는 함수
+function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwner {
+    require(_lpToken != address(0), "LP token: zero address"); 
+    if (lpTokenIsHighRisk[_lpToken] != _isHighRisk) {
+        lpTokenIsHighRisk[_lpToken] = _isHighRisk;
+        emit LpTokenRiskStatusUpdated(_lpToken, _isHighRisk);
+        // 이 이벤트는 오프체인 경고 시스템에 의해 감지되어 사용자에게 알림을 보낼 수 있습니다.
     }
-    ...
-}
-
-// operator 변경시 타임락 적용
-function acceptOperatorChange(bytes calldata pubkey) external {
-    ...
-
-    if (queuedTimestamp + ONE_DAY > uint96(block.timestamp)) { 
-        NotEnoughTime.selector.revertWith();
-    }
-
-    address oldOperator = _operatorByPubKey[pubkey];
-    _operatorByPubKey[pubkey] = newOperator;
-    delete queuedOperator[pubkey];
-    emit OperatorUpdated(pubkey, newOperator, oldOperator);
 }
 ```
 
 ***
 
-### 위협 2: 자산 가치 평가 프로토콜간 불일치로 인한 시스템 불안정
+### 위협 2: $HONEY 가격 불안정으로 인한 대출 프로코콜 마비
+
+$HONEY와 대출 프로토콜에서 사용되는 $NECT는 연결되어 있다. $HONEY의 가격이 불안정해지면 $NECT로 1:1 교환하여 담보 상환이 지속돼 대출 프로토콜이 마비 될 수 있다.
 
 #### 가이드라인
 
-> * 통합 Price Oracle 인프라:&#x20;
->   * LP 토큰, 스테이킹 토큰 등 복합 자산이 프로토콜마다 다르게 평가되는 문제 해결
-> * 크로스 프로토콜 가격 합의:&#x20;
->   * 주요 프로토콜 간 가격 정보 실시간 공유 메커니즘
+> * **$HONEY 가격이 사전에 정의된 안전 임계치 이하로 크게 하락하거나 단기간에 급격한 변동성을 보일 경우, $NECT와 관련된 특정 기능을 일시적으로 중단하거나 제한**
 
 #### Best Practice
 
 ```solidity
-// contracts/src/pol/BeaconDeposit.sol
+// $HONEY의 건전성 체크
+function setHoneyPriceInstability(bool _isUnstable) external onlyOwner {
+    if (isHoneyPriceUnstable != _isUnstable) {
+        isHoneyPriceUnstable = _isUnstable;
+        emit HoneyPriceInstabilityTriggered(_isUnstable, msg.sender);
+    }
+}
 
-• **표준화된 가격 오라클**: 모든 프로토콜이 동일한 가격 참조 소스 사용하도록 표준 제정
-• **가격 편차 모니터링**: 프로토콜 간 동일 자산 가격 차이가 2% 초과 시 자동 경고
-• **차익거래 임계값 설정**: 24시간 내 동일 사용자의 차익거래 거래량을 $100,000로 제한
-• **
-• **Dynamic Pricing Adjustment**: 프로토콜 간 가격 차이 발생 시 자동으로 수수료 조정하여 균형 유도
+// 가이드라인 적용: $HONEY 가격 불안정 시 $NECT를 통한 1:1 가치 상환 제한
+function repayDebtWithNect(uint256 _amountToRepay) external {
+    address user = msg.sender;
+    require(_amountToRepay > 0, "Repayment amount must be positive");
+    require(userDebtInNect[user] >= _amountToRepay, "Amount exceeds debt");
+
+    if (isHoneyPriceUnstable) {
+        emit NectRepaymentBlocked(user, _amountToRepay, "$HONEY price is unstable. $NECT repayments temporarily suspended.");
+        revert("Repayments with $NECT are temporarily suspended due to $HONEY price instability.");
+    }
+    ...
+}
 ```
 
 ***
 
-### 위협 3: 자산 가치 평가 프로토콜간 불일치로 인한 시스템 불안정
-
-시나리오: 개별 프로토콜 붕괴 시 연쇄 반응으로 인한 베라체인 생태계 붕괴
+### 위협 3: 개별 프로토콜 붕괴 시 연쇄 반응으로 인한 베라체인 생태계 붕괴
 
 #### 가이드라인
 
@@ -92,9 +89,14 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 #### Best Practice
 
 ```solidity
-// contracts/src/pol/BeaconDeposit.sol
-
-• **Cross-Protocol Risk Dashboard**: 모든 연계 프로토콜의 핵심 지표를 실시간 통합 모니터링
-• **Gradual Recovery Protocol**: 위기 상황 해결 후 단계적 서비스 재개 절차 (30% → 70% → 100%)
-• **Community Alert System**: 위기 상황 시 모든 이해관계자에게 실시간 상황 공유
+  // Circuit Breaker 예시
+  function setSystemPause(bool _pause, string calldata _reason) external onlyOwner {
+    if (_pause) {
+        require(currentSystemStatus != SystemStatus.Paused, "System already paused");
+        currentSystemStatus = SystemStatus.Paused;
+        recoveryLevelPercentage = 0; // 일시 중지 시 운영 레벨 0%
+        emit SystemPaused(msg.sender, _reason);
+        // 오프체인 Community Alert System이 이 이벤트를 감지하여 모든 이해관계자에게 즉시 알림
+    }
+}
 ```
