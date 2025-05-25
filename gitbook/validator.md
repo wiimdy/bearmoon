@@ -17,7 +17,7 @@ icon: user-check
 
 #### Best Practice&#x20;
 
-[BeaconDeposit.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BGTFeeDeployer.sol#L5)
+[BeaconDeposit.sol](https://github.com/berachain/contracts/blob/main/src/pol/BeaconDeposit.sol)
 
 ```solidity
 // contracts/src/pol/BeaconDeposit.sol
