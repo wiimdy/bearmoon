@@ -15,39 +15,81 @@ icon: snake
 
 #### Best Practice
 
+[InfraredBERA.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERA.sol)
+
 ```solidity
-// Some code
+function mint(address receiver) public payable returns (uint256 shares) {
+    compound(); // 미반영 수익 정산 및 반영 절차 적용
+
+    uint256 d = deposits;
+    uint256 ts = totalSupply();
+
+    uint256 amount = msg.value;
+    // InfraredBERADepositor 컨트랙트 내 queue 함수로 BeaconDeposit 컨트랙트 호출하여 외부 자금 유입 동기화 실시
+    _deposit(amount);
+
+    // 초기화 시점에는 1:1, 이후에는 입금 비율에 비례하여 계산되도록 처리
+    shares = (d != 0 && ts != 0) ? (ts * amount) / d : amount;
+    // 초기화 시도 시 예외처리 실시
+    if (shares == 0) revert Errors.InvalidShares();
+    _mint(receiver, shares);
+
+    emit Mint(receiver, amount, shares);
+}
 ```
-
-• src/staking/InfraredBERA.sol\
-&#x20; \- L215: compound 함수 선 실행을 통한 미반영 수익 정산 및 반영 절차 적용\
-&#x20; \- L223 -> L277: InfraredBERADepositor 컨트랙트 내 queue 함수로 BeaconDeposit 컨트랙트 호출하여 외부 자금 유입 동기화 실시
-
-&#x20; \- L227-L229: 초기화 시점에는 1:1, 이후에는 입금 비율에 비례하여 계산되도록 처리하며 초기화 시도 시 분배량 값이 0으로 초기화되어 iBERA/BERA 교환 비율이 조작될 가능성을 막기위해 예외처리 실시
 
 ***
 
-### 위협 2: 특정 validator 자금 집중 현상으로 인한 보상 불균형과 중앙화 발생
+### 위협 2: 특정 검증자 자금 집중 현상으로 인한 보상 불균형과 중앙화 발생
 
 #### 가이드라인
 
-> * **validator 별 최대 스테이킹 한도 설정을 통한 보상 불균형 및 중앙화 발생 방지**
-> * **validator 상태 추적 및 강제 종료 감지**
+> * 검증자 **별 최대 스테이킹 한도 설정을 통한 보상 불균형 및 중앙화 발생 방지**
+> * 검증자 **상태 추적 및 강제 종료 감지**
 > * **리스테이킹 시 분산 정책 적용**
 > * **서비스 내부의 사용자 활동에 따른 추가 보상 시스템을 바탕으로 서비스 참여도 증진 및 유동성 증진을 통한 탈중앙성 강화 유도**
 
 #### Best Practice
 
+[InfraredBERADepositor.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERADepositor.sol)
+
 ```solidity
-// Some code
+function execute(bytes calldata pubkey, uint256 amount)
+    external
+    onlyKeeper
+{
+    // ... 중략 ...
+    address withdrawor = IInfraredBERA(InfraredBERA).withdrawor();
+    // 강제 퇴출된 기존 validator의 자금을 우선 처리
+    if (withdrawor.balance >= InfraredBERAConstants.INITIAL_DEPOSIT) {
+        revert Errors.HandleForceExitsBeforeDeposits();
+    }
+    // 검증자 현재 잔액 + 입금 금액 <= 스테이킹 최대 한도 검증
+    if (
+        IInfraredBERA(InfraredBERA).stakes(pubkey) + amount
+            > InfraredBERAConstants.MAX_EFFECTIVE_BALANCE
+    ) {
+        revert Errors.ExceedsMaxEffectiveBalance();
+    }
+
+    address operatorBeacon =
+        IBeaconDeposit(DEPOSIT_CONTRACT).getOperator(pubkey);
+    address operator = IInfraredBERA(InfraredBERA).infrared();
+    if (operatorBeacon != address(0)) {
+        if (operatorBeacon != operator) {
+            revert Errors.UnauthorizedOperator();
+        }
+        if (!IInfraredBERA(InfraredBERA).staked(pubkey)) {
+            revert Errors.OperatorAlreadySet();
+        }
+        operator = address(0);
+    }
+
+    // ... 중략 ...
+
+    emit Execute(pubkey, amount);
+}
 ```
-
-• src/staking/InfraredBERADepositor.sol\
-&#x20; \- L96-L98: 신규 validator 스테이킹을 허용하기 전 강제 퇴출된 기존 validator의 자금을 우선 처리할 때까지 신규 validator 예치를 일시 중단하는 로직 적용\
-&#x20; \- L100-L106: 스테이킹 시점의 validator 현재 보유액과 입금 시도 금액의 총합이 스테이킹 최대 한도(MAX\_EFFECTIVE\_BALANCE)를 넘을 경우 예외처리\
-&#x20; \- L111-L113: 허가된 validator 운영자 여부를 확인하여 의도되지 않은 스테이킹 발생 방지 처리
-
-• Infrared는 서비스 내부에서 Points 제도를 운영하여 사용자 활동을 강화하는 비즈니스 로직 적용
 
 ***
 
