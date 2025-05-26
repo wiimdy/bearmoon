@@ -6,7 +6,7 @@ description: 위 가이드라인에서 사용한 용어에 대한 설명입니�
 
 ### 기본 토큰 및 메커니즘
 
-* `PoL (Proof of Liquidity)`: 유동성 증명. 특정 dApp에 유동성을 제공하는 행위를 통해 네트워크 보안에 기여하고 보상을 받는 합의 메커니즘
+* `PoL (Proof of Liquidity)`: 유동성 증명. 특정 dApp에 유동성을 제공하는 행위를 통해 네트워크 보안에 기여하고 보상을 받는 메커니즘
 * `PoS (Proof of Stake)`: 지분 증명. 네이티브 토큰을 스테이킹하여 네트워크 보안에 기여하고 보상을 받는 전통적인 합의 메커니즘
 * `BERA`: 베라체인의 네이티브 가스 토큰
 * `BGT (Berachain Governance Token)`: 베라체인의 거버넌스 및 PoL 보상 토큰
