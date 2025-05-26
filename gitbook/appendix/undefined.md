@@ -11,7 +11,7 @@ description: 위 가이드라인에서 사용한 용어에 대한 설명입니�
 * `BERA`: 베라체인의 네이티브 가스 토큰
 * `BGT (Berachain Governance Token)`: 베라체인의 거버넌스 및 PoL 보상 토큰
 * `HONEY`: 베라체인의 스테이블코인. 스테이블코인(USDC, BYUSD)을 담보로 생성되며 dApp 생태계 내 기본 거래 단위로 사용
-* `Soulbound Token`: 특정 지갑에 영구적으로 귀속되어 전송이 불가능한 토큰
+* `SBT(Soulbound Token)`: 특정 지갑에 영구적으로 귀속되어 전송이 불가능한 토큰
 * `거버넌스(Governance)`: 프로토콜의 중요한 결정사항을 토큰 보유자들이 투표를 통해 결정하는 탈중앙화 의사결정 시스템
 
 ***
