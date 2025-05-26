@@ -6,7 +6,7 @@ icon: sack-dollar
 
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
-
+인센티브 토큰 관련 권한이 없는 사용자가 토큰 화이트리스트 내용을 조작할 경우 토큰 화이트리스트 내용이 무력화되어 사용자 보상 처리 과정에서 문제가 발생할 수 있다.
 
 #### 가이드라인
 
@@ -19,7 +19,7 @@ icon: sack-dollar
 [`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)&#x20;
 
 ```solidity
-function reverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
+function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
     //recoverERC20에서 incentive token과 staked token 회수 방지
     if (tokenAddress == address(stakeToken)) CannotRecoverStakingToken.selector.revertWith();
 
@@ -51,7 +51,7 @@ function whitelistIncentiveToken(
 
 ### 위협 2: 컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류
 
-
+컨트랙트 초기 배포 과정에서 영(0) 주소 입력 등 필수 검증 절차와 필터링 기능 누락 시 잘못된 설정으로 인한 시스템 오류 발생 가능성이 존재한다.
 
 #### 가이드라인
 
@@ -114,7 +114,7 @@ bytes32 public genesisDepositsRoot;
 
 ### 위협 3: BGT redeem 시 Native token 부족으로 인한 유동성 위기
 
-
+BGT redeem 시 redeem 대상 컨트랙트가 현재 보유하고 있는 Native 토큰의 수량이 부족할 경우 네트워크의 유동성 위기를 초래할 수 있다.
 
 #### 가이드라인
 
@@ -168,8 +168,6 @@ function _invariantCheck() private view {
 
 ### 위협 4: 보상 분배 로직 오류로 인한 특정 사용자에게 과도한 보상 지급 또는 보상 누락
 
-
-
 #### 가이드라인
 
 > * **95% 코드 커버리지, Fuzz 테스트, 100명 이상 사용자 시뮬레이션 등 구체적 수치 제시**
@@ -196,7 +194,7 @@ function _notifyRewardAmount(uint256 reward)
 
 ### 위협 5: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
 
-
+컨트랙트 접근 제어를 정확하게 처리하지 못할 경우 의도하지 않은 악성 사용자의 접근으로 인한 보상 인출 또는 조작 발생 가능성이 존재한다.
 
 #### 가이드라인
 
@@ -242,7 +240,7 @@ function getReward(
 
 ### 위협 6: 재진입 공격을 통해 보상 중복 청구
 
-
+컨트랙트 함수 중 토큰의 흐름을 제어하는 함수에 대한 재진입을 허용할 경우 재진입 공격에 의한 토큰 무단 인출 문제로 시스템 전체의 손해로 이어질 수 있다.
 
 #### 가이드라인
 
@@ -288,7 +286,7 @@ function _getReward(address account, address recipient)
 
 ### 위협 7: Operator들이 담합하여 특정 reward vault에만 BGT 보상을 집중, 유동성 쏠림 및 타 프로토콜 유동성 고갈
 
-
+Operator들이 담합하여 특정 reward vault에만 BGT 보상을 집중, 유동성 쏠림 및 타 프로토콜 유동성 고갈
 
 #### 가이드라인
 
@@ -429,7 +427,7 @@ function getReward(
 
 ### 위협 13: 정상적인 Incentive token 제거에 따른 보상 중단
 
-
+정상적인 incentive token 제거 시 사용자 보상 중단으로 인한 보상 구조 임의 변경 영향으로 문제 발생 가능성이 존재한다.
 
 #### 가이드라인
 
@@ -449,7 +447,7 @@ function getReward(
 
 ### 위협 14: claimFees() 프론트러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
-
+claimFees() 함수를 호출하는 사용자 앞에서 프론트러닝을 통한 트랜잭션 선점 시 수수료 보상 가로채기 또는 인센티브 왜곡이 발생할 수 있다.
 
 #### 가이드라인
 
@@ -467,7 +465,7 @@ function getReward(
 
 ### 위협 15: dApp 프로토콜의 Fee Token 송금 누락에 따른 사용자 보상 실패
 
-
+dApp 프로토콜의 Fee Token 송금 누락 시 user가 claimFees를 호출해도 정상적인 Fee를 받을 수 없어 BGT Staker의 $HONEY 보유량 감소로 BGT 예치자의 보상 수령 과정에서 문제가 발생할 수 있다.
 
 #### 가이드라인
 
@@ -484,7 +482,7 @@ function getReward(
 
 ### 위협 16: 토큰 승인 검증 부재 및 ERC-20 표준 미검증으로 인한 위협
 
-
+화이트리스트 토큰에 대한 ERC20 표준 준수 여부 등의 검증 절차 누락 시 네트워크 보상 처리 과정에서 의도하지 않은 악성 행위로 인해 문제가 발생할 수 있다.
 
 **가이드라인**
 
@@ -500,7 +498,7 @@ function getReward(
 
 #### Best Practice&#x20;
 
-RewardVault.sol
+&#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
 
 ```solidity
 // 토큰 화이트리스트 관리
@@ -533,7 +531,7 @@ function addIncentive(
 
 ### 위협 17: 인센티브 분배 대상 선정 로직 오류
 
-
+인센티브 분배기에서 분배 설정 시 누락 또는 미검증된 설정으로 인해 인센티브 분배 처리 과정에서 문제가 발생할 수 있다.
 
 #### 가이드라인
 
@@ -597,7 +595,7 @@ function setVaultWhitelistedStatus(
 
 ### 위협 18: 분배 비율 또는 기간 설정 오류로 인한 과도/과소 인센티브 지급
 
-
+인센티브 분배 비율, 분배 기간 설정 과정에서 미흡한 설정이 적용될 경우 인센티브가 과도/과소 지급될 가능성이 있다.
 
 #### 가이드라인
 
@@ -670,7 +668,7 @@ function _setRewardClaimDelay(uint64 _delay) internal {
 
 ### 위협 19: 권한 없는 사용자의 인센티브 풀 무단 인출&#x20;
 
-
+인센티브 분배 관련 권한이 없는 사용자가 인센티브 풀을 무단으로 인출할 경우 사용자 인센티브 처리 과정에 문제가 발생할 수 있다.
 
 #### 가이드라인
 
@@ -716,7 +714,7 @@ function initialize(
 
 ### 위협 20: Validator operator의 인센티브 분배 직전 queue 조작을 통한 commission 탈취 및 사용자 분배 손실
 
-
+validator 운영자가 인센티브 분배 직전 인센티브 분배 큐를 조작하여 commission을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
 
 #### 가이드라인
 
@@ -789,7 +787,7 @@ function _getOperatorCommission(bytes calldata valPubkey) internal view returns 
 
 ### 위협 21: $BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
 
-
+$BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 emission 관련 수식 변수 요소에 대한 조작을 시도할 시 예상치를 벗어난 의도하지 않은 인플레이션 발생 가능성이 있다.
 
 #### 가이드라인
 
