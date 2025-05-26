@@ -109,7 +109,7 @@ bytes32 public genesisDepositsRoot;
 
 ***
 
-### 위협 3: BGT redeem 시 Native token 부족으로 인한 유동성 위기
+### 위협 3: BGT 리딤 시 네이티브 토큰 부족으로 인한 유동성 위기
 
 BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 토큰의 수량이 부족할 경우 일부 사용자는 보상을 받지 못하고 유동성 위기가 발생한다.
 
