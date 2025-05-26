@@ -6,9 +6,7 @@ icon: sack-dollar
 
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -18,8 +16,9 @@ icon: sack-dollar
 
 #### Best Practice&#x20;
 
+[RewardVault.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+
 ```solidity
-// contracts/src/pol/rewards/RewardVault.sol
 function reverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
     //recoverERC20에서 incentive token과 staked token 회수 방지
     if (tokenAddress == address(stakeToken)) CannotRecoverStakingToken.selector.revertWith();
@@ -52,9 +51,7 @@ function whitelistIncentiveToken(
 
 ### 위협 2: 컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -65,6 +62,8 @@ function whitelistIncentiveToken(
 > * critical parameter 변경을 위한 롤백 메커니즘
 
 #### Best Practice&#x20;
+
+[BlockRewardController.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BlockRewardController.sol)
 
 ```solidity
 // contracts/src/pol/rewards/BlockRewardController.sol
@@ -91,8 +90,9 @@ function initialize(
 }
 ```
 
+[BGT.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BGT.sol)
+
 ```solidity
-// contracts/src/pol/BGT.sol
 function initialize(address _owner) external initializer {
     // initialize에서 boost delay를 BOOST_MAX_BLOCK_DELAY로 설정
     // ...
@@ -101,10 +101,10 @@ function initialize(address _owner) external initializer {
 }
 ```
 
-```solidity
-// contracts/src/pol/BeaconDeposit.sol
-// genesisDepositsRoot 설정으로 초기 상태 정의
+[BeaconDeposit.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BeaconDeposit.sol)
 
+```solidity
+// genesisDepositsRoot 설정으로 초기 상태 정의
 /// @dev The hash tree root of the genesis deposits.
 /// @dev Should be set in deployment (predeploy state or constructor).
 bytes32 public genesisDepositsRoot;
@@ -114,9 +114,7 @@ bytes32 public genesisDepositsRoot;
 
 ### 위협 3: BGT redeem 시 Native token 부족으로 인한 유동성 위기
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -126,9 +124,9 @@ bytes32 public genesisDepositsRoot;
 
 #### Best Practice&#x20;
 
-```solidity
-// contracts/src/pol/BGT.sol
+[BGT.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BGT.sol)
 
+```solidity
 function redeem(
     address receiver,
     uint256 amount
@@ -170,9 +168,7 @@ function _invariantCheck() private view {
 
 ### 위협 4: 보상 분배 로직 오류로 인한 특정 사용자에게 과도한 보상 지급 또는 보상 누락
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -180,6 +176,8 @@ function _invariantCheck() private view {
 > * Python/JavaScript 기반 오프체인 검증 시스템 구현 방안
 
 #### Best Practice&#x20;
+
+[StakingRewards.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/base/StakingRewards.sol)
 
 ```solidity
 // contracts/src/pol/rewards/StakingRewards.sol
@@ -198,6 +196,8 @@ function _notifyRewardAmount(uint256 reward)
 
 ### 위협 5: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
 
+
+
 #### 가이드라인
 
 > * 각 함수 및 중요 데이터에 대해 명확한 역할(Owner, Admin, User 등)을 정의, 역할에 따른 접근 권한을 엄격히 부여
@@ -206,8 +206,9 @@ function _notifyRewardAmount(uint256 reward)
 
 #### Best Practice&#x20;
 
+[RewardVault.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+
 ```solidity
-// contracts/src/pol/rewards/RewardVault.sol
 function addIncentive(
     address token,
     uint256 amount,
@@ -222,10 +223,7 @@ function addIncentive(
     if (msg.sender != manager) NotIncentiveManager.selector.revertWith();
     // ...
 }
-```
 
-```solidity
-// contracts/src/pol/rewards/RewardVault.sol
 function getReward(
     address account,
     address recipient
@@ -244,9 +242,7 @@ function getReward(
 
 ### 위협 6: 재진입 공격을 통해 보상 중복 청구
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -255,8 +251,9 @@ function getReward(
 
 #### Best Practice&#x20;
 
+[RewardVault.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+
 ```solidity
-// contracts/src/pol/rewards/RewardVault.sol
 function getReward(
     address account,
     address recipient
@@ -264,12 +261,16 @@ function getReward(
     external
     // nonReentrant 가드 사용
     nonReentrant
-
-
+    onlyOperatorOrUser(Account)
+    returns (uint256)
+{
+    // ...
+}
 ```
 
+[StakingRewards.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/base/StakingRewards.sol)
+
 ```solidity
-// contracts/src/base/StakingRewards.sol
 function _getReward(address account, address recipient)
     internal
     virtual
@@ -287,9 +288,7 @@ function _getReward(address account, address recipient)
 
 ### 위협 7: Operator들이 담합하여 특정 reward vault에만 BGT 보상을 집중, 유동성 쏠림 및 타 프로토콜 유동성 고갈
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -300,8 +299,9 @@ function _getReward(address account, address recipient)
 
 #### Best Practice&#x20;
 
+[BeraChef.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BeraChef.sol)
+
 ```solidity
-// contracts/src/pol/rewards/Berachef.sol
 function _validateWeights(Weight[] calldata weights) internal view {
     // reward vault당 최대 30% 까지 할당 가능
     if (weights.length > maxNumWeightsPerRewardAllocation) {
@@ -318,9 +318,7 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ### 위협 8: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -337,9 +335,7 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ### 위협 9: Reward Vault Factory Owner가 악의적인 distributor 생성 시 사용자 보상 시스템 문제 발생
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -355,9 +351,7 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ### 위협 10: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 벨리데이터의 Boost Reward 감소
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -374,9 +368,7 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ### 위협 11: Incentive token가 고갈 된 후 Incentive rate를 낮춰 해당 vault를 선택한 벨리데이터의 Boost APR 감소
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -386,8 +378,9 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 #### Best Practice&#x20;
 
+[RewardVault.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+
 ```solidity
-// contracts/src/pol/rewards/RewardVault.sol
 function addIncentive(
     address token,
     uint256 amount,
@@ -402,10 +395,7 @@ function addIncentive(
     if (msg.sender != manager) NotIncentiveManager.selector.revertWith();
     // ...
 }
-```
 
-```solidity
-// contracts/src/pol/rewards/RewardVault.sol
 function getReward(
     address account,
     address recipient
@@ -424,9 +414,7 @@ function getReward(
 
 ### 위협 12: 보상 분배 중 모든 LP token을 인출하여 잔고를 0으로 만들면 해당 보상 증발
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -441,9 +429,7 @@ function getReward(
 
 ### 위협 13: 정상적인 Incentive token 제거에 따른 보상 중단
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -463,9 +449,7 @@ function getReward(
 
 ### 위협 14: claimFees() 프론트러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -483,9 +467,7 @@ function getReward(
 
 ### 위협 15: dApp 프로토콜의 Fee Token 송금 누락에 따른 사용자 보상 실패
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -502,9 +484,7 @@ function getReward(
 
 ### 위협 16: 토큰 승인 검증 부재 및 ERC-20 표준 미검증으로 인한 위협
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -531,9 +511,7 @@ SafeERC20 라이브러리 및 TransferHelper 활용 - kodiak-contracts/KodiakFar
 
 ### 위협 17: 인센티브 분배 대상 선정 로직 오류
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -546,6 +524,9 @@ SafeERC20 라이브러리 및 TransferHelper 활용 - kodiak-contracts/KodiakFar
 ```solidity
 • src/pol/rewards/BGTIncentiveDistributor.sol
   -
+```
+
+```solidity
 • src/pol/rewards/BeraChef.sol
   - _validateWeights, _checkIfStillValid 등
   - 설정 변경 후 실제 지연에 시간차를 두기 위한 시간 지연 로직을 queueNewRewardAllocation, activateQueuedValCommision 함수를 통해서 구현
@@ -556,9 +537,7 @@ SafeERC20 라이브러리 및 TransferHelper 활용 - kodiak-contracts/KodiakFar
 
 ### 위협 18: 분배 비율 또는 기간 설정 오류로 인한 과도/과소 인센티브 지급
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -567,23 +546,71 @@ SafeERC20 라이브러리 및 TransferHelper 활용 - kodiak-contracts/KodiakFar
 
 #### Best Practice&#x20;
 
+[StakingRewards.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/base/StakingRewards.sol)
+
 ```solidity
-• src/pol/rewards/RewardVault.sol -> src/base/StakingRewards.sol
-  - 리워드 최솟값과 토큰 계산 과정에서 안전한 연산을 위한 FixedPointMathLib 라이브러리 사용
-  - _notifyRewardAmount, _computeLeftOverReward 함수에서 조건부 시간 계산을 위해 안전성이 보장된 상황에서만 시간 차이를 계산
-• src/pol/rewards/BeraChef.sol
-  - queueNewRewardAllocation 함수 시작부에서 블록 번호 기반 지연 처리를 통해 타임스탬프 조작 공격 방지
-• src/pol/rewards/BGTIncentiveDistributor.sol
-  - MAX_REWARD_CLAIM_DELAY 지정을 통해 타임스탬프 기반 지연 시간 최소화
+function _notifyRewardAmount(uint256 reward) internal virtual updateReward(address(0)) {
+    reward = reward * PRECISION;
+    
+    // 조건부 시간 계산을 위해 안전성이 보장된 상황에서만 시간 차이를 계산
+    if (totalSupply != 0 && block.timestamp < periodFinish) {
+        reward += _computeLeftOverReward();
+    }
+    
+    // ...
+}
+
+function rewardPerToken() public view virtual returns (uint256) {
+    //...
+    // 리워드 최솟값과 토큰 계산 과정에서 안전한 연산을 위한 FixedPointMathLib 라이브러리 사용
+    // computes reward per token by rounding it down to avoid reverting '_getReward' with insufficient rewards
+    uint256 _newRewardPerToken = 
+    FixedPointMathLib.fullMulDiv(rewardRate, timeDelta, _totalSupply);
+    return rewardPerTokenStored + _newRewardPerToken;
+}
+```
+
+[BeraChef.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BeraChef.sol)
+
+```solidity
+function queueNewRewardAllocation(
+    bytes calldata valPubkey,
+    uint64 startBlock,
+    Weight[] calldata weights
+)
+    external
+    onlyOperator(valPubkey)
+{
+    // 블록 번호 기반 지연 처리를 이용한 타임스탬프 조작 공격 방지
+    if (startBlock <= block.number + rewardAllocationBlockDelay) {
+        InvalidStartBlock.selector.revertWith();
+    }
+    // ...
+}
+```
+
+[BGTIncentiveDistributor.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BGTIncentiveDistributor.sol)
+
+```solidity
+uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
+
+// ...
+
+function _setRewardClaimDelay(uint64 _delay) internal {
+    // MAX_REWARD_CLAIM_DELAY 지정을 통한 타임스탬프 기반 지연 시간 최소화
+    if (_delay > MAX_REWARD_CLAIM_DELAY) {
+        InvalidRewardClaimDelay.selector.revertWith();
+    }
+    rewardClaimDelay = _delay;
+    emit RewardClaimDelaySet(_delay);
+}
 ```
 
 ***
 
 ### 위협 19: 권한 없는 사용자의 인센티브 풀 무단 인출&#x20;
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -591,23 +618,45 @@ SafeERC20 라이브러리 및 TransferHelper 활용 - kodiak-contracts/KodiakFar
 > * 인센티브 토큰 보상 정보를 독립적으로 관리할 수 있는 로직 추가
 > * 인센티브 토큰 지급 Vault 별 분산된 권한 관리를 위한 계층적 권한 구조 적용
 
-#### Best Practice&#x20;
+#### Best Practice
+
+[RewardVault.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
 
 ```solidity
-• src/pol/rewards/RewardVault.sol
-  - 오프체인 거버넌스 포럼 검증을 통한 허가된 Vault만 인센티브 보상을 제공하는 방식 제공 (향후 온체인 구현 필요)
-  - 각 인센티브 토큰 정보를 별도의 구조체(struct Incentive)로 관리
-  - 인센티브 토큰 별 정확한 잔액 추적과 관리자 지정을 위한 구조체 내 변수 지정
-  - Vault에 필요한 계층적 권한 구조를 최고 관리자, Vault 관리자, Pauser, 인센티브 토큰 별 개별 관리자와 같이 지정 (src/base/FactoryOwnable.sol 상속 코드 확인)
+// 오프체인 거버넌스 포럼 검증을 통한 허가된 Vault만 인센티브 보상을 제공하는 방식 제공 (향후 온체인 구현 필요)
+// 각 인센티브 토큰 정보를 별도의 구조체(struct Incentive)로 관리
+struct Incentive {
+    uint256 minIncentiveRate;
+    uint256 incentiveRate;
+    uint256 amountRemaining;
+    address manager; // 인센티브 토큰 별 정확한 잔액 추적과 관리자 지정을 위한 구조체 내 변수 지정
+}
+
+// ...
+
+function initialize(
+    address _beaconDepositContract,
+    address _bgt,
+    address _distributor,
+    address _stakingToken
+)
+    external
+    initializer
+{
+    // Vault에 필요한 계층적 권한 구조를 지정하여 관리자 역할 구분
+    __FactoryOwnable_init(msg.sender);
+    __Pausable_init();
+    __ReentrancyGuard_init();
+    __StakingRewards_init(_stakingToken, _bgt, 3 days);
+    // ...
+}
 ```
 
 ***
 
 ### 위협 20: Validator operator의 인센티브 분배 직전 queue 조작을 통한 commission 탈취 및 사용자 분배 손실
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
@@ -616,22 +665,44 @@ SafeERC20 라이브러리 및 TransferHelper 활용 - kodiak-contracts/KodiakFar
 
 #### Best Practice&#x20;
 
+[RewardVault.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+
 ```solidity
-• src/pol/rewards/RewardVault.sol
-  - _processIncentives 함수 내에서 BGT Booster와 Validator 몫에 대한 로깅을 이중으로 수행
-  - _processIncentives 함수 내 성공/실패 이력 모두 로깅 수행
-• src/pol/rewards/BeraChef.sol
-  - _getOperatorCommission 함수에서 매개변수로 제공받은 validator의 공개키로 인센티브 수량 계산 전 수령 유효성 확인
-  - 악의적인 validator 탐지를 위한 ValidatorSet 등의 이벤트 처리기로 이력 추적 진행
+// _processIncentives 함수 내에서 BGT Booster와 Validator 몫에 대한 로깅을 이중으로 수행
+// _processIncentives 함수 내 성공/실패 이력 모두 로깅 수행
+function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
+    // ...
+    
+    unchecked {
+        // ...
+            if (validatorShare > 0) {
+                // Transfer the validator share of the incentive to its operator address.
+                // slither-disable-next-line arbitrary-send-erc20
+                bool success = token.trySafeTransfer(_operator, validatorShare);
+                if (success) {
+                    // Update the remaining amount only if tokens were transferred.
+                    amountRemaining -= validatorShare;
+                    emit IncentivesProcessed(pubkey, token, bgtEmitted, validatorShare);
+                } else {
+                    emit IncentivesProcessFailed(pubkey, token, bgtEmitted, validatorShare);
+                }
+            }
+    }
+}
+```
+
+[BeraChef.sol](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BeraChef.sol)
+
+```solidity
+// _getOperatorCommission 함수에서 매개변수로 제공받은 validator의 공개키로 인센티브 수량 계산 전 수령 유효성 확인
+// 악의적인 validator 탐지를 위한 ValidatorSet 등의 이벤트 처리기로 이력 추적 진행
 ```
 
 ***
 
 ### 위협 21: $BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
 
-#### 시나리오
 
->
 
 #### 가이드라인
 
