@@ -15,7 +15,7 @@ icon: snake
 
 #### Best Practice
 
-[InfraredBERA.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERA.sol)
+[`InfraredBERA.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERA.sol)
 
 ```solidity
 function mint(address receiver) public payable returns (uint256 shares) {
@@ -51,7 +51,7 @@ function mint(address receiver) public payable returns (uint256 shares) {
 
 #### Best Practice
 
-[InfraredBERADepositor.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERADepositor.sol)
+[`InfraredBERADepositor.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERADepositor.sol)
 
 ```solidity
 function execute(bytes calldata pubkey, uint256 amount)
@@ -102,7 +102,7 @@ function execute(bytes calldata pubkey, uint256 amount)
 
 #### Best Practice
 
-[InfraredV1\_2.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/InfraredV1_2.sol)
+[`InfraredV1_2.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/InfraredV1_2.sol)
 
 ```solidity
 function updateFee(ConfigTypes.FeeType _t, uint256 _fee)
@@ -146,7 +146,7 @@ function claimExternalVaultRewards(address _asset, address user)
 
 #### Best Practice
 
-[RewardLib.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
+[`RewardLib.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
 
 ```solidity
 function harvestBribes(
@@ -167,7 +167,7 @@ function harvestBribes(
 }
 ```
 
-[BribeCollectorV1\_3.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/BribeCollectorV1_3.sol)
+[`BribeCollectorV1_3.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/BribeCollectorV1_3.sol)
 
 ```solidity
 function claimFees(
@@ -187,7 +187,7 @@ function claimFees(
 
 #### Best Practice
 
-[RewardLib.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
+[`RewardLib.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
 
 ```solidity
 function updateFee(
