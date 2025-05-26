@@ -18,7 +18,7 @@ icon: square-poll-vertical
 
 #### Best Practice
 
-위치 : [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
+[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
 
 ```solidity
 function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
@@ -61,7 +61,7 @@ contract ComponentValidator {
 
 #### Best Practice
 
-위치 : [`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L56-L58)&#x20;
+[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L56-L58)&#x20;
 
 ```solidity
 if (guardian != address(0)) {
@@ -103,7 +103,7 @@ contract TransparentGovernance {
 
 #### Best Practice
 
-위치 : [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L110-L127)
+[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L110-L127)
 
 ```solidity
 function _countVote(
@@ -126,7 +126,7 @@ function _countVote(
 }
 ```
 
-위치 : [`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L61-L66)&#x20;
+&#x20;[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L61-L66)&#x20;
 
 ```solidity
 InitialGovernorParameters memory params = InitialGovernorParameters({
@@ -166,7 +166,7 @@ contract ParticipationIncentive {
 
 #### Best Practice
 
-위치 : [`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L42-L43)
+&#x20;[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L42-L43)
 
 ```solidity
 // Check if the token implements ERC20Votes and ERC20 metadata
@@ -208,7 +208,7 @@ contract ValidatorIndependence {
 
 #### Best Practice
 
-위치 : [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
+[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
 
 ```solidity
 function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
@@ -250,7 +250,7 @@ contract QuadraticGovernance {
 
 #### Best Practice
 
-위치: [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L100-L108)&#x20;
+[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L100-L108)&#x20;
 
 ```solidity
 function getTimelockOperationId(uint256 proposalId) external view returns (bytes32 operationId) {
@@ -296,7 +296,7 @@ contract ProposalValidator {
 
 #### Best Practice
 
-**위치:** [**`BerachainGovernance.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L134-L151)
+&#x20;[**`BerachainGovernance.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L134-L151)
 
 ```solidity
 function state(uint256 proposalId) public view override returns (ProposalState) {
