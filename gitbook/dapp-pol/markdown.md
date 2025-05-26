@@ -23,7 +23,7 @@ MCR = params.MCR;
 
 ***
 
-### 위협 2: 스테이블 코인($NECT)의 디페깅
+### 위협 2: 스테이블 코인(NECT)의 디페깅
 
 NECT가 디페깅된 상황에서 공격자가 1달러 상당의 BTC 담보를 redemption으로 회수하여 차익 실현
 
@@ -87,10 +87,6 @@ LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 NECT를 직접 전송�
 
 ```solidity
 if (totalSupply() == 0) revert ZeroTotalSupply(); // convertToShares will return 0 for 'assets < totalAssets'
-```
-
-```
-// Some code
 ```
 
 ***
@@ -197,7 +193,7 @@ if (newInterestRate != interestRate) {
 
 ### 위협 9: redeemCollateral()을 통한 selective redemption으로 건전한 포지션 타겟팅
 
-공격자가 redeemCollateral()로 낮은 ICR을 가진 iBGT Den만 선별하여 redemption, 해당 사용자의 iBGT를 시장가 이하로 획득
+공격자가 redeemCollateral()로 낮은 ICR을 가진 iBGT Den만 선별하여 상환, 해당 사용자의 iBGT를 시장가 이하로 획득
 
 #### 가이드라인
 
@@ -389,7 +385,7 @@ totalActiveDebt = _newTotalDebt;
 
 ### 위협 16: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
 
-TCR이 CCR 이하 진입했으나 BorrowerOperations의 checkRecoveryMode() 로직 버그로 정상 모드 유지, 추가 차용 허용으로 손실 확대
+TCR이 CCR 이하 진입했으나 BorrowerOperations의 `checkRecoveryMode()` 로직 버그로 정상 모드 유지, 추가 차용 허용으로 손실 확대
 
 #### 가이드라인
 
