@@ -1,10 +1,14 @@
+---
+description: 위 가이드라인에서 사용한 용어에 대한 설명입니다.
+---
+
 # 용어집
 
 * PoL (Proof of Liquidity): 유동성 증명. 특정 dApp에 유동성을 제공하는 행위를 통해 네트워크 보안에 기여하고 보상을 받는 합의 메커니즘.
-* $BERA: 베라체인의 네이티브 가스 토큰.
-* $BGT (Berachain Governance Token): 베라체인의 거버넌스 및 PoL 보상 토큰.
-* $NECT: Beraborrow 프로토콜에서 발행하는 스테이블코인.
-* $POLLEN: Beraborrow 프로토콜의 거버넌스 토큰.
+* BERA: 베라체인의 네이티브 가스 토큰.
+* BGT (Berachain Governance Token): 베라체인의 거버넌스 및 PoL 보상 토큰.
+* NECT: Beraborrow 프로토콜에서 발행하는 스테이블코인.
+* POLLEN: Beraborrow 프로토콜의 거버넌스 토큰.
 * iBERA (Infrared BERA): Infrared 프로토콜에서 $BERA를 스테이킹하여 발행하는 유동 스테이킹 파생 토큰.
 * iBGT (Infrared BGT): Infrared 프로토콜에서 $BGT 보상을 유동화한 토큰.
 * LP 토큰 (Liquidity Provider Token): DEX 유동성 풀에 유동성을 제공한 대가로 받는 토큰.
