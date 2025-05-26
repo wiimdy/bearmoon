@@ -12,17 +12,16 @@ icon: honey-pot
 
 > * **다수의 독립적인 오라클 피드(예: Chainlink, Pyth, Tellor 및 신뢰할 수 있는 CEX/DEX의 TWAP/VWAP) 통합 및 이들의 중앙값(median) 또는 가중 평균을 최종 가격으로 사용**
 > * **단기간 내에 오라클 가격이 사전 설정된 임계치 이상 변동시 사용자에게 경고, 알림 및 고위험군으로 분류될 수 있는 거래(예: 대규모 민팅/리딤)에 대한 추가 확인 절차와 같은 단계적 위험 관리 프로토콜 필요**
-> * **각 담보 자산별 합리적인 일일 가격 변동 한도 설정 및 이를 초과하는 오라클에 대한 제한 또는 추가 검증 처리**
 > * **HONEY 토큰의 심각한 페깅 이탈을 악용한 경제적 공격을 방지하기 위해 비정상적인 거래량 급증 또는 반복적인 공격 패턴 감지 시 거래를 지연이나 추가 검증을 요구하는 메커니즘 도입 고려. 또한, 페깅 안정성을 위한 지속적인 모니터링 필요**
 > * **"spot oracle에서 stable coin의 가격이 특정 기준 가격(예: $1)을 초과할 경우 $1 가격으로 처리"와 같은 비대칭적 가격 처리 로직 재검토**
 > * **대규모 민팅/리딤 요청에 대한 짧은 지연 시간 처리 또는 최근 일정 기간의 시간 가중 평균 가격(TWAP) 기준 교환 비율 결정을 통해 실시간 오라클 조작 공격 영향 완화**
-> * **프로토콜 또는 가디언의 사용자 자산 직접 리딤/민팅 기능은 극히 예외적인 경우(예: Emergency Stop)로만 제한 및 실행 시 다중 서명(Multi-sig) 승인 의무화**
 
 #### Best Practice
 
 &#x20;[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)&#x20;
 
 ```solidity
+// 페깅 로직 확인
 function isPegged(address asset) public view returns (bool) {
     if (!priceOracle.priceAvailable(asset)) return false;
     IPriceOracle.Data memory data = priceOracle.getPriceUnsafe(asset);
@@ -34,6 +33,7 @@ function isPegged(address asset) public view returns (bool) {
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)&#x20;
 
 ```solidity
+// 오라클에서 최신 가격을 가져오도록 설
 function setMaxFeedDelay(uint256 maxTolerance) external {
     _checkRole(MANAGER_ROLE);
     if (maxTolerance > MAX_PRICE_FEED_DELAY_TOLERANCE) {
@@ -80,7 +80,11 @@ contract MultiOracleSystem {
 
 ### 위협 2: 지나치게 민감한 디페깅 기준 및 Basket 모드 활성화 조건 악용
 
-매우 낮은 수준의 가격 변동에도 디페깅으로 간주하는 기준은, 사소한 시장 변동성에도 Basket 모드를 빈번하게 활성화시켜 사용자 경험을 저해할 수 있다. 또한, 공격자가 의도적으로 특정 구성 스테이블 코인의 미세한 디페깅을 유도하여 Basket 모드를 발동시키고 사용자가 예측하지 못한 자산 구성 비율로 민팅(mint) 또는 상환(redeem)하도록 유도할 가능성이 있다. 예를 들어, 복수의 구성 스테이블 코인 중 일부만 소폭 디페깅된 경우에도 Basket 모드에 의한 상환이 강제된다면 사용자는 정상 페깅 상태인 자산으로만 받기를 원했음에도 불구하고 원치 않는 디페깅 자산을 일부 수령하게 될 위험이 있다.
+매우 낮은 수준의 가격 변동에도 디페깅으로 간주하는 기준은, 사소한 시장 변동성에도 Basket 모드를 빈번하게 활성화시켜 사용자 경험을 저해할 수 있다.&#x20;
+
+또한, 공격자가 의도적으로 특정 구성 스테이블 코인의 미세한 디페깅을 유도하여 Basket 모드를 발동시키고 사용자가 예측하지 못한 자산 구성 비율로 민팅(mint) 또는 상환(redeem)하도록 유도할 가능성이 있다.&#x20;
+
+예를 들어, 복수의 구성 스테이블 코인 중 일부만 소폭 디페깅된 경우에도 Basket 모드에 의한 상환이 강제된다면 사용자는 정상 페깅 상태인 자산으로만 받기를 원했음에도 불구하고 원치 않는 디페깅 자산을 일부 수령하게 될 위험이 있다.
 
 #### 가이드라인
 
@@ -130,7 +134,7 @@ contract TimeBasedDepegDetection {
 
 ### 위협 3: Basket 모드 내 가중치 결정 로직의 외부 영향 취약성 또는 예측 가능성
 
-Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환하거나 요구할 때, 이 구성 비율 결정 로직(예: 실시간 유동성, 외부 오라클 가격, 고정 비율 등 참조)이 외부 가격 피드의 일시적 오류, 특정 풀의 유동성 급변 등 외부 요인에 의해 공격자에게 유리하게 예측되거나 형성될 수 있다면, 공격자는 Basket 모드 활성화 시점 또는 특정 시장 상황을 노려 자신에게 유리한 조건으로 자산을 교환하려 시도할 수 있다.
+Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환하거나 요구할 때, 이 구성 비율 결정 로직이 외부 가격 피드의 일시적 오류, 특정 풀의 유동성 급변 등 외부 요인에 의해 공격자에게 유리하게 예측되거나 형성될 수 있다면, 공격자는 Basket 모드 활성화 시점 또는 특정 시장 상황을 노려 자신에게 유리한 조건으로 자산을 교환하려 시도할 수 있다.
 
 #### 가이드라인
 
