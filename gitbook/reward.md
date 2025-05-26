@@ -336,8 +336,7 @@ contract RewardVault is ... {
         // ... 기존 코드 ...
         
         for (uint256 i; i < whitelistedTokensCount; ++i) {
-            address token = whitelistedTokens[i];
-            Incentive storage incentive = incentives[token];
+            // ...
             
             // 기존: uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
             // 개선: 정밀도 유지 + 최소값 보장
@@ -428,12 +427,12 @@ contract RewardVault is ... {
     
     // 가이드라인 1: 타임락 추가
     struct PendingDistributor {
-        address newDistributor;
-        uint256 executeAfter;
+        address newDistributor; // 신규 distributor
+        uint256 executeAfter;   // Timelock 해제 시간 지정
     }
     
-    PendingDistributor public pendingDistributor;
-    uint256 constant TIMELOCK_DELAY = 2 days;
+    PendingDistributor public pendingDistributor; // Timelock을 위한 구조체 변수
+    uint256 constant TIMELOCK_DELAY = 2 days; // Timelock 기간
     
     // 기존 함수 수정: 즉시 변경 대신 타임락 적용
     /// @inheritdoc IRewardVault
@@ -471,20 +470,30 @@ contract RewardVaultFactory is ... {
     // ... 기존 코드 ...
     
     // 다중서명을 위한 추가 상태 변수
-    mapping(address => mapping(address => bool)) public distributorApprovals; // vault => governor => approved
-    mapping(address => uint256) public approvalCount; // vault => count
+    // vault => governor => approved
+    mapping(address => mapping(address => bool)) public distributorApprovals; 
+    
+    // vault => count
+    mapping(address => uint256) public approvalCount; 
     
     // 기존 AccessControl 역할 활용
     bytes32 public constant GOVERNOR_ROLE = keccak256("GOVERNOR_ROLE");
+
+    // 거버넌스 정족 수 확인
     uint256 constant REQUIRED_APPROVALS = 2;
     
     // RewardVault의 distributor 변경 승인
     function approveDistributorChange(address vault) external onlyRole(GOVERNOR_ROLE) {
         RewardVault rewardVault = RewardVault(vault);
+        
+        // distributor 주소 zero address 여부 확인
         require(rewardVault.pendingDistributor().newDistributor != address(0), "No pending change");
+        // distributor 승인 여부 확인
         require(!distributorApprovals[vault][msg.sender], "Already approved");
         
+        // distributor 승인 처리
         distributorApprovals[vault][msg.sender] = true;
+        // 현재 보상 금고의 distributor 승인 수 증가
         approvalCount[vault]++;
         
         // 2/3 승인 달성 시 실행 가능
@@ -637,11 +646,11 @@ contract ValidatorRewardSelection {
 // 가이드라인 3: 대시보드 데이터 집계
 contract IncentiveDashboard {
     struct VaultIncentiveInfo {
-        address vault;
-        address token;
-        uint256 remaining;
-        uint256 estimatedDaysLeft;
-        bool needsRefill;
+        address vault;             // 보상 금고
+        address token;             // 토큰 주소
+        uint256 remaining;         // 남아있는 토큰 수
+        uint256 estimatedDaysLeft; // 대시보드 재집계 주기
+        bool needsRefill;          // 채워야 하는 토큰 수
     }
     
     function getAllVaultIncentiveStatus(address[] calldata vaults) 
@@ -784,8 +793,8 @@ contract RewardVaultFactory {
 contract RewardVault is RewardVault {
     // ... 기존 코드 ...
     
-    uint256 public immutable MIN_LP_THRESHOLD;
-    address public initialLPProvider;
+    uint256 public immutable MIN_LP_THRESHOLD; // LP 토큰 최소 임계 수량 변수
+    address public initialLPProvider; // 초기 LP 토큰 공급자 주소
     
     // 초기화 시 최소 LP 설정
     function initialize(
@@ -797,7 +806,7 @@ contract RewardVault is RewardVault {
     ) external initializer {
         // ... 기존 초기화 로직 ...
         
-        MIN_LP_THRESHOLD = _minLPThreshold;
+        MIN_LP_THRESHOLD = _minLPThreshold; // LP 토큰 최소 임계 수량 지정
     }
     
     // 초기 LP 예치 처리 (factory만 호출 가능)
@@ -805,7 +814,7 @@ contract RewardVault is RewardVault {
         require(msg.sender == factory(), "Only factory");
         require(initialLPProvider == address(0), "Already initialized");
         
-        initialLPProvider = tx.origin;
+        initialLPProvider = tx.origin; // LP 토큰 공급자 주소 설
         _stake(address(this), amount); // vault 자체가 보유
         
         emit InitialLPDeposited(amount);
