@@ -25,7 +25,7 @@ icon: rotate-reverse
 
 #### Best Practice
 
-[WeightedMath.sol](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
 
 ```solidity
 // 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
@@ -39,7 +39,7 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
 ```
 
-[KodiakIslandWithRouter.sol](https://github.com/wiimdy/bearmoon/blob/main/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol)
+[`KodiakIslandWithRouter.sol`](https://github.com/wiimdy/bearmoon/blob/main/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol)
 
 ```solidity
 // 슬리피지 기반 최소 출력 계산
@@ -95,7 +95,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 
 #### Best Practice
 
-[WeightedMath.sol](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
 
 ```solidity
 // 가중치 기반 자동 리밸런싱 및 불변량 검증
@@ -134,7 +134,7 @@ function _calculateInvariant(uint256[] memory normalizedWeights, uint256[] memor
 
 #### Best Practice
 
-[KodiakIslandWithRouter.sol](https://github.com/wiimdy/bearmoon/blob/main/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol)
+[`KodiakIslandWithRouter.sol`](https://github.com/wiimdy/bearmoon/blob/main/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol)
 
 ```solidity
 function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX96) {
@@ -149,7 +149,7 @@ function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX
 }
 ```
 
-[WeightedMath.sol](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
 
 ```solidity
 // 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
@@ -182,7 +182,7 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
 #### Best Practice
 
-[IslandRouter.sol](https://github.com/wiimdy/bearmoon/blob/main/Kodiak/IslandRouter/src/vaults/IslandRouter.sol)
+[`IslandRouter.sol`](https://github.com/wiimdy/bearmoon/blob/main/Kodiak/IslandRouter/src/vaults/IslandRouter.sol)
 
 ```solidity
 function addLiquiditySingle(
@@ -241,7 +241,7 @@ function addLiquiditySingle(
 
 #### Best Practice
 
-[ProtocolFeesWithdrawer.sol](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/ProtocolFeesWithdrawer.sol)
+[`ProtocolFeesWithdrawer.sol`](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/ProtocolFeesWithdrawer.sol)
 
 ```solidity
 using FixedPoint for uint256;
@@ -273,7 +273,7 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 
 #### Best Practice
 
-[WeightedMath.sol](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/WeightedMath.sol)
 
 ```solidity
 // 최대 300% 불변량 증가 제한
@@ -301,7 +301,7 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 
 #### Best Practice
 
-[ProtocolFeesWithdrawer.sol](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/ProtocolFeesWithdrawer.sol)
+[`ProtocolFeesWithdrawer.sol`](https://github.com/wiimdy/bearmoon/blob/main/Bex/contracts/ProtocolFeesWithdrawer.sol)
 
 ```solidity
 // `authenticate` 모디파이어로 권한 검증
