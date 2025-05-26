@@ -102,16 +102,37 @@ function execute(bytes calldata pubkey, uint256 amount)
 
 #### Best Practice
 
+[InfraredV1\_2.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/InfraredV1_2.sol)
+
 ```solidity
-// Some code
+function updateFee(ConfigTypes.FeeType _t, uint256 _fee)
+    external
+    onlyGovernor // 수수료 변경 권한 제한
+{
+    // 이전 수수료에 대한 정산
+    uint256 prevFee = fees(uint256(_t));
+    _rewardsStorage().updateFee(_t, _fee);
+    emit FeeUpdated(msg.sender, _t, prevFee, _fee);
+}
 ```
 
-• src/core/upgrades/InfraredV1\_2.sol\
-&#x20; \- L519: 수수료 변경 시 변경 권한을 거버넌스 관리자에 한정하여 변경할 수 있도록 변경 권한 제한\
-&#x20; \- L521-L522: 수수료 변경 전 fees 함수 실행을 통해 이전 수수료에 대한 정산을 진행하여 보상 오류 발생 가능성 차단 조치
+InfraredV1\_5.sol
 
-• src/core/upgrades/InfraredV1\_5.sol\
-&#x20; \- L26-L29: 외부 볼트에 대한 보상 수확을 Keeper 역할을 지닌 msg.sender에 한정하여 처리
+L26-L29: 외부 볼트에 대한 보상 수확을 Keeper 역할을 지닌 msg.sender에 한정하여 처리
+
+```solidity
+function claimExternalVaultRewards(address _asset, address user)
+        external
+        whenNotPaused
+    {
+        // 보상 수확을 Keeper 권한 한정
+        address sender = msg.sender;
+        if (!hasRole(KEEPER_ROLE, sender) && sender != user) {
+            revert Errors.Unauthorized(sender);
+        }
+        // ... 중략 ...
+    }
+```
 
 ***
 
@@ -125,14 +146,36 @@ function execute(bytes calldata pubkey, uint256 amount)
 
 #### Best Practice
 
+[RewardLib.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
+
 ```solidity
-// Some code
+function harvestBribes(
+    RewardsStorage storage $,
+    address collector,
+    address[] memory _tokens,
+    bool[] memory whitelisted
+) external returns (address[] memory tokens, uint256[] memory amounts) {
+    uint256 len = _tokens.length;
+    amounts = new uint256[](len);
+    tokens = new address[](len);
+
+    for (uint256 i = 0; i < len; i++) {
+        // 화이트리스트 토큰 여부 검증
+        if (!whitelisted[i]) continue;
+        // ... 중략 ...
+    }
+}
 ```
 
-• src/core/libraries/RewardLib.sol\
-&#x20; \- L583: 화이트리스트 토큰 여부 검증 후 해당 시 해당 토큰들에 대한 BribeCollector 동작 실행 준비\
-• src/core/upgrades/BribeCollectorV1\_3.sol\
-&#x20; \- L60: BribeCollector의 보상 수거 실행 권한을 Keeper 사용자 한정으로 제한 처리
+[BribeCollectorV1\_3.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/BribeCollectorV1_3.sol)
+
+```solidity
+function claimFees(
+        address _recipient,
+        address[] calldata _feeTokens,
+        uint256[] calldata _feeAmounts
+    ) external onlyKeeper // 보상 수거 실행 권한 Keeper 한정
+```
 
 ***
 
@@ -144,11 +187,17 @@ function execute(bytes calldata pubkey, uint256 amount)
 
 #### Best Practice
 
+[RewardLib.sol](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
+
 ```solidity
-// Some code
+function updateFee(
+        RewardsStorage storage $,
+        ConfigTypes.FeeType _t,
+        uint256 _fee
+    ) external {
+        // 최대 수수료 한도를 통해 급격한 수수료 변경 피해 최소화
+        if (_fee > UNIT_DENOMINATOR) revert Errors.InvalidFee();
+        $.fees[uint256(_t)] = _fee;
+    }
 ```
 
-• src/core/libraries/RewardLib.sol\
-&#x20; \- L263: 최대 수수료 한도 (UNIT\_DENOMINATOR) 설정을 통한 악성 행위에 의한 수수료 변경 여파로 발생하는 피해 최소화
-
-\
