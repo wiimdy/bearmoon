@@ -4,13 +4,18 @@ icon: plane-arrival
 
 # dApp: Lending 가이드라인
 
-### 위협 1: 담보별 위험도 평가 미흡으로 인한 과도한 담보 인정
+### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
 
-공격자가 새로 추가된 알트코인을 담보로 NECT를 과도하게 차용 후, 해당 토큰 폭락 시 LSP가 손실 흡수
+유동성이 낮은 토큰을 담보로 등록될 경우, 공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 저평가된 담보로 과도한 NECT 차용
 
 #### 가이드라인
 
-> * **각 담보 자산(iBGT, iBERA, LP 토큰 등)의 유동성, 변동성, 오라클 신뢰도를 개별적으로 평가하고, 이에 따른 LTV(담보인정비율), 청산 임계값, 청산 패널티 등을 차등 설정.**
+> * **각 담보 자산(iBGT, iBERA, LP 토큰 등)의 유동성, 변동성, 오라클 신뢰도를 개별적으로 평가하고, 이에 따른 LTV(담보인정비율), 청산 임계값, 청산 패널티 등을 차등 설정**
+> *
+> * **최소 2개 이상의 독립적인 가격 소스 사용**
+> * **가격 편차 임계값 설정 (예: 5% 초과 시 거래 일시 중단)**
+> * **타임윈도우 기반 가격 평균화 적용 (TWAP)**
+> * **급격한 가격 하락 시 청산 지연 메커니즘 적용**
 
 #### Best Practice
 
@@ -29,51 +34,7 @@ MCR = params.MCR;
 
 ***
 
-### 위협 2: 스테이블 코인(NECT)의 디페깅
-
-NECT가 디페깅된 상황에서 공격자가 1달러 상당의 BTC 담보를 상환으로 회수하여 차익 실현
-
-#### 가이드라인
-
-> * **스테이블 코인 유동성 풀 충분성 확보 및 DEX 거래량 모니터링**
-> * **페깅 이탈 시 긴급 안정화 메커니즘 자동 실행**
-
-***
-
-### 위협 3: 담보 가격 오라클 조작을 통한 부당한 청산 및 차용
-
-공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 저평가된 담보로 과도한 NECT 차용
-
-#### 가이드라인
-
-> * **최소 2개 이상의 독립적인 가격 소스 사용**
-> * **가격 편차 임계값 설정 (예: 5% 초과 시 거래 일시 중단)**
-> * **타임윈도우 기반 가격 평균화 적용 (TWAP)**
-> * **급격한 가격 하락 시 청산 지연 메커니즘 적용**
-
-#### Best Practice
-
-[`PriceFeed.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/PriceFeed.sol#L88-L123)
-
-```solidity
-// 신뢰할 수 있는 oracle에서 가격 인용
-if (_heartbeat > MAX_ORACLE_HEARTBEAT) revert PriceFeed__HeartbeatOutOfBoundsError();
-        IAggregatorV3Interface newFeed = IAggregatorV3Interface(_chainlinkOracle);
-        (FeedResponse memory currResponse, FeedResponse memory prevResponse) = _fetchFeedResponses(newFeed);
-        
-        if (_token == address(0)) revert PriceFeed__PotentialDos();
-
-        if (!_isFeedWorking(currResponse, prevResponse)) {
-            revert PriceFeed__InvalidFeedResponseError(_token);
-        }
-        if (_isPriceStale(currResponse.timestamp, _heartbeat, _staleThreshold)) {
-            revert PriceFeed__FeedFrozenError(_token);
-        }
-```
-
-***
-
-### 위협 4: ERC-4626 인플레이션 공격
+### 위협 2: ERC-4626 인플레이션 공격
 
 LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 NECT를 직접 전송하여 후속 예치자 지분 탈취
 
@@ -104,7 +65,7 @@ if (block.timestamp < bootstrapEndTime) {
 
 ***
 
-### 위협 5: 플래시론 재진입 공격
+### 위협 3: 플래시론 재진입 공격
 
 공격자가 플래시론 실행 중  콜백을 이용해 동일 트랜잭션에서 담보 인출과 추가 차용을 동시 실행
 
@@ -129,7 +90,7 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 
 ***
 
-### 위협 6: 상환 프로세스의 MEV 익스트랙션과 프론트러닝을 통한 사용자 손실
+### 위협 4: 상환 프로세스의 MEV 익스트랙션과 프론트러닝을 통한 사용자 손실
 
 봇이 대량 청산 예정인 Den을 감지하여 프론트러닝으로 먼저 LSP offset 실행, 청산 담보를 할인가에 선점 획득
 
@@ -141,7 +102,7 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 
 ***
 
-### 위협 7: ICR/TCR 검증 우회를 통한 과도한 차용
+### 위협 5: ICR/TCR 검증 우회를 통한 과도한 차용
 
 공격자가 DenManager의 adjustDen() 함수에서 Recovery Mode 조건 검증 로직을 우회하여 MCR 미달에서도 추가 NECT 차용
 
@@ -175,7 +136,7 @@ if (_isRecoveryMode) {
 
 ***
 
-### 위협 8: interestRate 조작을 통한 부당한 이자 부과
+### 위협 6: interestRate 조작을 통한 부당한 이자 부과
 
 #### 가이드라인
 
@@ -204,7 +165,7 @@ if (newInterestRate != interestRate) {
 
 ***
 
-### 위협 9: redeemCollateral()을 통한 selective redemption으로 건전한 포지션 타겟팅
+### 위협 7: redeemCollateral()을 통한 selective redemption으로 건전한 포지션 타겟팅
 
 공격자가 redeemCollateral()로 낮은 ICR을 가진 iBGT Den만 선별하여 상환, 해당 사용자의 iBGT를 시장가 이하로 획득
 
@@ -251,7 +212,7 @@ function _updateBaseRateFromRedemption(
 
 ***
 
-### 위협 10: 악의적인 DenManager 배포를 통한 시스템 무결성 침해
+### 위협 8: 악의적인 DenManager 배포를 통한 시스템 무결성 침해
 
 공격자가 Factory를 통해 가짜 DenManager 배포 후 허니팟 담보를 등록, 사용자들이 실제 자산을 예치하도록 유도 후 탈취
 
@@ -287,7 +248,7 @@ function removeDenManager(IDenManager denManager) external {
 
 ***
 
-### 위협 11: Owner 권한 남용을 통한 프로토콜 파라미터 악의적 변경
+### 위협 9: Owner 권한 남용을 통한 프로토콜 파라미터 악의적 변경
 
 #### 가이드라인
 
@@ -310,7 +271,7 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 ***
 
-### 위협 12: 대량 인출을 통한 Stability Pool 고갈로 청산 메커니즘 마비
+### 위협 10: 대량 인출을 통한 Stability Pool 고갈로 청산 메커니즘 마비
 
 대량 청산 시 LSP의 NECT 잔고가 부족하여 청산이 불가능해지고, Recovery Mode 진입으로 시스템 마비
 
@@ -326,7 +287,7 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 ***
 
-### 위협 13: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
+### 위협 11: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
 #### 가이드라인
 
@@ -357,7 +318,7 @@ function startSunset() external onlyOwner {
 
 ***
 
-### 위협 14: 고정 이자율 모델의 한계
+### 위협 12: 고정 이자율 모델의 한계
 
 시장 상황과 무관한 고정 이자율로 인한 자본 효율성 저하 및 리스크 부적절한 반영
 
@@ -374,7 +335,7 @@ function startSunset() external onlyOwner {
 
 ***
 
-### 위협 15: 다중 담보 상관관계 위협
+### 위협 13: 다중 담보 상관관계 위협
 
 여러 담보 자산 간 높은 상관관계로 인한 동시 가격 하락 시 시스템 위험 증폭
 
@@ -396,7 +357,7 @@ totalActiveDebt = _newTotalDebt;
 
 ***
 
-### 위협 16: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
+### 위협 14: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
 
 TCR이 CCR 이하 진입했으나 BorrowerOperations의 `checkRecoveryMode()` 로직 버그로 정상 모드 유지, 추가 차용 허용으로 손실 확대
 
