@@ -20,7 +20,7 @@ icon: honey-pot
 
 #### Best Practice
 
-위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)&#x20;
+&#x20;[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)&#x20;
 
 ```solidity
 function isPegged(address asset) public view returns (bool) {
@@ -31,7 +31,7 @@ function isPegged(address asset) public view returns (bool) {
 }
 ```
 
-위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)&#x20;
 
 ```solidity
 function setMaxFeedDelay(uint256 maxTolerance) external {
@@ -88,7 +88,7 @@ contract MultiOracleSystem {
 
 #### Best Practice
 
-* 위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
 
 ```solidity
 function isBasketModeEnabled(bool isMint) public view returns (bool) {
@@ -135,7 +135,7 @@ Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환
 
 #### Best Practice
 
-* 위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L664-L693)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L664-L693)&#x20;
 
 ```solidity
 function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) internal view returns (uint256[] memory weights) {
@@ -200,7 +200,7 @@ contract TWAPBasedWeights {
 
 #### Best Practice
 
-* 위치: [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L368-L418)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L368-L418)&#x20;
 
 ```solidity
 function redeem(address asset, uint256 honeyAmount, address receiver, bool expectBasketMode) 
