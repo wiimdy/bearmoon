@@ -163,8 +163,6 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
 ***
 
-## 유동성 풀 관리 취약점
-
 ### 위협 4: 유동성 풀 불균형
 
 특정 토큰에만 대량 입출금이 반복되면서 풀 내 토큰 비율이 심하게 무너지고 이로 인해 가격이 왜곡되거나 일부 토큰의 유동성이 고갈될 수 있다.
@@ -283,8 +281,6 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 ```
 
 ***
-
-## 프로토콜 수수료 취약점
 
 ### 위협 7: 수수료 관리 및 변경 취약점
 
