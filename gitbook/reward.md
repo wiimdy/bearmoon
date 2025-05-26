@@ -1362,19 +1362,14 @@ contract BlockRewardController {
         // ... 기존 코드 ...
         
         // 가이드라인 3: 배출량 모니터링을 위한 이벤트
-        emit EmissionRateChanged(
-            "baseRate",
-            baseRate,
-            _baseRate,
-            block.timestamp
-        );
+        emit EmissionRateChanged( ... );
     }
     
     // 가이드라인 4: 긴급 조치 프로토콜
     function emergencyPauseEmission() 
         external 
-        onlyEmergencyCouncil 
-        whenAbnormalEmissionDetected 
+        onlyEmergencyCouncil         // 긴급 조치가 가능한 거버넌스 멤버 한정 실행
+        whenAbnormalEmissionDetected // 비정상 BGT 분배 행위 탐지 시에만 동작
     {
         _pauseEmission();
         emit EmergencyPause(block.timestamp);
