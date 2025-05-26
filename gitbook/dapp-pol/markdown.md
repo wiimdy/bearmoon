@@ -12,7 +12,7 @@ icon: plane-arrival
 
 #### Best Practice
 
-[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ```solidity
 require(params.MCR <= BERABORROW_CORE.CCR() && params.MCR >= 1.1e18, "MCR cannot be > CCR or < 110%");
@@ -41,7 +41,7 @@ MCR = params.MCR;
 
 #### Best Practice
 
-[PriceFeed.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/PriceFeed.sol)
+[`PriceFeed.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/PriceFeed.sol)
 
 ```solidity
 if (_heartbeat > MAX_ORACLE_HEARTBEAT) revert PriceFeed__HeartbeatOutOfBoundsError();
@@ -77,7 +77,7 @@ LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 자산 조작을 통�
 
 #### Best Practice
 
-[LiquidStabilityPool.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/LiquidStabilityPool.sol)
+[`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/LiquidStabilityPool.sol)
 
 ```solidity
 if (totalSupply() == 0) revert ZeroTotalSupply(); // convertToShares will return 0 for 'assets < totalAssets'
@@ -97,7 +97,7 @@ if (totalSupply() == 0) revert ZeroTotalSupply(); // convertToShares will return
 
 #### Best Practice
 
-[DebtToken.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol)
+[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol)
 
 ```solidity
 function flashFee(address token, uint256 amount) public view returns (uint256) {
@@ -133,7 +133,7 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 
 #### Best Practice
 
-[BeraborrowOperation.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
+[`BeraborrowOperation.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
 
 ```solidity
 if (_isRecoveryMode) {
@@ -165,7 +165,7 @@ if (_isRecoveryMode) {
 
 #### Best Practice
 
-[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ```solidity
 uint256 newInterestRate = (INTEREST_PRECISION * params.interestRateInBps) / (BP * SECONDS_IN_YEAR);
@@ -194,7 +194,7 @@ if (newInterestRate != interestRate) {
 
 #### Best Practice
 
-[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ```solidity
 function _updateBaseRateFromRedemption(
@@ -239,7 +239,7 @@ function _updateBaseRateFromRedemption(
 
 #### Best Practice
 
-[BorrowerOperations.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
+[`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
 
 ```solidity
 function configureCollateral(IDenManager denManager, IERC20 collateralToken) external {
@@ -273,7 +273,7 @@ function removeDenManager(IDenManager denManager) external {
 
 #### Best Practice
 
-[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ```solidity
 require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unauthorized");
@@ -309,7 +309,7 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 #### Best practice
 
-[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ```solidity
 function startSunset() external onlyOwner {
@@ -355,7 +355,7 @@ function startSunset() external onlyOwner {
 
 #### Best Practice
 
-[DenManager.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ```solidity
 uint256 _newTotalDebt = totalActiveDebt + _compositeDebt;
@@ -380,7 +380,7 @@ totalActiveDebt = _newTotalDebt;
 
 #### Best Practice
 
-[BorrowerOperations.sol](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
+[`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
 
 ```solidity
 function checkRecoveryMode(uint256 TCR) public view returns (bool) {
