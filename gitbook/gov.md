@@ -28,9 +28,11 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
 }
 ```
 
-`커스텀 코드` : 제안을 기술적 검토 → 경제적 검토 → 보안 감사 단계로 나누어 각 단계별 승인자가 순차적으로 검증하는 시스템
+`커스텀 코드`&#x20;
 
 ```solidity
+// 제안을 기술적 검토 → 경제적 검토 → 보안 감사 단계로 나누어 각 단계별 승인자가 순차적으로 검증하는 시스템
+
 contract ComponentValidator {
     enum ValidationStage { TECHNICAL, ECONOMIC, SECURITY, APPROVED }
     mapping(uint256 => ValidationStage) public proposalStage;
@@ -69,9 +71,11 @@ if (guardian != address(0)) {
 }
 ```
 
-`커스텀 코드` : 제안 거부 시 구체적인 사유와 거부자, 시간을 기록하여 투명성을 확보하고 커뮤니티가 거부 사유를 확인할 수 있는 시스템
+`커스텀 코드`&#x20;
 
 ```solidity
+// 제안 거부 시 구체적인 사유와 거부자, 시간을 기록하여 투명성을 확보하고 커뮤니티가 거부 사유를 확인할 수 있는 시스템
+
 contract TransparentGovernance {
     struct RejectionRecord {
         string reason;
@@ -137,9 +141,11 @@ InitialGovernorParameters memory params = InitialGovernorParameters({
 });
 ```
 
-`커스텀 코드` : 거버넌스 투표 참여자에게 토큰 보상을 지급하여 투표율을 높이고 커뮤니티 참여를 장려하는 인센티브 시스템
+`커스텀 코드`&#x20;
 
 ```solidity
+// 거버넌스 투표 참여자에게 토큰 보상을 지급하여 투표율을 높이고 커뮤니티 참여를 장려하는 인센티브 시스템
+
 contract ParticipationIncentive {
     mapping(address => uint256) public participationRewards;
     uint256 public constant VOTE_REWARD = 10e18;
@@ -173,9 +179,11 @@ contract ParticipationIncentive {
 _checkIfERC20Votes(token);
 ```
 
-`커스텀 코드` : 검증자의 재단 의존도를 모니터링하고 30% 이하로 제한하여 중앙화를 방지하는 독립성 점수 시스템
+`커스텀 코드`&#x20;
 
 ```solidity
+// 검증자의 재단 의존도를 모니터링하고 30% 이하로 제한하여 중앙화를 방지하는 독립성 점수 시스템
+
 contract ValidatorIndependence {
     struct ValidatorInfo {
         uint256 foundationStake;
@@ -218,9 +226,11 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
 }
 ```
 
-`커스텀 코드` : BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
+`커스텀 코드`&#x20;
 
 ```solidity
+// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
+
 contract QuadraticGovernance {
     function calculateQuadraticWeight(uint256 bgtAmount) public pure returns (uint256) {
         return sqrt(bgtAmount);
@@ -261,9 +271,11 @@ function getTimelockOperationId(uint256 proposalId) external view returns (bytes
 }
 ```
 
-`커스텀 코드` : 제안 내용을 분석하여 금융 기능이나 권한 변경 포함 시 위험도 점수를 부여하고 고위험 제안에 대한 비상 정지 기능을 제공하는 시스템
+`커스텀 코드`&#x20;
 
 ```solidity
+// 제안 내용을 분석하여 금융 기능이나 권한 변경 포함 시 위험도 점수를 부여하고 고위험 제안에 대한 비상 정지 기능을 제공하는 시스템
+
 contract ProposalValidator {
     mapping(uint256 => uint256) public riskScores; // 0-100
     mapping(uint256 => bool) public emergencyPaused;
@@ -308,9 +320,11 @@ function proposalNeedsQueuing(uint256 proposalId) public view override returns (
 }
 ```
 
-`커스텀 코드` : 제안의 영향도에 따라 차등적인 공지 기간을 설정하여 사용자에게 충분한 준비 시간을 제공하는 알림 시스템
+`커스텀 코드`&#x20;
 
 ```solidity
+// 제안의 영향도에 따라 차등적인 공지 기간을 설정하여 사용자에게 충분한 준비 시간을 제공하는 알림 시스템
+
 contract UserNotificationSystem {
     enum ImpactLevel { LOW, MEDIUM, HIGH, CRITICAL }
     
