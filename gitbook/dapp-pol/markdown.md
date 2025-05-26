@@ -6,9 +6,11 @@ icon: plane-arrival
 
 ### 위협 1: 담보별 위험도 평가 미흡으로 인한 과도한 담보 인정
 
+공격자가 새로 추가된 알트코인을 담보로 NECT를 과도하게 차용 후, 해당 토큰 폭락 시 LSP가 손실 흡수
+
 #### 가이드라인
 
-> * 각 담보 자산(iBGT, iBERA, LP 토큰 등)의 유동성, 변동성, 오라클 신뢰도를 개별적으로 평가하고, 이에 따른 LTV(담보인정비율), 청산 임계값, 청산 패널티 등을 차등 설정.&#x20;
+> * 각 담보 자산(iBGT, iBERA, LP 토큰 등)의 유동성, 변동성, 오라클 신뢰도를 개별적으로 평가하고, 이에 따른 LTV(담보인정비율), 청산 임계값, 청산 패널티 등을 차등 설정.
 
 #### Best Practice
 
@@ -21,7 +23,9 @@ MCR = params.MCR;
 
 ***
 
-### 위협 2: 스테이블 코인($NECT)의 디페깅으로 인한 시스템 붕괴
+### 위협 2: 스테이블 코인($NECT)의 디페깅
+
+NECT가 디페깅된 상황에서 공격자가 1달러 상당의 BTC 담보를 redemption으로 회수하여 차익 실현
 
 #### 가이드라인
 
@@ -31,6 +35,8 @@ MCR = params.MCR;
 ***
 
 ### 위협 3: 담보 가격 오라클 조작을 통한 부당한 청산 및 차용
+
+공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 저평가된 담보로 과도한 NECT 차용
 
 #### 가이드라인
 
@@ -62,7 +68,7 @@ if (_heartbeat > MAX_ORACLE_HEARTBEAT) revert PriceFeed__HeartbeatOutOfBoundsErr
 
 ### 위협 4: ERC-4626 인플레이션 공격
 
-LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 자산 조작을 통한 후속 예치자 지분 탈취
+LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 NECT를 직접 전송하여 후속 예치자 지분 탈취
 
 #### 가이드라인
 
@@ -83,9 +89,15 @@ LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 자산 조작을 통�
 if (totalSupply() == 0) revert ZeroTotalSupply(); // convertToShares will return 0 for 'assets < totalAssets'
 ```
 
+```
+// Some code
+```
+
 ***
 
 ### 위협 5: 플래시론 재진입 공격
+
+공격자가 플래시론 실행 중  콜백을 이용해 동일 트랜잭션에서 담보 인출과 추가 차용을 동시 실행
 
 #### 가이드라인
 
@@ -110,6 +122,8 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 
 ### 위협 6: 상환 프로세스의 MEV 익스트랙션과 프론트러닝을 통한 사용자 손실
 
+봇이 대량 청산 예정인 Den을 감지하여 프론트러닝으로 먼저 LSP offset 실행, 청산 담보를 할인가에 선점 획득
+
 #### 가이드라인
 
 > * 멀티 상환시 무작위 순서 적용
@@ -119,6 +133,8 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 ***
 
 ### 위협 7: ICR/TCR 검증 우회를 통한 과도한 차용
+
+공격자가 DenManager의 adjustDen() 함수에서 Recovery Mode 조건 검증 로직을 우회하여 MCR 미달에서도 추가 NECT 차용
 
 #### 가이드라인
 
@@ -181,6 +197,8 @@ if (newInterestRate != interestRate) {
 
 ### 위협 9: redeemCollateral()을 통한 selective redemption으로 건전한 포지션 타겟팅
 
+공격자가 redeemCollateral()로 낮은 ICR을 가진 iBGT Den만 선별하여 redemption, 해당 사용자의 iBGT를 시장가 이하로 획득
+
 #### 가이드라인
 
 > * 상환 공정성 보장:
@@ -225,6 +243,8 @@ function _updateBaseRateFromRedemption(
 ***
 
 ### 위협 10: 악의적인 DenManager 배포를 통한 시스템 무결성 침해
+
+공격자가 Factory를 통해 가짜 DenManager 배포 후 허니팟 담보를 등록, 사용자들이 실제 자산을 예치하도록 유도 후 탈취
 
 #### 가이드라인
 
@@ -282,6 +302,8 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 ***
 
 ### 위협 12: 대량 인출을 통한 Stability Pool 고갈로 청산 메커니즘 마비
+
+대량 청산 시 LSP의 NECT 잔고가 부족하여 청산이 불가능해지고, Recovery Mode 진입으로 시스템 마비
 
 #### 가이드라인
 
@@ -366,6 +388,8 @@ totalActiveDebt = _newTotalDebt;
 ***
 
 ### 위협 16: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
+
+TCR이 CCR 이하 진입했으나 BorrowerOperations의 checkRecoveryMode() 로직 버그로 정상 모드 유지, 추가 차용 허용으로 손실 확대
 
 #### 가이드라인
 
