@@ -11,12 +11,12 @@ icon: rotate-reverse
 #### 가이드라인
 
 > * **슬리피지 허용 한도 설정 및 검증:**
->   * **거래 전 최대 슬리피지 임계값 사전 정의 (예: 0.5%, 1%, 2%)**
+>   * **거래 전 최대 슬리피지 임계값 사전 정의**
 >   * **사용자 설정 슬리피지와 계산된 최소 아웃풋 일치 확인**
 >   * **슬리피지 초과 시 거래 자동 취소**
 > * **대량 거래 시 분할 처리:**
->   * **임계값 초과 거래 자동 분할 알고리즘 (예: 총 유동성의 5% 초과시)**
->   * **분할 거래 간 최소 블록 간격 설정 (예: 1-2 블록)**
+>   * **임계값 초과 거래 자동 분할 알고리즘**
+>   * **분할 거래 간 최소 블록 간격 설정**
 >   * **분할 거래별 개별 슬리피지 검증 및 전체 누적 슬리피지 확인**
 > * **실시간 가격 모니터링 및 검증:**
 >   * **거래 실행 직전 최신 가격 재확인 및 가격 변동 임계값 초과 시 계산 재수행**
@@ -30,6 +30,7 @@ icon: rotate-reverse
 ```solidity
 // 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
 // 풀 안정성 & 과도하게 큰 거래로 인한 가격변동 방지
+
 uint256 internal constant _MAX_IN_RATIO = 0.3e18;
 uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
 // ... 중략 ...
@@ -53,6 +54,7 @@ function worstAmountOut(uint256 amountIn, uint16 slippageBPS, uint160 avgSqrtPri
 
     // ... 중략 ...
 }
+
 // TWAP 기반 평균 가격 활용
 function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX96) {
     // ... 중략 ...
@@ -64,6 +66,7 @@ function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX
     int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(uint56(interval)));
     avgSqrtPriceX96 = avgTick.getSqrtRatioAtTick();
 }
+
 // 슬리피지를 고려한 최악의 출력값을 계산하여 실제 AmountOut 검증
 function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, SwapData calldata swapData) external whenNotPaused onlyManager {
     require(swapRouter[swapData.router], "Unauthorized router");
@@ -87,10 +90,10 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 >   * **모든 관련 풀 상태 변경을 단일 트랜잭션 내 처리**
 >   * **중간 단계 실패 시 전체 거래 롤백 메커니즘**
 > * **중간 상태 검증:**
->   * **각 풀 업데이트 후 K=xy 불변량 검증**
+>   * **각 풀 업데이트 후 `X * Y = K` 불변량 검증**
 >   * **풀 간 가격 일관성 확인 및 총 토큰 공급량 보존 검증**
 > * **풀 상태 동기화:**
->   * **풀 간 상태 불일치 탐지 임계값 설정 (예: 0.1% 가격 편차)**
+>   * **풀 간 상태 불일치 탐지 임계값 설정**
 >   * **자동 재동기화 트리거 및 동기화 실패 시 풀 일시 중단**
 
 #### Best Practice
@@ -121,16 +124,16 @@ function _calculateInvariant(uint256[] memory normalizedWeights, uint256[] memor
 #### 가이드라인
 
 > * **플래시론 공격 방지:**
->   * **거래 전후 가격 변동률 제한 (예: 단일 블록 내 ±10%)**
+>   * **거래 전후 가격 변동률 제한**
 >   * **플래시론 사용 탐지 시 추가 수수료 자동 부과**
 >   * **동일 블록 내 복수 거래 수수료 누적 계산**
 > * **오라클 가격 검증:**
 >   * **최소 2개 이상 독립적 오라클 가격 소스 활용**
->   * **오라클 간 가격 편차 임계값 설정 (예: 5% 이내)**
->   * **가격 업데이트 주기 검증 (예: 최근 1시간 이내)**
+>   * **오라클 간 가격 편차 임계값 설정**
+>   * **가격 업데이트 주기 검증**
 > * **최소 유동성 요구사항:**
->   * **풀별 최소 유동성 임계값 동적 설정**
->   * **유동성 대비 거래량 비율 제한 (예: 단일 거래 최대 30%)**
+>   * **풀 별 최소 유동성 임계값 동적 설정**
+>   * **유동성 대비 거래량 비율 제한**
 
 #### Best Practice
 
@@ -170,11 +173,11 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 #### 가이드라인
 
 > * **자동 리밸런싱 메커니즘:**
->   * **목표 비율 대비 편차 임계값 설정 (예: ±15%)**
+>   * **목표 비율 대비 편차 임계값 설정**
 >   * **편차 발생 시 자동 리밸런싱 트리거 실행**
 > * **불균형 모니터링:**
 >   * **실시간 풀 비율 추적 및 편차 계산**
->   * **편차 단계별 경고 시스템 (5%, 10%, 15% 단계별 알림)**
+>   * **편차 단계별 경고 시스템**
 > * **자동 스왑 처리:**
 >   * **단일 토큰으로 유동성 공급 시 풀의 비율에 맞게 스왑 후 유동성 공급**
 
@@ -262,12 +265,12 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 
 > * **최소 유동성 검증:**
 >   * **풀별 절대적 최소 유동성 임계값 설정**
->   * **토큰 가치 기준 최소 유동성 검증 (USD 기준)**
+>   * **토큰 가치 기준 최소 유동성 검증**
 >   * **유동성 제거 시 잔여 유동성 임계값 사전 검증**
 > * **타이밍 공격 방지:**
 >   * **제거 요청 시점의 가격 고정 및 검증**
 >   * **다중 블록 평균 가격 활용으로 조작 방지**
->   * **유동성 제공 후 최소 보유 기간 설정 (예: 24시간)**
+>   * **유동성 제공 후 최소 보유 기간 설정**
 
 #### Best Practice
 
@@ -284,15 +287,15 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 
 ### 위협 7: 수수료 관리 및 변경 취약점
 
-관리자가 수수료율을 갑자기 크게 변경하거나 대량의 수수료를 즉시 인출해 일반 유동성 제공자들이 예기치 못한 손실을 입을 수 있다.
+관리자가 수수료 비율을 갑자기 크게 변경하거나 대량의 수수료를 즉시 인출해 유동성 제공자들이 예기치 못한 손실을 입을 수 있다.
 
 #### 가이드라인
 
 > * **자동화된 수수료 관리:**
 >   * **수수료 누적 임계값 도달 시 자동 수집 트리거**
->   * **정기적 수집 주기 설정 (예: 매 24시간)**
+>   * **정기적 수집 주기 설정**
 > * **권한 및 변경 관리:**
->   * **대량 인출 시 타임락 적용 (예: 72시간 지연)**
+>   * **대량 인출 시 타임락 적용**
 >   * **수수료 변경 시 단계적 적용**
 
 #### Best Practice
@@ -307,6 +310,7 @@ function setPOLFeeCollectorPercentage(uint256 _polFeeCollectorPercentage) extern
     polFeeCollectorPercentage = _polFeeCollectorPercentage;
     emit POLFeeCollectorPercentageChanged(_polFeeCollectorPercentage);
 }
+
 // 배치 수수료 처리
 function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external override authenticate {
     (

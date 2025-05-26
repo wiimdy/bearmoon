@@ -14,7 +14,7 @@
 ## dApp 빌더를 위한 PoL 활용 보안 가이드라인
 
 * [💸 dApp 가이드라인](dapp-pol/dapp.md)
-  * [dApp: Lending 가이드라인](dapp-pol/markdown.md)
+  * [dApp: Lending 보안 가이드라인](dapp-pol/markdown.md)
   * [dApp: DEX 가이드라인](dapp-pol/images-and-media.md)
   * [dApp: LSD 가이드라인](dapp-pol/interactive-blocks.md)
   * [dApp 체이닝 가이드라인](dapp-pol/openapi.md)

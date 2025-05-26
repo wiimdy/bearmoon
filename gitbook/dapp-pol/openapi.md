@@ -15,16 +15,16 @@ layout:
 
 # dApp 체이닝 가이드라인
 
-여러 dApp의 기능을 연쇄적으로 조합하여 사용하는 복합 DeFi 전략(예: LP 토큰을 담보로 스테이블코인 발행 후, 다시 해당 스테이블코인을 유동성 풀에 제공)은 고수익 기회를 제공한다. \
+여러 dApp의 기능을 연쇄적으로 조합하여 사용하는 복합 DeFi 전략은 고수익 기회를 제공한다. \
 하지만 이러한 dApp 체이닝은 개별 dApp 사용 시에는 드러나지 않았던 새로운 상호작용 위험을 발생시키고 기존 위험을 증폭시킬 수 있다.&#x20;
 
 ### 위협 1: DEX 풀 불균형으로 LP 토큰 담보가치 급락 시 대출 대량 청산
 
-DEX 유동성 풀이 한쪽으로 치우치며 LP 토큰 가치가 폭락하자, 이를 담보로 한 대출들이 연쇄적으로 청산될 위험이 있다.
+DEX 유동성 풀이 한쪽으로 치우치며 LP 토큰 가치가 폭락 시, 이를 담보로 한 대출들이 연쇄적으로 청산될 위험이 있다.
 
 #### 가이드라인
 
-> * **Dex 풀의 불균형 발생 시 LP 토큰을 담보로 하는 대출 프로토콜에 경고 시스템 제작**
+> * **Dex 풀의 불균형 발생 시 LP 토큰을 담보로 하는  Lending 프로토콜에 경고 시스템 제작**
 > * **Dex-Lending 프로토콜 간 실시간 위험 지표 공유**
 
 #### Best Practice&#x20;
@@ -54,7 +54,7 @@ HONEY와 대출 프로토콜에서 사용되는 NECT는 연결되어 있다. HON
 #### Best Practice
 
 ```solidity
-// $HONEY의 건전성 체크
+// HONEY의 건전성 체크
 function setHoneyPriceInstability(bool _isUnstable) external onlyOwner {
     if (isHoneyPriceUnstable != _isUnstable) {
         isHoneyPriceUnstable = _isUnstable;
@@ -62,7 +62,7 @@ function setHoneyPriceInstability(bool _isUnstable) external onlyOwner {
     }
 }
 
-// $HONEY 가격 불안정 시 $NECT를 통한 1:1 가치 상환 제한
+// HONEY 가격 불안정 시 $NECT를 통한 1:1 가치 상환 제한
 function repayDebtWithNect(uint256 _amountToRepay) external {
     address user = msg.sender;
     require(_amountToRepay > 0, "Repayment amount must be positive");
@@ -83,7 +83,7 @@ function repayDebtWithNect(uint256 _amountToRepay) external {
 #### 가이드라인
 
 > * **모든 연계 프로토콜의 핵심 지표를 실시간 통합 모니터링**
-> * **위협 발생 시 사람의 개입 없이 자동으로 방어 메커니즘 실행. Circuit Breaker로 자동으로 시스템 일시 정지**
+> * **위협 발생 시 사람의 개입 없이 자동으로 방어 메커니즘 실행. 서킷 브레이커로 자동으로 시스템 일시 정지**
 > * **프로토콜 간 상호 의존도 매핑 및 위험 전파 경로 사전 분석**
 
 #### Best Practice
