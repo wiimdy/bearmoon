@@ -324,6 +324,87 @@ function _validateWeights(Weight[] calldata weights) internal view {
 #### Best Practice&#x20;
 
 ```solidity
+// 기존 RewardVault.sol의 _processIncentives 함수 개선
+contract RewardVault is ... {
+    // ... 기존 코드 ...
+    
+    // 가이드라인 2: 최소/최대 수량 설정
+    uint256 private constant MIN_INCENTIVE_AMOUNT = 1e6; // dust 방지
+    uint256 private constant MAX_INCENTIVE_RATE = 1e36; // 기존 코드에 이미 있음
+    
+    // 기존 _processIncentives 함수 개선
+    function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
+        // ... 기존 코드 ...
+        
+        for (uint256 i; i < whitelistedTokensCount; ++i) {
+            address token = whitelistedTokens[i];
+            Incentive storage incentive = incentives[token];
+            
+            // 기존: uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
+            // 개선: 정밀도 유지 + 최소값 보장
+            uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
+            
+            // 가이드라인 2: 최소 수량 보장 (dust 방지)
+            if (amount > 0 && amount < MIN_INCENTIVE_AMOUNT) {
+                amount = MIN_INCENTIVE_AMOUNT;
+            }
+            
+            uint256 amountRemaining = incentive.amountRemaining;
+            amount = FixedPointMathLib.min(amount, amountRemaining);
+            
+            // 가이드라인 1: 교차 검증 추가
+            uint256 validatorShare;
+            if (amount > 0) {
+                validatorShare = beraChef.getValidatorIncentiveTokenShare(pubkey, amount);
+                
+                // 검증: validator share가 전체 amount를 초과하지 않는지 확인
+                require(validatorShare <= amount, "Invalid share calculation");
+                
+                amount -= validatorShare;
+            }
+            
+            // ... 나머지 코드 ...
+        }
+    }
+    
+    // ... 기존 코드 ...
+}
+```
+
+```solidity
+// 기존 StakingRewards.sol의 earned 함수 개선
+contract StakingRewards is ... {
+    // ... 기존 코드 ...
+    
+    // 가이드라인 3: 사용자 유리한 반올림
+    function earned(address account) public view virtual returns (uint256) {
+        Info storage info = _accountInfo[account];
+        // ... 기존 코드 ...
+        
+        // 기존: return unclaimedReward + FixedPointMathLib.fullMulDiv(balance, rewardPerTokenDelta, PRECISION);
+        // 개선: 사용자에게 유리한 반올림 적용
+        uint256 earnedAmount = FixedPointMathLib.fullMulDiv(balance, rewardPerTokenDelta, PRECISION);
+        
+        // 잔액이 있지만 계산 결과가 0인 경우 최소값 보장
+        if (balance > 0 && earnedAmount == 0 && rewardPerTokenDelta > 0) {
+            earnedAmount = 1; // 최소 1 wei 보장
+        }
+        
+        return unclaimedReward + earnedAmount;
+    }
+    
+    // 가이드라인 1: 보상 계산 검증 함수 추가
+    function _verifyRewardCalculation(uint256 reward, uint256 totalSupply) internal pure {
+        // 역계산으로 정확성 검증
+        if (totalSupply > 0 && reward > 0) {
+            uint256 reverseCalc = FixedPointMathLib.fullMulDiv(reward, PRECISION, totalSupply);
+            // 오차가 0.01% 이내인지 확인
+            require(reverseCalc <= rewardRate * 10001 / 10000, "Calculation error");
+        }
+    }
+    
+    // ... 기존 코드 ...
+}
 ```
 
 ***
@@ -340,6 +421,79 @@ function _validateWeights(Weight[] calldata weights) internal view {
 #### Best Practice&#x20;
 
 ```solidity
+// 기존 RewardVault.sol의 setDistributor 함수 개선
+contract RewardVault is ... {
+    // ... 기존 코드 ...
+    
+    // 가이드라인 1: 타임락 추가
+    struct PendingDistributor {
+        address newDistributor;
+        uint256 executeAfter;
+    }
+    
+    PendingDistributor public pendingDistributor;
+    uint256 constant TIMELOCK_DELAY = 2 days;
+    
+    // 기존 함수 수정: 즉시 변경 대신 타임락 적용
+    /// @inheritdoc IRewardVault
+    function setDistributor(address _rewardDistribution) external onlyFactoryOwner {
+        if (_rewardDistribution == address(0)) ZeroAddress.selector.revertWith();
+        
+        // 기존: distributor = _rewardDistribution;  // 즉시 변경
+        // 개선: 타임락 적용
+        pendingDistributor = PendingDistributor({
+            newDistributor: _rewardDistribution,
+            executeAfter: block.timestamp + TIMELOCK_DELAY
+        });
+        
+        emit DistributorChangeRequested(_rewardDistribution, block.timestamp + TIMELOCK_DELAY);
+    }
+    
+    // 새로운 함수: 타임락 경과 후 실행
+    function executeDistributorChange() external {
+        require(pendingDistributor.executeAfter != 0, "No pending change");
+        require(block.timestamp >= pendingDistributor.executeAfter, "Timelock active");
+        
+        distributor = pendingDistributor.newDistributor;
+        emit DistributorSet(pendingDistributor.newDistributor);
+        
+        delete pendingDistributor;
+    }
+    
+    // ... 나머지 코드 ...
+}
+```
+
+```solidity
+// 가이드라인 2: RewardVaultFactory에 다중서명 추가
+contract RewardVaultFactory is ... {
+    // ... 기존 코드 ...
+    
+    // 다중서명을 위한 추가 상태 변수
+    mapping(address => mapping(address => bool)) public distributorApprovals; // vault => governor => approved
+    mapping(address => uint256) public approvalCount; // vault => count
+    
+    // 기존 AccessControl 역할 활용
+    bytes32 public constant GOVERNOR_ROLE = keccak256("GOVERNOR_ROLE");
+    uint256 constant REQUIRED_APPROVALS = 2;
+    
+    // RewardVault의 distributor 변경 승인
+    function approveDistributorChange(address vault) external onlyRole(GOVERNOR_ROLE) {
+        RewardVault rewardVault = RewardVault(vault);
+        require(rewardVault.pendingDistributor().newDistributor != address(0), "No pending change");
+        require(!distributorApprovals[vault][msg.sender], "Already approved");
+        
+        distributorApprovals[vault][msg.sender] = true;
+        approvalCount[vault]++;
+        
+        // 2/3 승인 달성 시 실행 가능
+        if (approvalCount[vault] >= REQUIRED_APPROVALS) {
+            emit DistributorChangeApproved(vault);
+        }
+    }
+    
+    // ... 나머지 코드 ...
+}
 ```
 
 ***
@@ -357,6 +511,162 @@ function _validateWeights(Weight[] calldata weights) internal view {
 #### Best Practice&#x20;
 
 ```solidity
+// 기존 RewardVault.sol 개선
+contract RewardVault is ... {
+    // ... 기존 코드 ...
+    
+    // 가이드라인 1: 최소 보유량 제한
+    mapping(address => uint256) public minIncentiveReserve; // 토큰별 최소 보유량
+    uint256 constant DEFAULT_MIN_RESERVE = 1000e18; // 기본 최소 보유량
+    
+    // 기존 addIncentive 함수 개선
+    function addIncentive(
+        address token,
+        uint256 amount,
+        uint256 incentiveRate
+    ) external nonReentrant onlyWhitelistedToken(token) {
+        // ... 기존 검증 로직 ...
+        
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+        incentive.amountRemaining = amountRemainingBefore + amount;
+        
+        // 가이드라인 1: 최소 보유량 경고
+        uint256 minReserve = minIncentiveReserve[token] > 0 ? 
+            minIncentiveReserve[token] : DEFAULT_MIN_RESERVE;
+            
+        if (incentive.amountRemaining < minReserve) {
+            emit IncentiveLowReserveWarning(token, incentive.amountRemaining, minReserve);
+        }
+        
+        // ... 나머지 코드 ...
+    }
+    
+    // 가이드라인 2: 인센티브 충분성 확인 함수
+    function isIncentiveSufficient(address token) external view returns (bool) {
+        Incentive storage incentive = incentives[token];
+        uint256 minReserve = minIncentiveReserve[token] > 0 ? 
+            minIncentiveReserve[token] : DEFAULT_MIN_RESERVE;
+            
+        // 최소 7일치 인센티브가 있는지 확인
+        uint256 estimatedDailyUsage = incentive.incentiveRate * 86400; // 일일 예상 사용량
+        uint256 requiredAmount = estimatedDailyUsage * 7; // 7일치
+        
+        return incentive.amountRemaining >= Math.max(minReserve, requiredAmount);
+    }
+    
+    // 가이드라인 3: 대시보드용 상세 정보 제공
+    function getIncentiveStatus(address token) 
+        external 
+        view 
+        returns (
+            uint256 remaining,
+            uint256 rate,
+            uint256 estimatedDaysLeft,
+            bool isHealthy
+        ) 
+    {
+        Incentive storage incentive = incentives[token];
+        remaining = incentive.amountRemaining;
+        rate = incentive.incentiveRate;
+        
+        // 예상 소진 일수 계산
+        if (rate > 0) {
+            estimatedDaysLeft = remaining / (rate * 86400);
+        } else {
+            estimatedDaysLeft = type(uint256).max; // 무한대
+        }
+        
+        // 건강 상태: 7일 이상 남았는지
+        isHealthy = estimatedDaysLeft >= 7;
+    }
+    
+    // 최소 보유량 설정 (관리자 전용)
+    function setMinIncentiveReserve(address token, uint256 minReserve) 
+        external 
+        onlyFactoryOwner 
+    {
+        minIncentiveReserve[token] = minReserve;
+        emit MinReserveUpdated(token, minReserve);
+    }
+    
+    // ... 기존 코드 ...
+}
+```
+
+```solidity
+// BeraChef 또는 Validator 선택 로직 개선
+contract ValidatorRewardSelection {
+    // 가이드라인 2: 벨리데이터의 vault 선택 시 인센티브 확인
+    function selectRewardVault(address[] calldata vaults) 
+        external 
+        view 
+        returns (address bestVault) 
+    {
+        uint256 bestScore = 0;
+        
+        for (uint256 i = 0; i < vaults.length; i++) {
+            IRewardVault vault = IRewardVault(vaults[i]);
+            
+            // 인센티브 토큰들의 상태 확인
+            address[] memory tokens = vault.getWhitelistedTokens();
+            uint256 healthyTokens = 0;
+            
+            for (uint256 j = 0; j < tokens.length; j++) {
+                if (vault.isIncentiveSufficient(tokens[j])) {
+                    healthyTokens++;
+                }
+            }
+            
+            // 건강한 인센티브가 많은 vault 선택
+            uint256 score = healthyTokens * 1000 + vault.totalSupply() / 1e18;
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestVault = vaults[i];
+            }
+        }
+    }
+}
+```
+
+```solidity
+// 가이드라인 3: 대시보드 데이터 집계
+contract IncentiveDashboard {
+    struct VaultIncentiveInfo {
+        address vault;
+        address token;
+        uint256 remaining;
+        uint256 estimatedDaysLeft;
+        bool needsRefill;
+    }
+    
+    function getAllVaultIncentiveStatus(address[] calldata vaults) 
+        external 
+        view 
+        returns (VaultIncentiveInfo[] memory infos) 
+    {
+        // ... 모든 vault의 인센티브 상태 수집 ...
+        
+        for (uint256 i = 0; i < vaults.length; i++) {
+            IRewardVault vault = IRewardVault(vaults[i]);
+            address[] memory tokens = vault.getWhitelistedTokens();
+            
+            for (uint256 j = 0; j < tokens.length; j++) {
+                (uint256 remaining, , uint256 daysLeft, bool isHealthy) = 
+                    vault.getIncentiveStatus(tokens[j]);
+                    
+                // 7일 미만 남은 경우 리필 필요
+                infos[index++] = VaultIncentiveInfo({
+                    vault: vaults[i],
+                    token: tokens[j],
+                    remaining: remaining,
+                    estimatedDaysLeft: daysLeft,
+                    needsRefill: !isHealthy
+                });
+            }
+        }
+    }
+}
 ```
 
 ***
@@ -422,6 +732,103 @@ function getReward(
 #### Best Practice&#x20;
 
 ```solidity
+// 최소 LP 토큰 예치 요구사항 적용
+contract RewardVaultFactory {
+    // ... 기존 코드 ...
+    
+    // 최소 LP 토큰 예치량 설정
+    uint256 public constant MIN_INITIAL_LP_AMOUNT = 1e18; // 예: 1 LP 토큰
+    
+    // 초기 LP 예치 여부 추적
+    mapping(address => bool) public initialLPDeposited;
+    
+    // 기존 createRewardVault 함수 수정
+    function createRewardVault(
+        address stakingToken,
+        uint256 initialLPAmount
+    ) external returns (address) {
+        // ... 기존 검증 로직 ...
+        
+        // 최소 LP 토큰 예치량 검증
+        require(initialLPAmount >= MIN_INITIAL_LP_AMOUNT, "Initial LP too low");
+        
+        // vault 생성
+        address vault = LibClone.deployDeterministicERC1967BeaconProxy(beacon, salt);
+        
+        // ... vault 초기화 ...
+        
+        // 초기 LP 토큰 예치
+        IERC20(stakingToken).safeTransferFrom(msg.sender, vault, initialLPAmount);
+        RewardVault(vault).depositInitialLP(initialLPAmount);
+        
+        initialLPDeposited[vault] = true;
+        emit InitialLPDeposited(vault, stakingToken, initialLPAmount);
+        
+        return vault;
+    }
+    
+    // ... 기존 코드 ...
+}
+```
+
+```solidity
+contract RewardVault is RewardVault {
+    // ... 기존 코드 ...
+    
+    uint256 public immutable MIN_LP_THRESHOLD;
+    address public initialLPProvider;
+    
+    // 초기화 시 최소 LP 설정
+    function initialize(
+        address _beaconDepositContract,
+        address _bgt,
+        address _distributor,
+        address _stakingToken,
+        uint256 _minLPThreshold
+    ) external initializer {
+        // ... 기존 초기화 로직 ...
+        
+        MIN_LP_THRESHOLD = _minLPThreshold;
+    }
+    
+    // 초기 LP 예치 처리 (factory만 호출 가능)
+    function depositInitialLP(uint256 amount) external {
+        require(msg.sender == factory(), "Only factory");
+        require(initialLPProvider == address(0), "Already initialized");
+        
+        initialLPProvider = tx.origin;
+        _stake(address(this), amount); // vault 자체가 보유
+        
+        emit InitialLPDeposited(amount);
+    }
+    
+    // withdraw 함수 수정
+    function _withdraw(address account, uint256 amount) internal override {
+        // ... 기존 코드 ...
+        
+        // LP 토큰이 최소 임계값 이상 유지되는지 확인
+        require(
+            totalSupply - amount >= MIN_LP_THRESHOLD,
+            "Cannot withdraw below minimum LP"
+        );
+        
+        // ... 나머지 withdraw 로직 ...
+    }
+    
+    // 초기 LP 제공자만 초기 LP를 회수할 수 있음 (비상 상황용)
+    function recoverInitialLP() external {
+        require(msg.sender == initialLPProvider, "Not initial provider");
+        require(totalSupply > MIN_LP_THRESHOLD * 2, "Insufficient total LP");
+        
+        uint256 initialStake = balanceOf(address(this));
+        _withdraw(address(this), initialStake);
+        stakeToken.safeTransfer(initialLPProvider, initialStake);
+        
+        emit InitialLPRecovered(initialStake);
+    }
+    
+    // ... 기존 코드 ...
+}
 ```
 
 ***
@@ -442,6 +849,37 @@ function getReward(
 #### Best Practice&#x20;
 
 ```solidity
+contract RewardVault {
+    // ... 기존 코드 ...
+
+    // 가이드라인 1: 토큰 제거 조건 제한
+    function removeIncentiveToken(address token) 
+        external 
+        onlyFactoryVaultManager 
+        onlyWhitelistedToken(token) 
+        onlyAfterTimelock 
+        requiresGovernanceApproval 
+    {
+        // ... 기존 코드 ...
+        
+        // 가이드라인 3,4: 토큰 제거 이벤트 기록
+        emit IncentiveTokenRemovalScheduled(
+            token,
+            incentives[token].amountRemaining,
+            block.timestamp + REMOVAL_NOTICE_PERIOD
+        );
+        
+        // ... 기존 코드 ...
+    }
+
+    // 가이드라인 6: 토큰 변경 이력 기록
+    event IncentiveTokenAuditLog(
+        address indexed token,
+        string action,
+        uint256 timestamp,
+        address initiator
+    );
+}
 ```
 
 ***
@@ -460,6 +898,37 @@ claimFees() 함수를 호출하는 사용자 앞에서 프론트러닝을 통한
 #### Best Practice&#x20;
 
 ```solidity
+contract FeeCollector {
+    // ... 기존 코드 ...
+
+    // 가이드라인 1: 프론트러닝 방지를 위한 블록 넘버 기반 수수료 계산
+    function claimFees(
+        address recipient, 
+        address[] calldata feeTokens,
+        uint256 blockNumber  // 클레임 기준 블록
+    ) external whenNotPaused {
+        // ... 기존 코드 ...
+        
+        // 가이드라인 2: HONEY 등 수수료 잔고 급변 감지
+        if (_isAbnormalBalanceChange(feeTokens)) {
+            emit AbnormalBalanceChange(feeTokens);
+            _pause();
+            return;
+        }
+
+        // 가이드라인 4: 화이트리스트 기반 토큰 제한
+        require(_isWhitelistedTokens(feeTokens), "Non-whitelisted token");
+
+        // ... 기존 코드 ...
+
+        // 가이드라인 3: 수수료 처리 이벤트 기록
+        emit FeesProcessed(
+            recipient,
+            blockNumber,
+            feeTokens
+        );
+    }
+}
 ```
 
 ***
@@ -477,6 +946,50 @@ dApp 프로토콜의 수수료 송금 누락 시 사용자가 claimFees를 호�
 #### Best Practice&#x20;
 
 ```solidity
+contract FeeCollector {
+    // ... 기존 코드 ...
+    
+    // 가이드라인 2: dApp 상태 관리
+    struct DAppInfo {
+        uint256 lastFeeTimestamp;
+        bool isActive;
+        uint256 totalFeesAccumulated;
+    }
+    
+    mapping(address => DAppInfo) public dappInfo;
+    uint256 public constant MIN_HONEY_AMOUNT = 200e18; // 200 HONEY
+    
+    function claimFees(
+        address _recipient, 
+        address[] calldata _feeTokens
+    ) external whenNotPaused {
+        // 가이드라인 3: 최소 HONEY 수량 체크
+        uint256 honeyBalance = IERC20(payoutToken).balanceOf(address(this));
+        if (honeyBalance <= MIN_HONEY_AMOUNT) {
+            revert InsufficientHoneyForClaim();
+        }
+        
+        // ... 기존 코드 ...
+        
+        // 가이드라인 1: 수수료 정산 상태 기록
+        _updateDAppFeeStatus(msg.sender);
+        
+        emit FeeSettlementUpdated(
+            msg.sender,
+            block.timestamp,
+            honeyBalance
+        );
+    }
+    
+    // 가이드라인 2: 비활성 dApp 제재
+    function penalizeDApp(address dapp) external onlyRole(MANAGER_ROLE) {
+        DAppInfo storage info = dappInfo[dapp];
+        if (block.timestamp - info.lastFeeTimestamp > 7 days) {
+            info.isActive = false;
+            emit DAppPenalized(dapp);
+        }
+    }
+}
 ```
 
 ***
@@ -801,4 +1314,43 @@ $BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배�
 #### Best Practice&#x20;
 
 ```solidity
+contract BlockRewardController {
+    // ... 기존 코드 ...
+    
+    // 가이드라인 2: 파라미터 변경 제한
+    struct ParamLimits {
+        uint256 maxChangePerUpdate;  // 한 번에 변경 가능한 최대 크기
+        uint256 minUpdateInterval;   // 최소 업데이트 간격
+        uint256 lastUpdateTime;      // 마지막 업데이트 시간
+    }
+    
+    mapping(bytes32 => ParamLimits) public parameterLimits;
+    
+    // 가이드라인 1: 거버넌스 투표 필수
+    function setBaseRate(uint256 _baseRate) 
+        external 
+        onlyGovernance 
+        validateParamChange("baseRate", _baseRate) 
+    {
+        // ... 기존 코드 ...
+        
+        // 가이드라인 3: 배출량 모니터링을 위한 이벤트
+        emit EmissionRateChanged(
+            "baseRate",
+            baseRate,
+            _baseRate,
+            block.timestamp
+        );
+    }
+    
+    // 가이드라인 4: 긴급 조치 프로토콜
+    function emergencyPauseEmission() 
+        external 
+        onlyEmergencyCouncil 
+        whenAbnormalEmissionDetected 
+    {
+        _pauseEmission();
+        emit EmergencyPause(block.timestamp);
+    }
+}
 ```
