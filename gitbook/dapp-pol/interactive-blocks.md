@@ -44,8 +44,8 @@ function mint(address receiver) public payable returns (uint256 shares) {
 
 #### 가이드라인
 
-> * 검증자 **별 최대 스테이킹 한도 설정을 통한 보상 불균형 및 중앙화 발생 방지**
-> * 검증자 **상태 추적 및 강제 종료 감지**
+> * **검증자 별 최대 스테이킹 한도 설정을 통한 보상 불균형 및 중앙화 발생 방지**
+> * **검증자 상태 추적 및 강제 종료 감지**
 > * **리스테이킹 시 분산 정책 적용**
 > * **서비스 내부의 사용자 활동에 따른 추가 보상 시스템을 바탕으로 서비스 참여도 증진 및 유동성 증진을 통한 탈중앙성 강화 유도**
 
@@ -116,9 +116,7 @@ function updateFee(ConfigTypes.FeeType _t, uint256 _fee)
 }
 ```
 
-InfraredV1\_5.sol
-
-L26-L29: 외부 볼트에 대한 보상 수확을 Keeper 역할을 지닌 msg.sender에 한정하여 처리
+[`InfraredV1_5.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/upgrades/InfraredV1_5.sol#L21-L41)
 
 ```solidity
 function claimExternalVaultRewards(address _asset, address user)
