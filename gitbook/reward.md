@@ -16,7 +16,7 @@ icon: sack-dollar
 
 #### Best Practice&#x20;
 
-[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)&#x20;
+[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L164-L174)&#x20;
 
 ```solidity
 function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
@@ -63,10 +63,9 @@ function whitelistIncentiveToken(
 
 #### Best Practice&#x20;
 
-&#x20;[`BlockRewardController.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BlockRewardController.sol)&#x20;
+&#x20;[`BlockRewardController.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BlockRewardController.sol#L71-L88)&#x20;
 
 ```solidity
-// contracts/src/pol/rewards/BlockRewardController.sol
 function initialize(
     address _bgt,
     address _distributor,
@@ -90,7 +89,7 @@ function initialize(
 }
 ```
 
-&#x20;[`BGT.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BGT.sol)
+&#x20;[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L117-L123)
 
 ```solidity
 function initialize(address _owner) external initializer {
@@ -101,7 +100,7 @@ function initialize(address _owner) external initializer {
 }
 ```
 
-&#x20;[`BeaconDeposit.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BeaconDeposit.sol)
+&#x20;[`BeaconDeposit.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BeaconDeposit.sol#L57)
 
 ```solidity
 // 초기 루트 상태 정의
@@ -122,7 +121,7 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 
 #### Best Practice&#x20;
 
-&#x20;[`BGT.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/BGT.sol)
+&#x20;[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L369)
 
 ```solidity
 function redeem(
@@ -172,7 +171,7 @@ function _invariantCheck() private view {
 
 #### Best Practice&#x20;
 
-&#x20;[`StakingRewards.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/base/StakingRewards.sol)
+&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L107)
 
 ```solidity
 // contracts/src/pol/rewards/StakingRewards.sol
@@ -201,7 +200,7 @@ function _notifyRewardAmount(uint256 reward)
 
 #### Best Practice&#x20;
 
-&#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L373)
 
 ```solidity
 function addIncentive(
@@ -246,7 +245,7 @@ function getReward(
 
 #### Best Practice&#x20;
 
-&#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L336)
 
 ```solidity
 function getReward(
@@ -263,7 +262,7 @@ function getReward(
 }
 ```
 
-&#x20;[`StakingRewards.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/base/StakingRewards.sol)
+&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L139)
 
 ```solidity
 function _getReward(address account, address recipient)
@@ -294,7 +293,7 @@ function _getReward(address account, address recipient)
 
 #### Best Practice&#x20;
 
-&#x20;[`BeraChef.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BeraChef.sol)
+&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L392-L394)
 
 ```solidity
 function _validateWeights(Weight[] calldata weights) internal view {
@@ -683,7 +682,7 @@ contract IncentiveDashboard {
 
 #### Best Practice&#x20;
 
-&#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L373)
 
 ```solidity
 function addIncentive(
@@ -1055,7 +1054,7 @@ function addIncentive(
 
 #### Best Practice&#x20;
 
-&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BGTIncentiveDistributor.sol)&#x20;
+&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L34-L35)&#x20;
 
 ```solidity
 // 인센티브 분배기 역할별 권한 분리
@@ -1074,7 +1073,7 @@ function initialize(address _governance) external initializer {
 }
 ```
 
-&#x20;[`BeraChef.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BeraChef.sol)&#x20;
+&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)&#x20;
 
 ```solidity
 function queueNewRewardAllocation(
@@ -1118,7 +1117,7 @@ function setVaultWhitelistedStatus(
 
 #### Best Practice&#x20;
 
-&#x20;[`StakingRewards.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/base/StakingRewards.sol)
+&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L108-L112)
 
 ```solidity
 function _notifyRewardAmount(uint256 reward) internal virtual updateReward(address(0)) {
@@ -1141,7 +1140,7 @@ function rewardPerToken() public view virtual returns (uint256) {
 }
 ```
 
-[`BeraChef.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BeraChef.sol)
+[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)
 
 ```solidity
 function queueNewRewardAllocation(
@@ -1160,7 +1159,7 @@ function queueNewRewardAllocation(
 }
 ```
 
-&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BGTIncentiveDistributor.sol)
+&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L204-L206)
 
 ```solidity
 uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
@@ -1192,7 +1191,7 @@ function _setRewardClaimDelay(uint64 _delay) internal {
 
 #### Best Practice
 
-&#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L54-L59)
 
 ```solidity
 // 오프체인 거버넌스 포럼 검증을 통한 허가된 보상 금고만 인센티브 보상을 제공하는 방식 제공 (향후 온체인 구현 필요)
@@ -1237,7 +1236,7 @@ function initialize(
 
 #### Best Practice&#x20;
 
-&#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L485-L487)
 
 ```solidity
 function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
@@ -1280,7 +1279,7 @@ function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal 
 }
 ```
 
-&#x20;[`BeraChef.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/BeraChef.sol)
+&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L290)
 
 ```solidity
 function activateQueuedValCommission(bytes calldata valPubkey) external {
