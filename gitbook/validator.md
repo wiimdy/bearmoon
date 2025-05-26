@@ -17,7 +17,7 @@ icon: user-check
 
 #### Best Practice&#x20;
 
-[BeaconDeposit.sol](https://github.com/wiimdy/bearmoon/blob/main/Core/src/pol/BeaconDeposit.sol)
+&#x20;[`BeaconDeposit.sol`](https://github.com/wiimdy/bearmoon/blob/main/Core/src/pol/BeaconDeposit.sol)&#x20;
 
 ```solidity
 // 첫 deposit시 operator가 zero address인지 검증
@@ -103,7 +103,7 @@ function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentr
 
 #### Best Practice&#x20;
 
-[Distributor.sol](https://github.com/wiimdy/bearmoon/blob/main/Core/src/pol/rewards/Distributor.sol)
+[`Distributor.sol`](https://github.com/wiimdy/bearmoon/blob/main/Core/src/pol/rewards/Distributor.sol)
 
 {% code fullWidth="false" %}
 ```solidity
