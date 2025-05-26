@@ -17,7 +17,7 @@ iBERA 토큰 컨트랙트를 대상으로 BERA 또는 iBERA를 대상으로 한 
 
 #### Best Practice
 
-[`InfraredBERA.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERA.sol)
+[`InfraredBERA.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/staking/InfraredBERA.sol#L213-L232)
 
 ```solidity
 function mint(address receiver) public payable returns (uint256 shares) {
@@ -55,7 +55,7 @@ function mint(address receiver) public payable returns (uint256 shares) {
 
 #### Best Practice
 
-[`InfraredBERADepositor.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/staking/InfraredBERADepositor.sol)
+[`InfraredBERADepositor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/staking/InfraredBERADepositor.sol#L76-L159)
 
 ```solidity
 function execute(bytes calldata pubkey, uint256 amount)
@@ -108,7 +108,7 @@ function execute(bytes calldata pubkey, uint256 amount)
 
 #### Best Practice
 
-[`InfraredV1_2.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/InfraredV1_2.sol)
+[`InfraredV1_2.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/upgrades/InfraredV1_2.sol#L517-L524)
 
 ```solidity
 function updateFee(ConfigTypes.FeeType _t, uint256 _fee)
@@ -152,7 +152,7 @@ function claimExternalVaultRewards(address _asset, address user)
 
 #### Best Practice
 
-[`RewardLib.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
+[`RewardLib.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/libraries/RewardsLib.sol#L569-L600)
 
 ```solidity
 function harvestBribes(
@@ -173,7 +173,7 @@ function harvestBribes(
 }
 ```
 
-[`BribeCollectorV1_3.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/upgrades/BribeCollectorV1_3.sol)
+[`BribeCollectorV1_3.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/upgrades/BribeCollectorV1_3.sol#L56-L105)
 
 ```solidity
 function claimFees(
@@ -195,7 +195,7 @@ function claimFees(
 
 #### Best Practice
 
-[`RewardLib.sol`](https://github.com/wiimdy/bearmoon/blob/main/Infrared/src/core/libraries/RewardsLib.sol)
+[`RewardLib.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/libraries/RewardsLib.sol#L258-L265)
 
 ```solidity
 function updateFee(
