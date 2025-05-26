@@ -51,6 +51,8 @@ LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 NECT를 직접 전송�
 
 #### Best Practice
 
+`커스텀 코드`
+
 ```solidity
 function deposit(uint256 assets, address receiver) public override returns (uint256 shares) {
 // 가이드라인: 최소 예치금 임계값 설정 & 부트스트랩 기간 보호 강화

@@ -29,6 +29,8 @@ DEX 유동성 풀이 한쪽으로 치우치며 LP 토큰 가치가 폭락 시, �
 
 #### Best Practice&#x20;
 
+`커스텀 코드`
+
 ```solidity
 // LP 토큰의 건정성을 확인하는 함수
 function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwner {
@@ -52,6 +54,8 @@ HONEY와 대출 프로토콜에서 사용되는 NECT는 연결되어 있다. HON
 > * **HONEY 가격이 사전에 정의된 안전 임계치 이하로 크게 하락하거나 단기간에 급격한 변동성을 보일 경우, NECT와 관련된 특정 기능을 일시적으로 중단하거나 제한**
 
 #### Best Practice
+
+`커스텀 코드`
 
 ```solidity
 // HONEY의 건전성 체크
@@ -87,6 +91,8 @@ function repayDebtWithNect(uint256 _amountToRepay) external {
 > * **프로토콜 간 상호 의존도 매핑 및 위험 전파 경로 사전 분석**
 
 #### Best Practice
+
+`커스텀 코드`
 
 ```solidity
 // Circuit Breaker 예시
