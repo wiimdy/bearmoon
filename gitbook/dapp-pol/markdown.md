@@ -14,18 +14,24 @@ icon: plane-arrival
 
 #### Best Practice
 
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L302-L336)
 
 ```solidity
-require(params.MCR <= BERABORROW_CORE.CCR() && params.MCR >= 1.1e18, "MCR cannot be > CCR or < 110%");
+// MCR 설정등 각 담보에 따라 차등 설정
+function setParameters(IFactory.DeploymentParams calldata params) public  {
+    require(!sunsetting, "Cannot change after sunset");
+    require(params.MCR <= BERABORROW_CORE.CCR() && params.MCR >= 1.1e18, "MCR cannot be > CCR or < 110%");
+    
+...
 MCR = params.MCR;
+}
 ```
 
 ***
 
 ### 위협 2: 스테이블 코인(NECT)의 디페깅
 
-NECT가 디페깅된 상황에서 공격자가 1달러 상당의 BTC 담보를 redemption으로 회수하여 차익 실현
+NECT가 디페깅된 상황에서 공격자가 1달러 상당의 BTC 담보를 상환으로 회수하여 차익 실현
 
 #### 가이드라인
 
@@ -47,9 +53,10 @@ NECT가 디페깅된 상황에서 공격자가 1달러 상당의 BTC 담보를 r
 
 #### Best Practice
 
-[`PriceFeed.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/PriceFeed.sol)
+[`PriceFeed.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/PriceFeed.sol#L88-L123)
 
 ```solidity
+// 신뢰할 수 있는 oracle에서 가격 인용
 if (_heartbeat > MAX_ORACLE_HEARTBEAT) revert PriceFeed__HeartbeatOutOfBoundsError();
         IAggregatorV3Interface newFeed = IAggregatorV3Interface(_chainlinkOracle);
         (FeedResponse memory currResponse, FeedResponse memory prevResponse) = _fetchFeedResponses(newFeed);
@@ -83,10 +90,16 @@ LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 NECT를 직접 전송�
 
 #### Best Practice
 
-[`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/LiquidStabilityPool.sol)
-
 ```solidity
-if (totalSupply() == 0) revert ZeroTotalSupply(); // convertToShares will return 0 for 'assets < totalAssets'
+function deposit(uint256 assets, address receiver) public override returns (uint256 shares) {
+// 가이드라인: 최소 예치금 임계값 설정 & 부트스트랩 기간 보호 강화
+if (block.timestamp < bootstrapEndTime) {
+    // 부트스트랩 기간: 더 엄격한 최소 예치금 적용
+    require(assets >= MIN_DEPOSIT_BOOTSTRAP, "Deposit amount below bootstrap period minimum");
+} else {
+    // 일반 기간: 일반 최소 예치금 적용
+    require(assets >= MIN_DEPOSIT_NORMAL, "Deposit amount below normal minimum");
+}
 ```
 
 ***
@@ -105,7 +118,7 @@ if (totalSupply() == 0) revert ZeroTotalSupply(); // convertToShares will return
 
 #### Best Practice
 
-[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol)
+[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol#L179-L182)
 
 ```solidity
 function flashFee(address token, uint256 amount) public view returns (uint256) {
@@ -145,7 +158,7 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 
 #### Best Practice
 
-[`BeraborrowOperation.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
+[`BeraborrowOperation.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L511-L530)
 
 ```solidity
 if (_isRecoveryMode) {
@@ -177,7 +190,7 @@ if (_isRecoveryMode) {
 
 #### Best Practice
 
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L326-L336)
 
 ```solidity
 uint256 newInterestRate = (INTEREST_PRECISION * params.interestRateInBps) / (BP * SECONDS_IN_YEAR);
@@ -208,7 +221,7 @@ if (newInterestRate != interestRate) {
 
 #### Best Practice
 
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L487-L508)
 
 ```solidity
 function _updateBaseRateFromRedemption(
@@ -255,7 +268,7 @@ function _updateBaseRateFromRedemption(
 
 #### Best Practice
 
-[`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
+[`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L123-L128)
 
 ```solidity
 function configureCollateral(IDenManager denManager, IERC20 collateralToken) external {
@@ -289,7 +302,7 @@ function removeDenManager(IDenManager denManager) external {
 
 #### Best Practice
 
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L254-L257)
 
 ```solidity
 require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unauthorized");
@@ -373,7 +386,7 @@ function startSunset() external onlyOwner {
 
 #### Best Practice
 
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L835-L839)
 
 ```solidity
 uint256 _newTotalDebt = totalActiveDebt + _compositeDebt;
@@ -400,7 +413,7 @@ TCR이 CCR 이하 진입했으나 BorrowerOperations의 `checkRecoveryMode()` �
 
 #### Best Practice
 
-[`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol)
+[`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L182-L184)
 
 ```solidity
 function checkRecoveryMode(uint256 TCR) public view returns (bool) {
