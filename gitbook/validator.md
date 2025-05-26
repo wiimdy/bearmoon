@@ -46,7 +46,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 ***
 
-### 위협 2: 출금 로직 미존재로 validator cap에서 벗어날 때까지 자금 동결
+### 위협 2: 출금 로직 미존재로 검증자 cap에서 벗어날 때까지 자금 동결
 
 현재 베라체인에서는 검증자가 예치한 금액을 자발적으로 인출하는 로직이 존재하지 않는다. 따라서 체인에 예치한 금액을 긴급하거나 필요할 때 인출이 불가능하다.
 

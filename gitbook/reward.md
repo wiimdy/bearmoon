@@ -51,14 +51,14 @@ function whitelistIncentiveToken(
 
 ### 위협 2: 컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류
 
-컨트랙트 초기 배포 과정에서 영(0) 주소 입력 등 필수 검증 절차와 필터링 기능 누락 시 잘못된 설정으로 인한 시스템 오류 발생 가능성이 존재한다.
+컨트랙트 초기 배포 과정에서 필수 검증 절차와 필터링 기능 누락 시 잘못된 설정으로 인한 시스템 오류 발생 가능성이 존재한다.
 
 #### 가이드라인
 
-> * **모든 컨트랙트 초기화 시 영주소 검증 및 필수 매개변수 검증**
+> * **모든 컨트랙트 초기화 시 zero address 검증 및 필수 매개변수 검증**
 > * **초기 설정 매개변수들의 합리적 범위 검증**
 > * **초기 예치 루트 설정 등 초기 상태의 무결성 보장**
-> * **초기화 함수의 멱등성 보장 및 재초기화 방지 메커니즘**
+> * **초기화 함수의 불변성 보장 및 초기화 중복 방지 메커니즘**
 > * **주요 파라미터 변경을 위한 롤백 메커니즘**
 
 #### Best Practice&#x20;
@@ -166,7 +166,7 @@ function _invariantCheck() private view {
 
 #### 가이드라인
 
-> * **95% 코드 커버리지, Fuzz 테스트, 100명 이상 사용자 시뮬레이션 등 구체적 수치 제시**
+> * **95% 코드 커버리지, Fuzz 테스트 등 구체적 수치 제시**
 > * **Python/JavaScript 기반 오프체인 검증 시스템 구현 방안**
 
 #### Best Practice&#x20;
@@ -174,8 +174,6 @@ function _invariantCheck() private view {
 &#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L107)
 
 ```solidity
-// contracts/src/pol/rewards/StakingRewards.sol
-// -> contracts/base/StakingRewards.sol
 function _notifyRewardAmount(uint256 reward)
     internal
     virtual
@@ -195,7 +193,7 @@ function _notifyRewardAmount(uint256 reward)
 #### 가이드라인
 
 > * **각 함수 및 중요 데이터에 대해 명확한 역할(Owner, Admin, User 등)을 정의, 역할에 따른 접근 권한을 엄격히 부여**
-> * **`onlyOwner`, `onlyRole` 등의 modifier를 명확히 사용**&#x20;
+> * **`onlyOwner`, `onlyRole`등의 modifier를 명확히 사용**&#x20;
 > * **관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅**
 
 #### Best Practice&#x20;
@@ -322,6 +320,8 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 #### Best Practice&#x20;
 
+`커스텀 코드`
+
 ```solidity
 // 기존 RewardVault.sol의 _processIncentives 함수 개선
 contract RewardVault is ... {
@@ -419,6 +419,8 @@ contract StakingRewards is ... {
 
 #### Best Practice&#x20;
 
+`커스텀 코드`
+
 ```solidity
 // 기존 RewardVault.sol의 setDistributor 함수 개선
 contract RewardVault is ... {
@@ -499,7 +501,8 @@ contract RewardVaultFactory is ... {
 
 ### 위협 10: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
 
-인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면, 벨리데이터의 Boost Reward가 급격히 감소한다. vault의 인센티브 토큰 잔고를 실시간으로 확인할 수 없다면, 벨리데이터가 보상 감소를 사전에 인지하지 못한다.
+인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면 검증자의 부스트 보상이 급격히 감소한다. \
+보상금고의 인센티브 토큰 잔고를 실시간으로 확인할 수 없다면 검증자가 보상 감소를 사전에 인지하지 못한다.
 
 #### 가이드라인
 
@@ -508,6 +511,8 @@ contract RewardVaultFactory is ... {
 > * **보상 금고에 인센티브 토큰 얼마나 남았는지 확인하는 대시보드 제작**
 
 #### Best Practice&#x20;
+
+`커스텀 코드`
 
 ```solidity
 // 기존 RewardVault.sol 개선
@@ -672,7 +677,7 @@ contract IncentiveDashboard {
 
 ### 위협 11: 인센티브 토큰가 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
 
-인센티브 토큰이 고갈된 후, 인센티브 비율이 낮아져 해당 vault를 선택한 벨리데이터의 Boost APR이 감소한다. 권한 관리가 미흡하면, 임의로 인센티브 비율이 조정되어 피해가 발생할 수 있다.
+인센티브 토큰이 고갈된 후, 인센티브 비율이 낮아져 해당 보상금고를 선택한 검증자의 부스트 APR이 감소한다. 권한 관리가 미흡하면, 임의로 인센티브 비율이 조정되어 피해가 발생할 수 있다.
 
 #### 가이드라인
 
@@ -716,19 +721,24 @@ function getReward(
 
 ***
 
-### 위협 12: LP 토큰 전량 인출 및 notifyRewardAmount 호출로 인한 보상 중복 누적 및 APR 급등
+### 위협 12: LP 토큰 전량 인출 및 notifyRewardAmount 호출로 인한 보상 중복 누적
 
-만약 epoch이 진행 중일 때 notifyRewardAmount 호출 후 모든 LP 토큰을 인출해 잔고를 0으로 만들면, 보상 잔액이 두 번 누적되어 보상 총액 기록이 비정상적으로 증가할 수 있다. 이후 스테이킹이 재개되면 APR이 급등하고, allowance가 부족할 경우 InsolventReward revert가 발생할 수 있다. 반대로 LP 토큰 잔고가 0인 상태에서 notifyRewardAmount가 먼저 실행되면, 보상 잔액이 다음 epoch으로 이월되지 않아 해당 epoch의 보상이 증발할 수 있다.
+`notifyRewardAmount` 호출 후 모든 LP 토큰을 인출해 잔고를 0으로 만들면 보상 잔액이 두 번 누적되어 보상 총액 기록이 비정상적으로 증가할 수 있다.&#x20;
+
+이후 스테이킹이 재개되면 APR이 급등하고 allowance가 부족할 경우 InsolventReward revert가 발생할 수 있다. \
+반대로 LP 토큰 잔고가 0인 상태에서 `notifyRewardAmount`가 먼저 실행되면 보상 잔액이 다음으로 이월되지 않아 해당 보상이 증발할 수 있다.
 
 #### 가이드라인
 
 > * **notifyRewardAmount 호출 시 LP 토큰 잔고가 0인 경우, 보상 누적 또는 이월을 제한하고 명확한 revert 사유를 제공해야 함.**
-> * **보상 총액 기록이 중복 누적되지 않도록, notifyRewardAmount와 LP 인출 간의 상호작용에 대한 상태 검증 로직을 추가.**
-> * **epoch 종료 전 LP 토큰 전량 인출 시, 보상 분배 및 이월 정책을 명확히 정의하고, 사용자에게 사전 안내.**
-> * **APR 급등 및 InsolventReward revert 발생 가능성을 사전에 감지하여, 스테이킹 재개 시 보상 분배를 일시적으로 제한하거나 관리자 승인 절차를 거치도록 설계.**
-> * **보상 분배 및 이월 관련 이벤트를 모두 기록하여, 이상 징후 발생 시 신속하게 감사 및 롤백이 가능하도록 시스템화.**
+> * **보상 총액 기록이 중복 누적되지 않도록 `notifyRewardAmount`와 LP 인출 간의 상호작용에 대한 상태 검증 로직을 추가.**
+> * **LP 토큰 전량 인출 시 보상 분배 및 이월 정책을 명확히 정의하고 사용자에게 사전 안내.**
+> * **APR 급등 및 revert 발생 가능성을 사전에 감지하여 스테이킹 재개 시 보상 분배를 일시적으로 제한하거나 관리자 승인 절차를 거치도록 설계.**
+> * **보상 분배 및 이월 관련 이벤트를 모두 기록하여 이상 징후 발생 시 신속하게 감사 및 롤백이 가능하도록 시스템화.**
 
 #### Best Practice&#x20;
+
+`커스텀 코드`
 
 ```solidity
 // 최소 LP 토큰 예치 요구사항 적용
@@ -843,9 +853,11 @@ contract RewardVault is RewardVault {
 > * **인센티브 토큰 제거 전, 해당 보상 금고의 남은 분배량 및 종료 일정 공지**
 > * **토큰 제거 시 이벤트 로그 기록 필수 및 대시보드 상 실시간 반영**
 > * **보상 금고의 보상 구조 변경(토큰 추가/제거)은 사용자에게 사전 고지 및 명확한 UI 표시**
-> * **보상 토큰 변경 이력은 감사 로그(audit trail) 로 저장, 분기별 커뮤니티 감사 진행**
+> * **보상 토큰 변경 이력은 감사 로그로 저장, 분기별 커뮤니티 감사 진행**
 
 #### Best Practice&#x20;
+
+`커스텀 코드`
 
 ```solidity
 contract RewardVault {
@@ -883,18 +895,20 @@ contract RewardVault {
 
 ***
 
-### 위협 14: claimFees() 프론트러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
+### 위협 14: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
-claimFees() 함수를 호출하는 사용자 앞에서 프론트러닝을 통한 트랜잭션 선점 시 수수료 보상 가로채기 또는 인센티브 왜곡이 발생할 수 있다.
+`claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상이 왜곡될 수 있다.
 
 #### 가이드라인
 
-> * **`claimFees()` 호출 시 프론트러닝 방지를 위해 수수료 계산 기준이 되는 블록 넘버/타임스탬프를 내부 저장하고 호출자 기준으로 고정하여 외부 간섭 방지 or 클레임 대상 사용자 주소 명시 필드 활용**
-> * **HONEY 등 수수료 잔고가 급변할 경우 이상 징후 탐지 및 임시 정지 로직(safeguard) 활성화**
+> * **`claimFees()` 호출 시 프론트 러닝 방지를 위해 수수료 계산 기준이 되는 블록 넘버/타임스탬프를 내부 저장하고 호출자 기준으로 고정하여 외부 간섭 방지 or 클레임 대상 사용자 주소 명시 필드 활용**
+> * **HONEY 등 수수료 잔고가 급변할 경우 이상 징후 탐지 및 임시 정지 로직 활성화**
 > * **수수료 누적/청구/소진 과정은 이벤트 로그를 통한 추적이 가능해야 하며, 이상 징후 발생 시 자동 경고를 발생시키는 보상 모니터링 시스템 구축**
-> * **클레임 가능한 수수료 토큰 종류는 허용된 화이트리스트기반으로 제한**
+> * **클레임 가능한 수수료 토큰 종류는 허용된 화이트 리스트기반으로 제한**
 
 #### Best Practice&#x20;
+
+`커스텀 코드`
 
 ```solidity
 contract FeeCollector {
@@ -934,7 +948,7 @@ contract FeeCollector {
 
 ### 위협 15: dApp 프로토콜의 수수료 송금 누락에 따른 사용자 보상 실패
 
-dApp 프로토콜의 수수료 송금 누락 시 사용자가 claimFees를 호출해도 정상적인 보상을 받을 수 없어 호출을 하지 않게 되면 BGT Staker의 HONEY 보유량 감소로 이어져 BGT 예치자의 보상이 정상적으로 분배되지 못할 수 있다.
+dApp 프로토콜의 수수료 송금 누락 시 사용자가 `claimFees`를 호출해도 정상적인 보상을 받을 수 없어 호출을 하지 않게 되면 BGT Staker의 HONEY 보유량 감소로 이어져 BGT 예치자의 보상이 정상적으로 분배되지 못할 수 있다.
 
 #### 가이드라인
 
@@ -943,6 +957,8 @@ dApp 프로토콜의 수수료 송금 누락 시 사용자가 claimFees를 호�
 > * **`claimFees()` 호출 시, 지급량이 200 HONEY(=1%) 이하일 경우 revert 및 UI 피드백 제공**
 
 #### Best Practice&#x20;
+
+`커스텀 코드`
 
 ```solidity
 contract FeeCollector {
@@ -1196,6 +1212,7 @@ function _setRewardClaimDelay(uint64 _delay) internal {
 ```solidity
 // 오프체인 거버넌스 포럼 검증을 통한 허가된 보상 금고만 인센티브 보상을 제공하는 방식 제공 (향후 온체인 구현 필요)
 // 각 인센티브 토큰 정보를 별도의 구조체(struct Incentive)로 관리
+
 struct Incentive {
     uint256 minIncentiveRate;
     uint256 incentiveRate;
@@ -1227,12 +1244,12 @@ function initialize(
 
 ### 위협 20: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
 
-검증자 운영자가 인센티브 분배 직전 인센티브 분배 큐를 조작하여 보상을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
+검증자 운영자가 인센티브 분배 직전 인센티브 분배 queue를 조작하여 보상을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
 
 #### 가이드라인
 
 > * **인센티브 분배 로그 분석을 통한 현황 추적**
-> * **악의적인 검증자 slashing**
+> * **악의적인 검증자 슬래싱**
 
 #### Best Practice&#x20;
 
@@ -1298,19 +1315,21 @@ function _getOperatorCommission(bytes calldata valPubkey) internal view returns 
 
 ***
 
-### 위협 21: $BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
+### 위협 21: BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
 
-$BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출량 관련 수식 변수 요소에 대한 조작을 시도할 시 예상치를 벗어난 의도하지 않은 인플레이션 발생 가능성이 있다.
+BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출량 관련 수식 변수 요소에 대한 조작을 시도할 시 예상치를 벗어난 인플레이션 발생 가능성이 있다.
 
 #### 가이드라인
 
+> * **즉시 대응을 위한 긴급 조치 프로토콜 마련**
 > * **모든 중요 파라미터 변경은 거버넌스 투표를 통해서만 가능하도록 제한**
-> * **보상 계산 파라미터 변경 시 점진적 변화만 허용하도록 상한선 및 하한선 설정**
 > * **실시간 보상 배출량 모니터링 시스템 구축 및 이상 징후 감지 메커니즘 설정**
-> * **심각한 계산 오류 발생 시 즉시 대응하기 위한 긴급 조치 프로토콜 마련**
+> * **보상 계산 파라미터 변경 시 점진적 변화만 허용하도록 상한선 및 하한선 설정**
 > * **보상 계산식에 대한 명확한 문서화와 커뮤니티 이해를 위한 시각화 자료 제공**
 
 #### Best Practice&#x20;
+
+`커스텀 코드`
 
 ```solidity
 contract BlockRewardController {
