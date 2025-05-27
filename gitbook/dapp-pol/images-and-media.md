@@ -4,6 +4,8 @@ icon: rotate-reverse
 
 # dApp: DEX 가이드라인
 
+<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="images-and-media.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="images-and-media.md#id-2">#id-2</a></td><td></td></tr><tr><td><a data-mention href="images-and-media.md#id-3">#id-3</a></td><td></td></tr><tr><td><a data-mention href="images-and-media.md#id-4">#id-4</a></td><td></td></tr><tr><td><a data-mention href="images-and-media.md#id-5-lp">#id-5-lp</a></td><td></td></tr><tr><td><a data-mention href="images-and-media.md#id-6">#id-6</a></td><td></td></tr><tr><td><a data-mention href="images-and-media.md#id-7">#id-7</a></td><td></td></tr></tbody></table>
+
 ### 위협 1: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
 
 사용자가 슬리피지 한도를 1%로 설정했지만 대량 거래로 인해 실제 체결 가격이 5% 이상 불리하게 변동되어 예상보다 훨씬 적은 토큰을 받게 된다. 또는 최소 아웃풋 계산에 오류가 있어 사용자가 입력한 최소 수량보다 적은 토큰이 지급되어 손실이 발생할 수 있다.

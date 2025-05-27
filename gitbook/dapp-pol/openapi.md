@@ -1,4 +1,7 @@
 ---
+description: >-
+  여러 dApp의 기능을 연쇄적으로 조합하여 사용하는 복합 DeFi 전략은 고수익 기회를 제공한다.  하지만 이러한 dApp 체이닝은 개별
+  dApp 사용 시에는 드러나지 않았던 새로운 상호작용 위험을 발생시키고 기존 위험을 증폭시킬 수 있다.
 icon: link
 layout:
   title:
@@ -15,8 +18,7 @@ layout:
 
 # dApp 체이닝 가이드라인
 
-여러 dApp의 기능을 연쇄적으로 조합하여 사용하는 복합 DeFi 전략은 고수익 기회를 제공한다. \
-하지만 이러한 dApp 체이닝은 개별 dApp 사용 시에는 드러나지 않았던 새로운 상호작용 위험을 발생시키고 기존 위험을 증폭시킬 수 있다.&#x20;
+<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="openapi.md#id-1-dex-lp">#id-1-dex-lp</a></td><td></td></tr><tr><td><a data-mention href="openapi.md#id-2-honey">#id-2-honey</a></td><td></td></tr><tr><td><a data-mention href="openapi.md#id-3">#id-3</a></td><td></td></tr></tbody></table>
 
 ### 위협 1: DEX 풀 불균형으로 LP 토큰 담보가치 급락 시 대출 대량 청산
 

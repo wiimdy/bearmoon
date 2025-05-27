@@ -4,6 +4,8 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
+<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-3-bgt">#id-3-bgt</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td></td></tr></tbody></table>
+
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
 권한이 없는 사용자가 인센티브 토큰을 임의로 추가하거나 중복 등록하여, 시스템에서 과도한 보상을 받는 상황이 발생할 수 있다. 화이트리스트와 토큰 개수 제한, 중복 방지 로직이 없다면 악의적 사용자가 인센티브 구조를 교란시킬 수 있다.

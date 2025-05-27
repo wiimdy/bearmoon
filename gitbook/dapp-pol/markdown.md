@@ -4,6 +4,8 @@ icon: plane-arrival
 
 # dApp: Lending 보안 가이드라인
 
+<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="markdown.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-2-erc-4626">#id-2-erc-4626</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-3">#id-3</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-4-mev">#id-4-mev</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-5-icr-tcr">#id-5-icr-tcr</a></td><td></td></tr></tbody></table>
+
 ### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
 
 유동성이 낮은 토큰을 담보로 등록될 경우, 공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 저평가된 담보로 과도한 NECT 차용

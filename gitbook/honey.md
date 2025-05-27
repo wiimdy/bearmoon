@@ -4,6 +4,8 @@ icon: honey-pot
 
 # PoL 보안 가이드라인: 오라클 및 HONEY
 
+<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td></td></tr></tbody></table>
+
 ### 위협 1: 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직
 
 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직(단일 소스 의존, 비대칭 처리 등)을 통해 HONEY 토큰의 민팅/리딤 과정에서 프로토콜 손실 또는 사용자 피해가 발생할 수 있다.
