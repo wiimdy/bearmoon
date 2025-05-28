@@ -153,8 +153,7 @@ function _depositAndMint(/*...*/) private {
 
 ### 위협 3: HONEY 가격 불안정으로 인한 대출 프로토콜 마비
 
-HONEY의 시장 가격이 폭락했음에도 `PermissionlessPSM.sol`이 정적인 1:1 로 NECT를 민팅할 경우, 공격자는\
-저렴해진 HONEY로 대량의 NECT를 확보한다.  이후 이 NECT를 대출 프로토콜에서 고정된 가치로 담보 상환에 악용하여 프로토콜의 자산을 고갈시킨다.
+HONEY의 시장 가격이 폭락했음에도 `PermissionlessPSM.sol`이  1:1로 NECT를 민팅할 경우, 공격자는 저렴해진 HONEY로 대량의 NECT를 확보한다.  이후 이 NECT를 대출 프로토콜에서 고정된 가치로 담보 상환에 악용하여 프로토콜의 자산을 고갈시킨다.
 
 #### 영향도
 
