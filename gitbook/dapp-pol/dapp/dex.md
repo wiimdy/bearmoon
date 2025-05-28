@@ -4,9 +4,177 @@ icon: rotate-reverse
 
 # dApp: DEX 보안 가이드라인
 
-<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-2">#id-2</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-3">#id-3</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-5-lp">#id-5-lp</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-7">#id-7</a></td><td align="center"></td></tr></tbody></table>
+<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr></tbody></table>
 
-### 위협 1: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
+### 위협 1: 토큰 가격 조작 및 플래시론 공격
+
+공격자가 플래시론을 이용해 단일 블록에서 대량의 자금을 빌려 풀 가격을 급격히 조작한 뒤 이익을 챙기고 바로 상환하여 일반 사용자가 왜곡된 가격에 거래하게 만든다.
+
+#### 가이드라인
+
+> * **플래시론 공격 방지:**
+>   * **거래 전후 가격 변동률 제한**
+>   * **플래시론 사용 탐지 시 추가 수수료 자동 부과**
+>   * **동일 블록 내 복수 거래 수수료 누적 계산**
+> * **오라클 가격 검증:**
+>   * **최소 2개 이상 독립적 오라클 가격 소스 활용**
+>   * **오라클 간 가격 편차 임계값 설정**
+>   * **가격 업데이트 주기 검증**
+> * **최소 유동성 요구사항:**
+>   * **풀 별 최소 유동성 임계값 동적 설정**
+>   * **유동성 대비 거래량 비율 제한**
+
+#### Best Practice
+
+[`KodiakIslandWithRouter.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol#L95-L107)
+
+```solidity
+function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX96) {
+    // ... 중략 ...
+    //UniswapV3 Pool 내장 오라클 사용
+    (int56[] memory tickCumulatives,) = pool.observe(secondsAgo);
+    require(tickCumulatives.length == 2, "array len");
+    unchecked {
+        int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(uint56(interval)));
+        avgSqrtPriceX96 = avgTick.getSqrtRatioAtTick();
+    }
+}
+```
+
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L37-L44)
+
+```solidity
+// 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
+uint256 internal constant _MAX_IN_RATIO = 0.3e18;
+uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
+// ... 중략 ...
+_require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
+// ... 중략 ...
+_require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
+```
+
+***
+
+### 위협 2: 유동성 풀 불균형
+
+특정 토큰에만 대량 입출금이 반복되면서 풀 내 토큰 비율이 심하게 무너지고 이로 인해 가격이 왜곡되거나 일부 토큰의 유동성이 고갈될 수 있다.
+
+#### 가이드라인
+
+> * **자동 리밸런싱 메커니즘:**
+>   * **목표 비율 대비 편차 임계값 설정**
+>   * **편차 발생 시 자동 리밸런싱 트리거 실행**
+> * **불균형 모니터링:**
+>   * **실시간 풀 비율 추적 및 편차 계산**
+>   * **편차 단계별 경고 시스템**
+> * **자동 스왑 처리:**
+>   * **단일 토큰으로 유동성 공급 시 풀의 비율에 맞게 스왑 후 유동성 공급**
+
+#### Best Practice
+
+[`IslandRouter.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Kodiak/IslandRouter/src/vaults/IslandRouter.sol#L119-L149)
+
+```solidity
+function addLiquiditySingle(
+    IKodiakIsland island,
+    uint256 totalAmountIn,
+    uint256 amountSharesMin,
+    uint256 maxStakingSlippageBPS,
+    RouterSwapParams calldata swapData,
+    address receiver
+) external override returns (uint256 amount0, uint256 amount1, uint256 mintAmount) {
+    require(maxStakingSlippageBPS <= 10000, "staking slippage too high");
+    IERC20 token0 = island.token0();
+    IERC20 token1 = island.token1();
+    IERC20 tokenIn = swapData.zeroForOne ? token0 : token1;
+    tokenIn.safeTransferFrom(msg.sender, address(this), totalAmountIn);
+    // 자동 스왑
+    (uint256 token0Balance, uint256 token1Balance) = _swapAndVerify(token0, token1, tokenIn, swapData);
+    // LP토큰 발행을 위한 토큰 양 계산
+    (amount0, amount1, mintAmount) = island.getMintAmounts(token0Balance, token1Balance);
+    require(mintAmount >= amountSharesMin, "Staking: below min share amount");
+
+    if (swapData.zeroForOne) require(amount1 >= token1Balance * (10000 - maxStakingSlippageBPS) / 10000, "Staking Slippage: below min amounts");
+    else require(amount0 >= token0Balance * (10000 - maxStakingSlippageBPS) / 10000, "Staking Slippage: below min amounts");
+
+    token0Balance -= amount0;
+    token1Balance -= amount1;
+    // 유동성 공급
+    _deposit(island, amount0, amount1, mintAmount, receiver);
+
+    // 남은 토큰 반환
+    if (token0Balance > 0) token0.safeTransfer(msg.sender, token0Balance);
+    if (token1Balance > 0) token1.safeTransfer(msg.sender, token1Balance);
+}
+```
+
+***
+
+### 위협 3: LP 토큰 가치 계산 및 발행 오류
+
+풀에 유동성을 추가할 때 실제 풀 자산 가치와 발행되는 LP 토큰 가치가 일치하지 않아 신규 유동성 제공자가 과도한 이득이나 손실을 볼 수 있다.
+
+#### 가이드라인
+
+> * **정확한 가치 계산:**
+>   * **각 토큰의 현재 시장 가격 실시간 반영**
+>   * **가중 평균 가격 계산 시 유동성 비중 적용**
+>   * **새로운 유동성의 풀 전체 대비 정확한 비중 계산**
+> * **수치 정밀도 보장:**
+>   * **고정소수점 연산 라이브러리 필수 사용 (최소 18자리)**
+>   * **중간 계산 결과의 정밀도 검증 및 유지**
+>   * **반올림 오차 누적 방지를 위한 연산 순서 최적화**
+> * **실시간 검증:**
+>   * **계산된 LP 토큰 가치와 실제 풀 자산 가치 비교**
+>   * **발행 예정량과 실제 발행량 일치 확인**
+>   * **편차 임계값 초과 시 계산 로직 재검증**
+
+#### Best Practice
+
+[`ProtocolFeesWithdrawer.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/ProtocolFeesWithdrawer.sol#L187-L204)
+
+```solidity
+using FixedPoint for uint256;
+// ... 중략 ...
+polFeeCollectorFees[i] = amount.mulDown(polFeeCollectorPercentage);
+// ... 중략 ...
+feeReceiverFees[i] = amount.sub(polFeeCollectorFees[i]);
+// ... 중략 ...
+polFeeCollectorPercentage = FixedPoint.ONE; // 100%
+require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED");
+```
+
+***
+
+### 위협 4: 유동성 제거 타이밍 공격 및 최소 유동성 우회
+
+공격자가 가격이 급등락하는 순간을 노려 유동성을 제거해 풀 내 잔여 유동성이 기준치 이하로 떨어지거나 최소 보유 기간을 우회해 빠르게 이익을 실현할 수 있다.
+
+#### 가이드라인
+
+> * **최소 유동성 검증:**
+>   * **풀별 절대적 최소 유동성 임계값 설정**
+>   * **토큰 가치 기준 최소 유동성 검증**
+>   * **유동성 제거 시 잔여 유동성 임계값 사전 검증**
+> * **타이밍 공격 방지:**
+>   * **제거 요청 시점의 가격 고정 및 검증**
+>   * **다중 블록 평균 가격 활용으로 조작 방지**
+>   * **유동성 제공 후 최소 보유 기간 설정**
+
+#### Best Practice
+
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)
+
+```solidity
+// 최대 300% 불변량 증가 제한
+uint256 internal constant _MAX_INVARIANT_RATIO = 3e18;
+// 최소 70% 불변량 감소 제한
+uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
+```
+
+***
+
+### 위협 5: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
 
 사용자가 슬리피지 한도를 1%로 설정했지만 대량 거래로 인해 실제 체결 가격이 5% 이상 불리하게 변동되어 예상보다 훨씬 적은 토큰을 받게 된다. 또는 최소 아웃풋 계산에 오류가 있어 사용자가 입력한 최소 수량보다 적은 토큰이 지급되어 손실이 발생할 수 있다.
 
@@ -82,7 +250,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 
 ***
 
-### 위협 2: 풀 상태 업데이트시 불일치
+### 위협 6: 풀 상태 업데이트시 불일치
 
 풀 리밸런싱 도중 일부 토큰의 상태만 변경되고 중간에 트랜잭션이 실패하여 풀의 불변량이나 총 공급량이 맞지 않는 불일치 상태가 발생할 수 있다.
 
@@ -115,174 +283,6 @@ function _calculateInvariant(uint256[] memory normalizedWeights, uint256[] memor
     }
     _require(invariant > 0, Errors.ZERO_INVARIANT);
 }
-```
-
-***
-
-### 위협 3: 토큰 가격 조작 및 플래시론 공격
-
-공격자가 플래시론을 이용해 단일 블록에서 대량의 자금을 빌려 풀 가격을 급격히 조작한 뒤 이익을 챙기고 바로 상환하여 일반 사용자가 왜곡된 가격에 거래하게 만든다.
-
-#### 가이드라인
-
-> * **플래시론 공격 방지:**
->   * **거래 전후 가격 변동률 제한**
->   * **플래시론 사용 탐지 시 추가 수수료 자동 부과**
->   * **동일 블록 내 복수 거래 수수료 누적 계산**
-> * **오라클 가격 검증:**
->   * **최소 2개 이상 독립적 오라클 가격 소스 활용**
->   * **오라클 간 가격 편차 임계값 설정**
->   * **가격 업데이트 주기 검증**
-> * **최소 유동성 요구사항:**
->   * **풀 별 최소 유동성 임계값 동적 설정**
->   * **유동성 대비 거래량 비율 제한**
-
-#### Best Practice
-
-[`KodiakIslandWithRouter.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol#L95-L107)
-
-```solidity
-function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX96) {
-    // ... 중략 ...
-    //UniswapV3 Pool 내장 오라클 사용
-    (int56[] memory tickCumulatives,) = pool.observe(secondsAgo);
-    require(tickCumulatives.length == 2, "array len");
-    unchecked {
-        int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(uint56(interval)));
-        avgSqrtPriceX96 = avgTick.getSqrtRatioAtTick();
-    }
-}
-```
-
-[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L37-L44)
-
-```solidity
-// 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
-uint256 internal constant _MAX_IN_RATIO = 0.3e18;
-uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
-// ... 중략 ...
-_require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
-// ... 중략 ...
-_require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
-```
-
-***
-
-### 위협 4: 유동성 풀 불균형
-
-특정 토큰에만 대량 입출금이 반복되면서 풀 내 토큰 비율이 심하게 무너지고 이로 인해 가격이 왜곡되거나 일부 토큰의 유동성이 고갈될 수 있다.
-
-#### 가이드라인
-
-> * **자동 리밸런싱 메커니즘:**
->   * **목표 비율 대비 편차 임계값 설정**
->   * **편차 발생 시 자동 리밸런싱 트리거 실행**
-> * **불균형 모니터링:**
->   * **실시간 풀 비율 추적 및 편차 계산**
->   * **편차 단계별 경고 시스템**
-> * **자동 스왑 처리:**
->   * **단일 토큰으로 유동성 공급 시 풀의 비율에 맞게 스왑 후 유동성 공급**
-
-#### Best Practice
-
-[`IslandRouter.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Kodiak/IslandRouter/src/vaults/IslandRouter.sol#L119-L149)
-
-```solidity
-function addLiquiditySingle(
-    IKodiakIsland island,
-    uint256 totalAmountIn,
-    uint256 amountSharesMin,
-    uint256 maxStakingSlippageBPS,
-    RouterSwapParams calldata swapData,
-    address receiver
-) external override returns (uint256 amount0, uint256 amount1, uint256 mintAmount) {
-    require(maxStakingSlippageBPS <= 10000, "staking slippage too high");
-    IERC20 token0 = island.token0();
-    IERC20 token1 = island.token1();
-    IERC20 tokenIn = swapData.zeroForOne ? token0 : token1;
-    tokenIn.safeTransferFrom(msg.sender, address(this), totalAmountIn);
-    // 자동 스왑
-    (uint256 token0Balance, uint256 token1Balance) = _swapAndVerify(token0, token1, tokenIn, swapData);
-    // LP토큰 발행을 위한 토큰 양 계산
-    (amount0, amount1, mintAmount) = island.getMintAmounts(token0Balance, token1Balance);
-    require(mintAmount >= amountSharesMin, "Staking: below min share amount");
-
-    if (swapData.zeroForOne) require(amount1 >= token1Balance * (10000 - maxStakingSlippageBPS) / 10000, "Staking Slippage: below min amounts");
-    else require(amount0 >= token0Balance * (10000 - maxStakingSlippageBPS) / 10000, "Staking Slippage: below min amounts");
-
-    token0Balance -= amount0;
-    token1Balance -= amount1;
-    // 유동성 공급
-    _deposit(island, amount0, amount1, mintAmount, receiver);
-
-    // 남은 토큰 반환
-    if (token0Balance > 0) token0.safeTransfer(msg.sender, token0Balance);
-    if (token1Balance > 0) token1.safeTransfer(msg.sender, token1Balance);
-}
-```
-
-***
-
-### 위협 5: LP 토큰 가치 계산 및 발행 오류
-
-풀에 유동성을 추가할 때 실제 풀 자산 가치와 발행되는 LP 토큰 가치가 일치하지 않아 신규 유동성 제공자가 과도한 이득이나 손실을 볼 수 있다.
-
-#### 가이드라인
-
-> * **정확한 가치 계산:**
->   * **각 토큰의 현재 시장 가격 실시간 반영**
->   * **가중 평균 가격 계산 시 유동성 비중 적용**
->   * **새로운 유동성의 풀 전체 대비 정확한 비중 계산**
-> * **수치 정밀도 보장:**
->   * **고정소수점 연산 라이브러리 필수 사용 (최소 18자리)**
->   * **중간 계산 결과의 정밀도 검증 및 유지**
->   * **반올림 오차 누적 방지를 위한 연산 순서 최적화**
-> * **실시간 검증:**
->   * **계산된 LP 토큰 가치와 실제 풀 자산 가치 비교**
->   * **발행 예정량과 실제 발행량 일치 확인**
->   * **편차 임계값 초과 시 계산 로직 재검증**
-
-#### Best Practice
-
-[`ProtocolFeesWithdrawer.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/ProtocolFeesWithdrawer.sol#L187-L204)
-
-```solidity
-using FixedPoint for uint256;
-// ... 중략 ...
-polFeeCollectorFees[i] = amount.mulDown(polFeeCollectorPercentage);
-// ... 중략 ...
-feeReceiverFees[i] = amount.sub(polFeeCollectorFees[i]);
-// ... 중략 ...
-polFeeCollectorPercentage = FixedPoint.ONE; // 100%
-require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED");
-```
-
-***
-
-### 위협 6: 유동성 제거 타이밍 공격 및 최소 유동성 우회
-
-공격자가 가격이 급등락하는 순간을 노려 유동성을 제거해 풀 내 잔여 유동성이 기준치 이하로 떨어지거나 최소 보유 기간을 우회해 빠르게 이익을 실현할 수 있다.
-
-#### 가이드라인
-
-> * **최소 유동성 검증:**
->   * **풀별 절대적 최소 유동성 임계값 설정**
->   * **토큰 가치 기준 최소 유동성 검증**
->   * **유동성 제거 시 잔여 유동성 임계값 사전 검증**
-> * **타이밍 공격 방지:**
->   * **제거 요청 시점의 가격 고정 및 검증**
->   * **다중 블록 평균 가격 활용으로 조작 방지**
->   * **유동성 제공 후 최소 보유 기간 설정**
-
-#### Best Practice
-
-[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)
-
-```solidity
-// 최대 300% 불변량 증가 제한
-uint256 internal constant _MAX_INVARIANT_RATIO = 3e18;
-// 최소 70% 불변량 감소 제한
-uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 ```
 
 ***
