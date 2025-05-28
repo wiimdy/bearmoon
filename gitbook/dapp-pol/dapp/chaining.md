@@ -28,23 +28,23 @@ layout:
 
 #### **공격 시나리오**
 
-#### **1단계: DEX 풀 불균형을 통한 LP 토큰 가치 조작**
+**1단계: DEX 풀 불균형을 통한 LP 토큰 가치 조작**
 
 * 공격자가 베라체인 DEX에서 대량 거래를 통해 특정 유동성 풀의 불균형을 유발한다.&#x20;
 
-#### **2단계: 연쇄 청산 유발 및 LSP 자금 고갈**
+**2단계: 연쇄 청산 유발 및 LSP 자금 고갈**
 
 * LP 토큰 가치 하락으로 담보비율(ICR)이 최소담보비율(MCR) 이하로 떨어지면서 대량 청산이 시작된다. 청산 규모가 LSP의 NECT 잔액을 초과하면서 LSP 예치자들의 대량 인출 러시가 발생한다.
 
-#### **3단계: LSP totalSupply 최소화 상태 달성**
+**3단계: LSP totalSupply 최소화 상태 달성**
 
 * 연쇄 청산과 인출 러시로 LSP의 totalSupply가 거의 0에 가까운 상태에 도달한다. 베라버로우 LSP는 BaseCollateralVault와 달리 virtual accounting 메커니즘을 구현하지 않았으며, deposit/mint 함수에서 totalSupply=0 보호장치가 없다.
 
-#### **4단계: ERC4626 인플레이션 공격 실행**
+**4단계: ERC4626 인플레이션 공격 실행**
 
 * 공격자가 1 wei의 NECT를 예치하여 100% 지분을 획득한 후, NECT 토큰을 LSP 컨트랙트로 직접 대량 전송한다. DebtToken의 \_requireValidRecipient 함수는 LSP 주소를 차단하지 않으며, LSP의 totalAssets() 함수는 도네이션된 NECT를 자산 계산에 포함하지 않는다.
 
-#### **5단계: 후속 예치자 공격 및 이익 실현**
+**5단계: 후속 예치자 공격 및 이익 실현**
 
 * 후속 예치자가 NECT를 예치할 때 ERC4626의 convertToShares 계산에서 Solidity 반올림으로 인해 0 shares를 받게 되고, 공격자는 전체 잔액을 인출하여 이익을 실현한다.
 
@@ -55,13 +55,13 @@ layout:
 #### 가이드라인
 
 > * **Dex 풀의 불균형 발생 시 LP 토큰을 담보로 하는  Lending 프로토콜에 경고 시스템 제작**
-> * #### **Virtual Accounting 시스템 구현**
->   * #### **LSP 컨트랙트에 BaseCollateralVault와 동일한 virtual accounting 메커니즘 도입내부 balance 추적과 실제 토큰 잔액 분리를 통한 도네이션 공격 차단**
+> * **Virtual Accounting 시스템 구현**
+> * **LSP 컨트랙트에 BaseCollateralVault와 동일한 virtual accounting 메커니즘 도입내부 balance 추적과 실제 토큰 잔액 분리를 통한 도네이션 공격 차단**
 > * **최소 예치금 임계값 설정**
 >   * **LSP deposit/mint 함수에 최소 예치금 요구사항 추가**&#x20;
 >   * **초기 예치 시 더 높은 최소 금액 설정으로 공격 비용 증가**
-> * #### **totalSupply=0 상태 보호 강화**
->   * #### **모든 예치 함수에 ZeroTotalSupply 체크 확장 적용linearVestingExtraAssets 함수에만 존재하는 보호를 전체 시스템으로 확산**
+> * **totalSupply=0 상태 보호 강화**
+>   * **모든 예치 함수에 ZeroTotalSupply 체크 확장 적용linearVestingExtraAssets 함수에만 존재하는 보호를 전체 시스템으로 확산**
 > * **부트스트랩 기간 보호 메커니즘**
 >   * **초기 24-48시간 동안 예치 제한 및 추가 검증 절차 적용**
 >   * **부트스트랩 기간 중 관리자 승인 없이는 대량 예치 차단**
