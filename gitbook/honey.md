@@ -4,7 +4,7 @@ icon: honey-pot
 
 # PoL 보안 가이드라인: 오라클 및 HONEY
 
-<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td></td></tr></tbody></table>
+<table><thead><tr><th width="618.2109375">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td align="center"></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td align="center"></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td align="center"></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td align="center"></td></tr></tbody></table>
 
 ### 위협 1: 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직
 

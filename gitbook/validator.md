@@ -4,7 +4,7 @@ icon: user-check
 
 # PoL 보안 가이드라인: 검증자
 
-<table><thead><tr><th width="485.96484375">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#id-1">#id-1</a></td><td>Low</td></tr><tr><td><a data-mention href="validator.md#id-2-cap">#id-2-cap</a></td><td>Low</td></tr><tr><td><a data-mention href="validator.md#id-3">#id-3</a></td><td>Low</td></tr></tbody></table>
+<table><thead><tr><th width="609.89453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#id-1">#id-1</a></td><td align="center">Low</td></tr><tr><td><a data-mention href="validator.md#id-2-cap">#id-2-cap</a></td><td align="center">Low</td></tr><tr><td><a data-mention href="validator.md#id-3">#id-3</a></td><td align="center">Low</td></tr></tbody></table>
 
 ### 위협 1: 운영자 변경 프로세스 악용
 

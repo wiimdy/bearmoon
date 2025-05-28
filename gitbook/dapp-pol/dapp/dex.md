@@ -4,7 +4,7 @@ icon: rotate-reverse
 
 # dApp: DEX 보안 가이드라인
 
-<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="dex.md#id-2">#id-2</a></td><td></td></tr><tr><td><a data-mention href="dex.md#id-3">#id-3</a></td><td></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td></td></tr><tr><td><a data-mention href="dex.md#id-5-lp">#id-5-lp</a></td><td></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td></td></tr><tr><td><a data-mention href="dex.md#id-7">#id-7</a></td><td></td></tr></tbody></table>
+<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-2">#id-2</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-3">#id-3</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-5-lp">#id-5-lp</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td align="center"></td></tr><tr><td><a data-mention href="dex.md#id-7">#id-7</a></td><td align="center"></td></tr></tbody></table>
 
 ### 위협 1: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
 

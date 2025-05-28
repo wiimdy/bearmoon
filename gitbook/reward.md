@@ -4,7 +4,7 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-3-bgt">#id-3-bgt</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"></td></tr><tr><td><a data-mention href="reward.md#id-3-bgt">#id-3-bgt</a></td><td align="center"></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"></td></tr></tbody></table>
 
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 

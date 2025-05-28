@@ -4,7 +4,7 @@ icon: plane-arrival
 
 # dApp: Lending 보안 가이드라인
 
-<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-4-mev">#id-4-mev</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-5-icr-tcr">#id-5-icr-tcr</a></td><td></td></tr></tbody></table>
+<table><thead><tr><th width="570.18359375">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-4-mev">#id-4-mev</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-5-icr-tcr">#id-5-icr-tcr</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-6-redeemcollateral">#id-6-redeemcollateral</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-7-denmanager">#id-7-denmanager</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-8-owner">#id-8-owner</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-9">#id-9</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-10-recovery-mode">#id-10-recovery-mode</a></td><td align="center"></td></tr></tbody></table>
 
 ### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
 
@@ -48,7 +48,6 @@ LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 NECT를 직접 전송�
 >   * **최소 예치금 임계값 설정**&#x20;
 > * **부트스트랩 기간 보호 강화:**
 >   * **`deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용**
->   * **첫 24시간 동안 최소 예치금 설정**
 >   * **`totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화**
 
 #### Best Practice
@@ -56,6 +55,20 @@ LSP의 totalSupply **≈** 0 상태에서 1wei 예치 후 NECT를 직접 전송�
 `커스텀 코드`
 
 ```solidity
+// totalSupply가 0이 되는 것을 방지.
+
+constructor(address _assetToken) {
+    if (_assetToken == address(0)) {
+        revert("Zero address provided for asset token");
+    }
+    asset = IERC20(_assetToken);
+
+    // 이 지분은 실질적으로 소각된 것과 같지만, totalSupply 계산에는 포함됨.
+    totalSupply = LOCKED_SHARES;
+    balanceOf[address(0)] = LOCKED_SHARES;
+    ...
+}
+
 function deposit(uint256 assets, address receiver) public override returns (uint256 shares) {
 // 가이드라인: 최소 예치금 임계값 설정 & 부트스트랩 기간 보호 강화
 if (block.timestamp < bootstrapEndTime) {
@@ -77,7 +90,6 @@ if (block.timestamp < bootstrapEndTime) {
 
 > * **CEI 패턴 엄격 적용**
 > * **플래시론 실행 중 모든 상태 변경 함수 접근 차단**
-> * **ReentrancyGuard 추가**
 > * **플래시론 한도를 총 공급량의 50%로 제한**
 > * **플래시론 수수료 최소 0.05% 설정**
 
@@ -94,19 +106,7 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 
 ***
 
-### 위협 4: 상환 프로세스의 MEV 익스트랙션과 프론트 러닝을 통한 사용자 손실
-
-봇이 대량 청산 예정인 Den을 감지하여 프론트 러닝으로 먼저 LSP offset 실행, 청산 담보를 할인가에 선점 획득
-
-#### 가이드라인
-
-> * **멀티 상환시 무작위 순서 적용**
-> * **상환 수수료의 일부를 Stability Pool에 배분**
-> * **상환 트랜잭션 시간 기반 수수료 차등 적용**
-
-***
-
-### 위협 5: ICR/TCR 검증 우회를 통한 과도한 차용
+### 위협 4: ICR/TCR 검증 우회를 통한 과도한 차용
 
 공격자가 DenManager의 `adjustDen()`함수에서 Recovery Mode 조건 검증 로직을 우회하여 MCR 미달에서도 추가 NECT 차용
 
@@ -140,7 +140,7 @@ if (_isRecoveryMode) {
 
 ***
 
-### 위협 6: 이자율 조작을 통한 부당한 이자 부과
+### 위협 5: 이자율 조작을 통한 부당한 이자 부과
 
 #### 가이드라인
 
@@ -169,9 +169,9 @@ if (newInterestRate != interestRate) {
 
 ***
 
-### 위협 7: redeemCollateral()을 통한 선택적 상환으로 건전한 포지션 타겟팅
+### 위협 6: redeemCollateral()을 통한 선택적 상환으로 건전한 포지션 타겟팅
 
-공격자가 `redeemCollateral()`로 낮은 ICR을 가진 iBGT Den만 선별하여 상환, 해당 사용자의 iBGT를 시장가 이하로 획득
+공격자가 `redeemCollateral()`로 높은 ICR을 가진 Den만 선별하여 상환, 해당 사용자의 담보를 시장가 이하로 획득
 
 #### 가이드라인
 
@@ -216,7 +216,7 @@ function _updateBaseRateFromRedemption(
 
 ***
 
-### 위협 8: 악의적인 DenManager 배포를 통한 시스템 무결성 침해
+### 위협 7: 악의적인 DenManager 배포를 통한 시스템 무결성 침해
 
 공격자가 Factory를 통해 가짜 DenManager 배포 후 가짜 담보를 등록, 사용자들이 실제 자산을 예치하도록 유도 후 탈취
 
@@ -252,7 +252,7 @@ function removeDenManager(IDenManager denManager) external {
 
 ***
 
-### 위협 9: Owner 권한 남용을 통한 프로토콜 파라미터 악의적 변경
+### 위협 8: Owner 권한 남용을 통한 프로토콜 파라미터 악의적 변경
 
 #### 가이드라인
 
@@ -275,23 +275,7 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 ***
 
-### 위협 10: 대량 인출을 통한 Stability Pool 고갈로 청산 메커니즘 마비
-
-대량 청산 시 LSP의 NECT 잔고가 부족하여 청산이 불가능해지고 Recovery Mode 진입으로 시스템 마비
-
-#### 가이드라인
-
-> * **유동성 보호 메커니즘:**
->   * **24시간 내 최대 인출 한도 설정**
->   * **대량 인출 시 점진적 수수료 증가**
->   * **풀 크기가 임계값 이하 시 새로운 차용 제한**
-> * **인센티브 분배:**
->   * **청산 시 추가 보너스 토큰 배분**
->   * **장기 예치자에게 수수료 할인 혜택 제공**
-
-***
-
-### 위협 11: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
+### 위협 9: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
 #### 가이드라인
 
@@ -322,46 +306,7 @@ function startSunset() external onlyOwner {
 
 ***
 
-### 위협 12: 고정 이자율 모델의 한계
-
-시장 상황과 무관한 고정 이자율로 인한 자본 효율성 저하 및 리스크 부적절한 반영
-
-#### 가이드라인
-
-> * **Dynamic Interest Rate 도입:**
->   * **이용률 기반 이자율 모델 구현**
->   * **담보별 리스크 프리미엄 차등 적용**
->   * **시장 변동성에 따른 이자율 동적 조정**
-> * **Interest Rate 거버넌스:**
->   * **이자율 변경 시 타임락 적용**
->   * **이자율 변경폭 제한**&#x20;
->   * **커뮤니티 투표를 통한 이자율 모델 파라미터 결정**
-
-***
-
-### 위협 13: 다중 담보 상관관계 위협
-
-여러 담보 자산 간 높은 상관관계로 인한 동시 가격 하락 시 시스템 위험 증폭
-
-#### 가이드라인
-
-> * **포트폴리오 위험 관리:**
->   * **단일 담보 집중도 한도 설정**
->   * **상관관계 높은 자산군별 통합 위험 한도 적용**
-
-#### Best Practice
-
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L835-L839)
-
-```solidity
-uint256 _newTotalDebt = totalActiveDebt + _compositeDebt;
-require(_newTotalDebt + defaultedDebt <= maxSystemDebt, "Collateral debt limit reached");
-totalActiveDebt = _newTotalDebt;
-```
-
-***
-
-### 위협 14: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
+### 위협 10: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
 
 TCR이 CCR 이하 진입했으나 BorrowerOperations의 `checkRecoveryMode()` 로직 버그로 정상 모드 유지, 추가 차용 허용으로 손실 확대
 
@@ -381,7 +326,24 @@ TCR이 CCR 이하 진입했으나 BorrowerOperations의 `checkRecoveryMode()` �
 [`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L182-L184)
 
 ```solidity
+// 현재 TCR 체크 
 function checkRecoveryMode(uint256 TCR) public view returns (bool) {
     return TCR < BERABORROW_CORE.CCR();
+}
+
+// 보호모드에 따라 다른 기준 적용
+if (isRecoveryMode) {
+    _requireICRisAboveCCR(vars.ICR);
+} else {
+    _requireICRisAboveMCR(vars.ICR, denManager.MCR(), account);
+    uint256 newTCR = _getNewTCRFromDenChange(
+        vars.totalPricedCollateral,
+        vars.totalDebt,
+        _collateralAmount * vars.price,
+        true,
+        vars.compositeDebt,
+        true
+    ); // bools: coll increase, debt increase
+    _requireNewTCRisAboveCCR(newTCR);
 }
 ```
