@@ -94,7 +94,7 @@ function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwne
 mapping(address => uint) internal virtualAssetBalance;
 
 function totalAssets() public view override returns (uint) {
-    return virtualAssetBalance[asset()]; // 핵심 수정
+    return virtualAssetBalance[asset()]; 
 }
 
 // 2. deposit 함수에 보호 로직 추가
