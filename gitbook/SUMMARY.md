@@ -13,13 +13,13 @@
   * [PoL 보안 가이드라인: 오라클 및 HONEY](honey.md)
   * [PoL 보안 가이드라인: 거버넌스](gov.md)
 
-## dApp 빌더를 위한 PoL 활용 보안 가이드라인
+## dApp 빌더를 위한 보안 가이드라인
 
-* [💸 dApp 가이드라인](dapp-pol/dapp.md)
-  * [dApp: Lending 보안 가이드라인](dapp-pol/dapp/lending.md)
-  * [dApp: DEX 보안 가이드라인](dapp-pol/dapp/dex.md)
-  * [dApp: LSD 보안 가이드라인](dapp-pol/dapp/lsd.md)
-  * [dApp 체이닝 보안 가이드라인](dapp-pol/dapp/chaining.md)
+* [💸 dApp 보안 가이드라인](dapp/dapp/README.md)
+  * [dApp 보안 가이드라인: Lending](dapp/dapp/lending.md)
+  * [dApp 보안 가이드라인: DEX](dapp/dapp/dex.md)
+  * [dApp 보안 가이드라인: LSD](dapp/dapp/lsd.md)
+  * [dApp 보안 가이드라인: 체이닝](dapp/dapp/chaining.md)
 
 ## 부록 <a href="#appendix" id="appendix"></a>
 
