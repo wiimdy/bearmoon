@@ -4,11 +4,11 @@ icon: coins
 
 # PoL 보안 가이드라인: 토크노믹스
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-3">#id-3</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-4-apr">#id-4-apr</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-claimfees">#id-5-claimfees</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-dapp">#id-6-dapp</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-7">#id-7</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-8">#id-8</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-9-queue">#id-9-queue</a></td><td align="center"></td></tr><tr><td><a data-mention href="tokenomics.md#id-10-bgt">#id-10-bgt</a></td><td align="center"></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: BGT 리딤 시 네이티브 토큰 부족으로 인한 유동성 위기
 
-BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 토큰의 수량이 부족할 경우 일부 사용자는 보상을 받지 못하고 유동성 위기가 발생한다.
+BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 토큰의 수량이 부족할 경우 일부 사용자는 보상을 받지 못하고 보상 수령 트랜잭션이 revert 되어 유동성 위기가 발생한다.
 
 #### 가이드라인
 
@@ -87,7 +87,271 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ***
 
-### 위협 3: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
+### 위협 3: 인센티브 분배 대상 선정 로직 오류
+
+인센티브 분배기에서 분배 설정 시 누락 또는 미검증된 설정으로 인해 인센티브 분배 처리 과정에서 문제가 발생할 수 있다.
+
+#### 가이드라인
+
+> * **인센티브 분배기에 필요한 각종 기능에 대한 권한을 거버넌스 구조로 역할 분리**
+> * **인센티브 분배 설정 변경 시 이중 검증 실시**
+> * **설정 변경 후 실제 적용에 시간차를 두기 위한 시간 지연 로직 구현**
+
+#### Best Practice&#x20;
+
+&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L34-L35)&#x20;
+
+```solidity
+// 인센티브 분배기 역할별 권한 분리
+bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
+
+// ...
+function initialize(address _governance) external initializer {
+    __AccessControl_init();
+    __Pausable_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
+    if (_governance == address(0)) ZeroAddress.selector.revertWith();
+    _grantRole(DEFAULT_ADMIN_ROLE, _governance);
+    // ...
+}
+```
+
+&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)&#x20;
+
+```solidity
+function queueNewRewardAllocation(
+    bytes calldata valPubkey,
+    uint64 startBlock,
+    Weight[] calldata weights
+)
+    external
+    onlyOperator(valPubkey)
+{
+    // 인센티브 분배 설정 변경 후 실제 지연에 시간차를 두기 위한 시간 지연 로직 구현
+    if (startBlock <= block.number + rewardAllocationBlockDelay) {
+        InvalidStartBlock.selector.revertWith();
+    }
+    // ...
+}
+
+// 허용된 인센티브 분배 대상을 분류하기 위한 화이트리스트 토큰, 보상 금고 주소 관리
+function setVaultWhitelistedStatus(
+    address receiver,
+    bool isWhitelisted,
+    string memory metadata
+)
+    external
+    onlyOwner
+{
+    // ...
+}
+```
+
+***
+
+### 위협 4: 분배 비율 또는 기간 설정 오류로 인한 과도/과소 인센티브 지급
+
+인센티브 분배 비율, 분배 기간 설정 과정에서 비정상적인 계산이 적용될 경우 인센티브가 과도/과소 지급될 가능성이 있다.
+
+#### 가이드라인
+
+> * **시간 기반 분배 로직 처리 과정에서 블록 타임스탬프 의존성 최소화**
+> * **인센티브 연산 과정에서 안전한 시간 연산을 위해 검증된 수학 계산 라이브러리 사용**
+
+#### Best Practice&#x20;
+
+&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L108-L112)
+
+```solidity
+function _notifyRewardAmount(uint256 reward) internal virtual updateReward(address(0)) {
+    reward = reward * PRECISION;
+    
+    // 조건부 시간 계산을 위해 안전성이 보장된 상황에서만 시간 차이를 계산
+    if (totalSupply != 0 && block.timestamp < periodFinish) {
+        reward += _computeLeftOverReward();
+    }
+    
+    // ...
+}
+
+function rewardPerToken() public view virtual returns (uint256) {
+    //...
+    // 리워드 최솟값과 토큰 계산 과정에서 안전한 연산을 위한 FixedPointMathLib 라이브러리 사용
+    uint256 _newRewardPerToken = 
+    FixedPointMathLib.fullMulDiv(rewardRate, timeDelta, _totalSupply);
+    return rewardPerTokenStored + _newRewardPerToken;
+}
+```
+
+[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)
+
+```solidity
+function queueNewRewardAllocation(
+    bytes calldata valPubkey,
+    uint64 startBlock,
+    Weight[] calldata weights
+)
+    external
+    onlyOperator(valPubkey)
+{
+    // 블록 번호 기반 지연 처리를 이용한 타임스탬프 조작 공격 방지
+    if (startBlock <= block.number + rewardAllocationBlockDelay) {
+        InvalidStartBlock.selector.revertWith();
+    }
+    // ...
+}
+```
+
+&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L204-L206)
+
+```solidity
+uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
+
+// ...
+
+function _setRewardClaimDelay(uint64 _delay) internal {
+    // 보상 획득 지연시간 지정을 통한 타임스탬프 기반 지연 시간 최소화
+    if (_delay > MAX_REWARD_CLAIM_DELAY) {
+        InvalidRewardClaimDelay.selector.revertWith();
+    }
+    rewardClaimDelay = _delay;
+    emit RewardClaimDelaySet(_delay);
+}
+```
+
+***
+
+### 위협 5: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
+
+검증자 운영자가 인센티브 분배 직전 인센티브 분배 queue를 조작하여 보상을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
+
+#### 가이드라인
+
+> * **인센티브 분배 로그 분석을 통한 현황 추적**
+> * **악의적인 검증자 슬래싱**
+
+#### Best Practice&#x20;
+
+&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L485-L487)
+
+```solidity
+function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
+    // ...
+    // BGT 부스터와 검증자 몫에 대한 로깅을 이중으로 수행
+    // 인센티브 처리 성공/실패 이력 모두 로깅 수행
+    unchecked {
+        // ...
+            if (validatorShare > 0) {
+                // ...
+                
+                if (success) {
+                    // ... 
+                    emit IncentivesProcessed(pubkey, token, bgtEmitted, validatorShare);
+                } else {
+                    emit IncentivesProcessFailed(pubkey, token, bgtEmitted, validatorShare);
+                }
+            }
+        // ...
+            if (amount > 0) {
+                // ...
+                if (success) {
+                    // ...
+                    if (success) {
+                        amountRemaining -= amount;
+                        emit BGTBoosterIncentivesProcessed(pubkey, token, bgtEmitted, amount);
+                    } else {
+                        // ...
+                        emit BGTBoosterIncentivesProcessFailed(pubkey, token, bgtEmitted, amount);
+                    }
+                }
+                else {
+                    emit BGTBoosterIncentivesProcessFailed(pubkey, token, bgtEmitted, amount);
+                }
+            }
+        / /...
+    }
+    
+    // ...
+}
+```
+
+&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L290)
+
+```solidity
+function activateQueuedValCommission(bytes calldata valPubkey) external {
+    // ...
+    // 악의적인 검증자 탐지를 위한 ValCommissionSet 등의 이벤트 처리기로 이력 추적 진행    
+    emit ValCommissionSet(valPubkey, oldCommission, commissionRate);
+    // ...
+}
+
+function _getOperatorCommission(bytes calldata valPubkey) internal view returns (uint96) {
+    // 검증자의 공개키로 인센티브 수량 계산 전 수령 유효성 확인
+    CommissionRate memory operatorCommission = valCommission[valPubkey];
+    // ...
+}
+```
+
+***
+
+### 위협 6: BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
+
+BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출량 관련 수식 변수 요소에 대한 조작을 시도할 시 예상치를 벗어난 인플레이션 발생 가능성이 있다.
+
+#### 가이드라인
+
+> * **즉시 대응을 위한 긴급 조치 프로토콜 마련**
+> * **모든 중요 파라미터 변경은 거버넌스 투표를 통해서만 가능하도록 제한**
+> * **실시간 보상 배출량 모니터링 시스템 구축 및 이상 징후 감지 메커니즘 설정**
+> * **보상 계산 파라미터 변경 시 점진적 변화만 허용하도록 상한선 및 하한선 설정**
+> * **보상 계산식에 대한 명확한 문서화와 커뮤니티 이해를 위한 시각화 자료 제공**
+
+#### Best Practice&#x20;
+
+`커스텀 코드`
+
+```solidity
+contract BlockRewardController {
+    // ... 기존 코드 ...
+    
+    // 가이드라인 2: 파라미터 변경 제한
+    struct ParamLimits {
+        uint256 maxChangePerUpdate;  // 한 번에 변경 가능한 최대 크기
+        uint256 minUpdateInterval;   // 최소 업데이트 간격
+        uint256 lastUpdateTime;      // 마지막 업데이트 시간
+    }
+    
+    mapping(bytes32 => ParamLimits) public parameterLimits;
+    
+    // 가이드라인 1: 거버넌스 투표 필수
+    function setBaseRate(uint256 _baseRate) 
+        external 
+        onlyGovernance 
+        validateParamChange("baseRate", _baseRate) 
+    {
+        // ... 기존 코드 ...
+        
+        // 가이드라인 3: 배출량 모니터링을 위한 이벤트
+        emit EmissionRateChanged( ... );
+    }
+    
+    // 가이드라인 4: 긴급 조치 프로토콜
+    function emergencyPauseEmission() 
+        external 
+        onlyEmergencyCouncil         // 긴급 조치가 가능한 거버넌스 멤버 한정 실행
+        whenAbnormalEmissionDetected // 비정상 BGT 분배 행위 탐지 시에만 동작
+    {
+        _pauseEmission();
+        emit EmergencyPause(block.timestamp);
+    }
+}
+```
+
+***
+
+### 위협 7: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
 
 인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면 검증자의 부스트 보상이 급격히 감소한다. \
 보상금고의 인센티브 토큰 잔고를 실시간으로 확인할 수 없다면 검증자가 보상 감소를 사전에 인지하지 못한다.
@@ -263,7 +527,7 @@ contract IncentiveDashboard {
 
 ***
 
-### 위협 4: 인센티브 토큰가 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
+### 위협 8: 인센티브 토큰가 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
 
 인센티브 토큰이 고갈된 후, 인센티브 비율이 낮아져 해당 보상금고를 선택한 검증자의 부스트 APR이 감소한다. 권한 관리가 미흡하면, 임의로 인센티브 비율이 조정되어 피해가 발생할 수 있다.
 
@@ -309,7 +573,7 @@ function getReward(
 
 ***
 
-### 위협 5: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
+### 위협 9: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
 `claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상이 왜곡될 수 있다.
 
@@ -360,7 +624,7 @@ contract FeeCollector {
 
 ***
 
-### 위협 6: dApp 프로토콜의 수수료 송금 누락에 따른 사용자 보상 실패
+### 위협 10: dApp 프로토콜의 수수료 송금 누락에 따른 사용자 보상 실패
 
 dApp 프로토콜의 수수료 송금 누락 시 사용자가 `claimFees`를 호출해도 정상적인 보상을 받을 수 없어 호출을 하지 않게 되면 BGT Staker의 HONEY 보유량 감소로 이어져 BGT 예치자의 보상이 정상적으로 분배되지 못할 수 있다.
 
@@ -417,270 +681,6 @@ contract FeeCollector {
             info.isActive = false;
             emit DAppPenalized(dapp);
         }
-    }
-}
-```
-
-***
-
-### 위협 7: 인센티브 분배 대상 선정 로직 오류
-
-인센티브 분배기에서 분배 설정 시 누락 또는 미검증된 설정으로 인해 인센티브 분배 처리 과정에서 문제가 발생할 수 있다.
-
-#### 가이드라인
-
-> * **인센티브 분배기에 필요한 각종 기능에 대한 권한을 거버넌스 구조로 역할 분리**
-> * **인센티브 분배 설정 변경 시 이중 검증 실시**
-> * **설정 변경 후 실제 적용에 시간차를 두기 위한 시간 지연 로직 구현**
-
-#### Best Practice&#x20;
-
-&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L34-L35)&#x20;
-
-```solidity
-// 인센티브 분배기 역할별 권한 분리
-bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
-
-// ...
-function initialize(address _governance) external initializer {
-    __AccessControl_init();
-    __Pausable_init();
-    __ReentrancyGuard_init();
-    __UUPSUpgradeable_init();
-    if (_governance == address(0)) ZeroAddress.selector.revertWith();
-    _grantRole(DEFAULT_ADMIN_ROLE, _governance);
-    // ...
-}
-```
-
-&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)&#x20;
-
-```solidity
-function queueNewRewardAllocation(
-    bytes calldata valPubkey,
-    uint64 startBlock,
-    Weight[] calldata weights
-)
-    external
-    onlyOperator(valPubkey)
-{
-    // 인센티브 분배 설정 변경 후 실제 지연에 시간차를 두기 위한 시간 지연 로직 구현
-    if (startBlock <= block.number + rewardAllocationBlockDelay) {
-        InvalidStartBlock.selector.revertWith();
-    }
-    // ...
-}
-
-// 허용된 인센티브 분배 대상을 분류하기 위한 화이트리스트 토큰, 보상 금고 주소 관리
-function setVaultWhitelistedStatus(
-    address receiver,
-    bool isWhitelisted,
-    string memory metadata
-)
-    external
-    onlyOwner
-{
-    // ...
-}
-```
-
-***
-
-### 위협 8: 분배 비율 또는 기간 설정 오류로 인한 과도/과소 인센티브 지급
-
-인센티브 분배 비율, 분배 기간 설정 과정에서 비정상적인 계산이 적용될 경우 인센티브가 과도/과소 지급될 가능성이 있다.
-
-#### 가이드라인
-
-> * **시간 기반 분배 로직 처리 과정에서 블록 타임스탬프 의존성 최소화**
-> * **인센티브 연산 과정에서 안전한 시간 연산을 위해 검증된 수학 계산 라이브러리 사용**
-
-#### Best Practice&#x20;
-
-&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L108-L112)
-
-```solidity
-function _notifyRewardAmount(uint256 reward) internal virtual updateReward(address(0)) {
-    reward = reward * PRECISION;
-    
-    // 조건부 시간 계산을 위해 안전성이 보장된 상황에서만 시간 차이를 계산
-    if (totalSupply != 0 && block.timestamp < periodFinish) {
-        reward += _computeLeftOverReward();
-    }
-    
-    // ...
-}
-
-function rewardPerToken() public view virtual returns (uint256) {
-    //...
-    // 리워드 최솟값과 토큰 계산 과정에서 안전한 연산을 위한 FixedPointMathLib 라이브러리 사용
-    uint256 _newRewardPerToken = 
-    FixedPointMathLib.fullMulDiv(rewardRate, timeDelta, _totalSupply);
-    return rewardPerTokenStored + _newRewardPerToken;
-}
-```
-
-[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)
-
-```solidity
-function queueNewRewardAllocation(
-    bytes calldata valPubkey,
-    uint64 startBlock,
-    Weight[] calldata weights
-)
-    external
-    onlyOperator(valPubkey)
-{
-    // 블록 번호 기반 지연 처리를 이용한 타임스탬프 조작 공격 방지
-    if (startBlock <= block.number + rewardAllocationBlockDelay) {
-        InvalidStartBlock.selector.revertWith();
-    }
-    // ...
-}
-```
-
-&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L204-L206)
-
-```solidity
-uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
-
-// ...
-
-function _setRewardClaimDelay(uint64 _delay) internal {
-    // 보상 획득 지연시간 지정을 통한 타임스탬프 기반 지연 시간 최소화
-    if (_delay > MAX_REWARD_CLAIM_DELAY) {
-        InvalidRewardClaimDelay.selector.revertWith();
-    }
-    rewardClaimDelay = _delay;
-    emit RewardClaimDelaySet(_delay);
-}
-```
-
-***
-
-### 위협 9: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
-
-검증자 운영자가 인센티브 분배 직전 인센티브 분배 queue를 조작하여 보상을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
-
-#### 가이드라인
-
-> * **인센티브 분배 로그 분석을 통한 현황 추적**
-> * **악의적인 검증자 슬래싱**
-
-#### Best Practice&#x20;
-
-&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L485-L487)
-
-```solidity
-function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
-    // ...
-    // BGT 부스터와 검증자 몫에 대한 로깅을 이중으로 수행
-    // 인센티브 처리 성공/실패 이력 모두 로깅 수행
-    unchecked {
-        // ...
-            if (validatorShare > 0) {
-                // ...
-                
-                if (success) {
-                    // ... 
-                    emit IncentivesProcessed(pubkey, token, bgtEmitted, validatorShare);
-                } else {
-                    emit IncentivesProcessFailed(pubkey, token, bgtEmitted, validatorShare);
-                }
-            }
-        // ...
-            if (amount > 0) {
-                // ...
-                if (success) {
-                    // ...
-                    if (success) {
-                        amountRemaining -= amount;
-                        emit BGTBoosterIncentivesProcessed(pubkey, token, bgtEmitted, amount);
-                    } else {
-                        // ...
-                        emit BGTBoosterIncentivesProcessFailed(pubkey, token, bgtEmitted, amount);
-                    }
-                }
-                else {
-                    emit BGTBoosterIncentivesProcessFailed(pubkey, token, bgtEmitted, amount);
-                }
-            }
-        / /...
-    }
-    
-    // ...
-}
-```
-
-&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L290)
-
-```solidity
-function activateQueuedValCommission(bytes calldata valPubkey) external {
-    // ...
-    // 악의적인 검증자 탐지를 위한 ValCommissionSet 등의 이벤트 처리기로 이력 추적 진행    
-    emit ValCommissionSet(valPubkey, oldCommission, commissionRate);
-    // ...
-}
-
-function _getOperatorCommission(bytes calldata valPubkey) internal view returns (uint96) {
-    // 검증자의 공개키로 인센티브 수량 계산 전 수령 유효성 확인
-    CommissionRate memory operatorCommission = valCommission[valPubkey];
-    // ...
-}
-```
-
-***
-
-### 위협 10: BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
-
-BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출량 관련 수식 변수 요소에 대한 조작을 시도할 시 예상치를 벗어난 인플레이션 발생 가능성이 있다.
-
-#### 가이드라인
-
-> * **즉시 대응을 위한 긴급 조치 프로토콜 마련**
-> * **모든 중요 파라미터 변경은 거버넌스 투표를 통해서만 가능하도록 제한**
-> * **실시간 보상 배출량 모니터링 시스템 구축 및 이상 징후 감지 메커니즘 설정**
-> * **보상 계산 파라미터 변경 시 점진적 변화만 허용하도록 상한선 및 하한선 설정**
-> * **보상 계산식에 대한 명확한 문서화와 커뮤니티 이해를 위한 시각화 자료 제공**
-
-#### Best Practice&#x20;
-
-`커스텀 코드`
-
-```solidity
-contract BlockRewardController {
-    // ... 기존 코드 ...
-    
-    // 가이드라인 2: 파라미터 변경 제한
-    struct ParamLimits {
-        uint256 maxChangePerUpdate;  // 한 번에 변경 가능한 최대 크기
-        uint256 minUpdateInterval;   // 최소 업데이트 간격
-        uint256 lastUpdateTime;      // 마지막 업데이트 시간
-    }
-    
-    mapping(bytes32 => ParamLimits) public parameterLimits;
-    
-    // 가이드라인 1: 거버넌스 투표 필수
-    function setBaseRate(uint256 _baseRate) 
-        external 
-        onlyGovernance 
-        validateParamChange("baseRate", _baseRate) 
-    {
-        // ... 기존 코드 ...
-        
-        // 가이드라인 3: 배출량 모니터링을 위한 이벤트
-        emit EmissionRateChanged( ... );
-    }
-    
-    // 가이드라인 4: 긴급 조치 프로토콜
-    function emergencyPauseEmission() 
-        external 
-        onlyEmergencyCouncil         // 긴급 조치가 가능한 거버넌스 멤버 한정 실행
-        whenAbnormalEmissionDetected // 비정상 BGT 분배 행위 탐지 시에만 동작
-    {
-        _pauseEmission();
-        emit EmergencyPause(block.timestamp);
     }
 }
 ```
