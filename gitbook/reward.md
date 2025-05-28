@@ -4,7 +4,7 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-4-erc-20">#id-4-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7">#id-7</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-9-lp-notifyrewardamount">#id-9-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-10">#id-10</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-4-erc-20">#id-4-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
@@ -327,37 +327,7 @@ bytes32 public genesisDepositsRoot;
 
 ***
 
-### 위협 6: 보상 분배 로직 오류로 인한 특정 사용자에게 과도한 보상 지급 또는 보상 누락
-
-보상 분배 로직에 버그가 있어 특정 사용자에게 과도한 보상이 지급되거나, 일부 사용자가 보상을 받지 못하는 상황이 발생한다.
-
-#### 영향도
-
-`Low`
-
-#### 가이드라인
-
-> * **95% 코드 커버리지, Fuzz 테스트 등 구체적 수치 제시**
-> * **Python/JavaScript 기반 오프체인 검증 시스템 구현 방안**
-
-#### Best Practice&#x20;
-
-&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L107)
-
-```solidity
-function _notifyRewardAmount(uint256 reward)
-    internal
-    virtual
-    // 보상이 추가 될 경우 rewardRate 계산
-    _updateReward(address(0))
-{
-    // ...
-}
-```
-
-***
-
-### 위협 7: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
+### 위협 6: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
 
 컨트랙트 접근 제어를 정확하게 처리하지 못할 경우 의도하지 않은 악성 사용자의 접근으로 인한 보상 인출 또는 조작 발생 가능성이 존재한다.
 
@@ -407,7 +377,7 @@ function getReward(
 
 ***
 
-### 위협 8: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
+### 위협 7: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
 
 보상 분배 계산 중 나눗셈 정밀도 오류로 인해, 일부 사용자의 보상이 소수점 이하로 계속 손실되어 누적된다.
 
@@ -510,7 +480,7 @@ contract StakingRewards is ... {
 
 ***
 
-### 위협 9: LP 토큰 전량 인출 및 notifyRewardAmount 호출로 인한 보상 중복 누적
+### 위협 8: LP 토큰 전량 인출 및 notifyRewardAmount 호출로 인한 보상 중복 누적
 
 `notifyRewardAmount` 호출 후 모든 LP 토큰을 인출해 잔고를 0으로 만들면 보상 잔액이 두 번 누적되어 보상 총액 기록이 비정상적으로 증가할 수 있다.&#x20;
 
@@ -635,7 +605,7 @@ contract RewardVault is RewardVault {
 
 ***
 
-### 위협 10: 정상적인 인센티브 토큰 제거에 따른 보상 중단
+### 위협 9: 정상적인 인센티브 토큰 제거에 따른 보상 중단
 
 정상적인 인센티브 토큰 제거 시 갑작스러운 사용자 보상 중단으로 인한 사용자 혼란이 발생할 수 있고 보상 구조의 변경으로 인한 문제 발생 가능성이 존재한다.
 
