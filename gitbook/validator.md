@@ -52,7 +52,7 @@ function distributeFor( ...
 
 #### 영향도
 
-`Lodw`
+`Low`
 
 #### 가이드라인
 
