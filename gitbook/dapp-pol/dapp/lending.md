@@ -4,11 +4,11 @@ icon: plane-arrival
 
 # dApp: Lending 보안 가이드라인
 
-<table><thead><tr><th width="611.7734375">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-4-icr-tcr">#id-4-icr-tcr</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-5">#id-5</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-6-redeemcollateral">#id-6-redeemcollateral</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-7-denmanager">#id-7-denmanager</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-8-owner">#id-8-owner</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-9">#id-9</a></td><td align="center"></td></tr><tr><td><a data-mention href="lending.md#id-10-recovery-mode">#id-10-recovery-mode</a></td><td align="center"></td></tr></tbody></table>
+<table><thead><tr><th width="611.7734375">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center">Midium</td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center">Midium</td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center">Midium</td></tr><tr><td><a data-mention href="lending.md#id-4-icr-tcr">#id-4-icr-tcr</a></td><td align="center">Midium</td></tr><tr><td><a data-mention href="lending.md#id-5">#id-5</a></td><td align="center">Low</td></tr><tr><td><a data-mention href="lending.md#id-6-redeemcollateral">#id-6-redeemcollateral</a></td><td align="center">Low</td></tr><tr><td><a data-mention href="lending.md#id-7-denmanager">#id-7-denmanager</a></td><td align="center">Midium</td></tr><tr><td><a data-mention href="lending.md#id-8-owner">#id-8-owner</a></td><td align="center">Midium</td></tr><tr><td><a data-mention href="lending.md#id-9">#id-9</a></td><td align="center">Midium</td></tr><tr><td><a data-mention href="lending.md#id-10-recovery-mode">#id-10-recovery-mode</a></td><td align="center">Midium</td></tr></tbody></table>
 
 ### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
 
-유동성이 낮은 토큰을 담보로 등록될 경우, 공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 저평가된 담보로 과도한 NECT 차용한다.
+유동성이 낮은 토큰이 담보로 등록될 경우 공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 저평가된 담보로 과도한 NECT를 차용한다.
 
 #### 가이드라인
 
@@ -38,8 +38,7 @@ function setParameters(IFactory.DeploymentParams calldata params) public  {
 
 ### 위협 2: ERC-4626 인플레이션 공격
 
-공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다.\
-&#x20;이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다.
+공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다.
 
 #### 가이드라인
 
@@ -85,8 +84,7 @@ if (block.timestamp < bootstrapEndTime) {
 
 ### 위협 3: 플래시론 재진입 공격
 
-플래시론 재진입 공격은 공격자가 대출금 상환 전에 콜백 함수를 통해 프로토콜에 다시 접근하여 담보물을 부당하게 인출하거나 추가 대출을 실행한다. \
-이는 결국 프로토콜에 상환되지 않는 부실 채권을 남기거나 담보 자산을 탈취당하게 만들어 직접적인 자금 손실을 야기한다.
+플래시론 재진입 공격은 공격자가 대출금 상환 전에 콜백 함수를 통해 프로토콜에 다시 접근하여 담보물을 부당하게 인출하거나 추가 대출을 실행한다. 이는 결국 프로토콜에 상환되지 않는 부실 채권을 남기거나 담보 자산을 탈취당하게 만들어 직접적인 자금 손실을 야기한다.
 
 #### 가이드라인
 
@@ -258,7 +256,7 @@ function removeDenManager(IDenManager denManager) external {
 
 ### 위협 8: Owner 권한 남용을 통한 프로토콜 파라미터 악의적 변경
 
-Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적으로 변경하면, 사용자들은 예기치 않은 수수료 폭탄이나 자산 청산 위험 증가 등 직접적인 경제적 손실을 입게 된다.
+Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적으로 변경하면, 사용자들은 예기치 않은 과도한 수수료 지불 및 자산 청산 위험 증가 등 직접적인 경제적 손실을 입게 된다.
 
 #### 가이드라인
 
