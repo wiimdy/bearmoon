@@ -2,17 +2,17 @@
 icon: plane-arrival
 ---
 
-# dApp: Lending 보안 가이드라인
+# dApp 보안 가이드라인: Lending
 
-<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Midium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Midium</code></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"><code>Midium</code></td></tr><tr><td><a data-mention href="lending.md#id-4-recovery-mode">#id-4-recovery-mode</a></td><td align="center"><code>Midium</code></td></tr><tr><td><a data-mention href="lending.md#id-5-owner">#id-5-owner</a></td><td align="center"><code>Midium</code></td></tr><tr><td><a data-mention href="lending.md#id-6-redeemcollateral">#id-6-redeemcollateral</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-8">#id-8</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-4-recovery-mode">#id-4-recovery-mode</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-5-owner">#id-5-owner</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-6-redeemcollateral">#id-6-redeemcollateral</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-8">#id-8</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
 
-유동성이 낮은 토큰이 담보로 등록될 경우 공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 저평가된 담보로 과도한 NECT를 차용한다.
+유동성이 낮은 토큰이 담보로 등록될 경우 공격자가 소형 DEX에서 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 고평가된 담보로 과도한 NECT를 차용한다. 다시 가격이 복구되어 청산 되어도 담보에 비해 많은 금액을 대출 하여 프로토콜에 손해를 입힌다.
 
 #### 영향도&#x20;
 
-`Midium`
+`Medium`
 
 #### 가이드라인
 
@@ -20,7 +20,6 @@ icon: plane-arrival
 > * **최소 2개 이상의 독립적인 가격 소스 사용**
 > * **가격 편차 임계값 설정**&#x20;
 > * **TWAP 적용**&#x20;
-> * **급격한 가격 하락 시 청산 지연 메커니즘 적용**
 
 #### Best Practice
 
@@ -46,7 +45,7 @@ function setParameters(IFactory.DeploymentParams calldata params) public  {
 
 #### 영향도&#x20;
 
-`Midium`
+`Medium`
 
 #### 가이드라인
 
@@ -96,7 +95,7 @@ if (block.timestamp < bootstrapEndTime) {
 
 #### 영향도&#x20;
 
-`Midium`
+`Medium`
 
 #### 가이드라인
 
@@ -126,7 +125,7 @@ Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제
 
 #### 영향도&#x20;
 
-`Midium`
+`Medium`
 
 #### 가이드라인
 
@@ -197,7 +196,7 @@ Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적
 
 #### 영향도&#x20;
 
-`Midium`
+`Medium`
 
 #### 가이드라인
 
