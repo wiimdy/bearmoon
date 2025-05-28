@@ -109,7 +109,6 @@ function setSystemPause(bool _pause, string calldata _reason) external onlyOwner
         currentSystemStatus = SystemStatus.Paused;
         recoveryLevelPercentage = 0; // 일시 중지 시 운영 레벨 0%
         emit SystemPaused(msg.sender, _reason);
-        // 오프체인 Community Alert System이 이 이벤트를 감지하여 모든 이해관계자에게 즉시 알림
     }
 }
 ```
