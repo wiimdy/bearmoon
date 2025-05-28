@@ -4,7 +4,7 @@ icon: d-and-d
 
 # dApp: LSD 보안 가이드라인
 
-<table><thead><tr><th width="609.7734375">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lsd.md#id-1-ibera-bera">#id-1-ibera-bera</a></td><td align="center"></td></tr><tr><td><a data-mention href="lsd.md#id-2">#id-2</a></td><td align="center"></td></tr><tr><td><a data-mention href="lsd.md#id-3">#id-3</a></td><td align="center"></td></tr><tr><td><a data-mention href="lsd.md#id-4-bribe">#id-4-bribe</a></td><td align="center"></td></tr><tr><td><a data-mention href="lsd.md#id-5">#id-5</a></td><td align="center"></td></tr></tbody></table>
+<table><thead><tr><th width="594.08203125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lsd.md#id-1-ibera-bera">#id-1-ibera-bera</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lsd.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lsd.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lsd.md#id-4-bribe">#id-4-bribe</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lsd.md#id-5">#id-5</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 대량 예치, 인출을 통한 iBERA/BERA 교환 비율 조작
 
