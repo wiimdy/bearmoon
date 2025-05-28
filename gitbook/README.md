@@ -30,3 +30,7 @@ layout:
 
 
 
+### Impact Classification
+
+<table><thead><tr><th width="211.04296875" align="center">위협</th><th align="center">Low</th><th align="center">Medium</th><th align="center">High</th></tr></thead><tbody><tr><td align="center">분류</td><td align="center">작의만한 위협</td><td align="center">프로토콜적 위협</td><td align="center">체인 전반적인 위협</td></tr></tbody></table>
+

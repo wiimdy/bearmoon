@@ -4,7 +4,7 @@ icon: user-check
 
 # PoL 보안 가이드라인: 검증자
 
-<table><thead><tr><th width="609.89453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#id-1">#id-1</a></td><td align="center">Low</td></tr><tr><td><a data-mention href="validator.md#id-2-cap">#id-2-cap</a></td><td align="center">Low</td></tr><tr><td><a data-mention href="validator.md#id-3">#id-3</a></td><td align="center">Low</td></tr></tbody></table>
+<table><thead><tr><th width="609.89453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#id-1">#id-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#id-2-cap">#id-2-cap</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr></tbody></table>
 
 ### 위협 1: 운영자 변경 프로세스 악용
 
@@ -95,7 +95,7 @@ function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentr
 ### 위협 3: 블록 보상 분배 시 검증자의 중복 수령, 누락
 
 검증자가 블록 생성 보상을 실행 레이어에서 수령하므로 합의 레이어의 정보를 가져와야 한다. \
-이 과정에서 정확하지 않는 정보 확인이 진행되면 블록 보상 수령 손해가 발생한다.
+이 과정에서 정확하지 않는 정보 확인이 진행되면 블록 보상 제공 오류가 발생한다.
 
 #### 가이드 라인
 
