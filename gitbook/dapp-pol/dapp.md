@@ -5,18 +5,18 @@
 
 **Bearmoon** 팀은 베라체인의 주요 dApp인 Beraborrow, Kodiak, BEX, Infrared을 분석하여 다음과 같은 가이드라인을 도출했습니다.
 
-{% content-ref url="markdown.md" %}
-[markdown.md](markdown.md)
+{% content-ref url="dapp/lending.md" %}
+[lending.md](dapp/lending.md)
 {% endcontent-ref %}
 
-{% content-ref url="images-and-media.md" %}
-[images-and-media.md](images-and-media.md)
+{% content-ref url="dapp/dex.md" %}
+[dex.md](dapp/dex.md)
 {% endcontent-ref %}
 
-{% content-ref url="interactive-blocks.md" %}
-[interactive-blocks.md](interactive-blocks.md)
+{% content-ref url="dapp/lsd.md" %}
+[lsd.md](dapp/lsd.md)
 {% endcontent-ref %}
 
-{% content-ref url="openapi.md" %}
-[openapi.md](openapi.md)
+{% content-ref url="dapp/chaining.md" %}
+[chaining.md](dapp/chaining.md)
 {% endcontent-ref %}

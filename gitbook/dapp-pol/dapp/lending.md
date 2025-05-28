@@ -4,7 +4,7 @@ icon: plane-arrival
 
 # dApp: Lending 보안 가이드라인
 
-<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="markdown.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-2-erc-4626">#id-2-erc-4626</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-3">#id-3</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-4-mev">#id-4-mev</a></td><td></td></tr><tr><td><a data-mention href="markdown.md#id-5-icr-tcr">#id-5-icr-tcr</a></td><td></td></tr></tbody></table>
+<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-4-mev">#id-4-mev</a></td><td></td></tr><tr><td><a data-mention href="lending.md#id-5-icr-tcr">#id-5-icr-tcr</a></td><td></td></tr></tbody></table>
 
 ### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
 

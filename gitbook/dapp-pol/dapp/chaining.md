@@ -16,9 +16,9 @@ layout:
     visible: true
 ---
 
-# dApp 체이닝 가이드라인
+# dApp 체이닝 보안 가이드라인
 
-<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="openapi.md#id-1-dex-lp">#id-1-dex-lp</a></td><td></td></tr><tr><td><a data-mention href="openapi.md#id-2-honey">#id-2-honey</a></td><td></td></tr><tr><td><a data-mention href="openapi.md#id-3">#id-3</a></td><td></td></tr></tbody></table>
+<table><thead><tr><th width="531.6640625">위협</th><th>영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1-dex-lp">#id-1-dex-lp</a></td><td></td></tr><tr><td><a data-mention href="chaining.md#id-2-honey">#id-2-honey</a></td><td></td></tr><tr><td><a data-mention href="chaining.md#id-3">#id-3</a></td><td></td></tr></tbody></table>
 
 ### 위협 1: DEX 풀 불균형으로 LP 토큰 담보가치 급락 시 대출 대량 청산
 

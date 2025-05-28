@@ -14,12 +14,12 @@
 ## dApp 빌더를 위한 PoL 활용 보안 가이드라인
 
 * [💸 dApp 가이드라인](dapp-pol/dapp.md)
-  * [dApp: Lending 보안 가이드라인](dapp-pol/markdown.md)
-  * [dApp: DEX 가이드라인](dapp-pol/images-and-media.md)
-  * [dApp: LSD 가이드라인](dapp-pol/interactive-blocks.md)
-  * [dApp 체이닝 가이드라인](dapp-pol/openapi.md)
+  * [dApp: Lending 보안 가이드라인](dapp-pol/dapp/lending.md)
+  * [dApp: DEX 보안 가이드라인](dapp-pol/dapp/dex.md)
+  * [dApp: LSD 보안 가이드라인](dapp-pol/dapp/lsd.md)
+  * [dApp 체이닝 보안 가이드라인](dapp-pol/dapp/chaining.md)
 
 ## 부록 <a href="#appendix" id="appendix"></a>
 
-* [용어집](appendix/undefined.md)
-* [참고 문헌 및 외부 리소스](appendix/undefined-1.md)
+* [용어집](appendix/glossary.md)
+* [참고 문헌 및 외부 리소스](appendix/ref.md)
