@@ -4,7 +4,7 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7">#id-7</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="reward.md#id-8-lp-notifyrewardamount">#id-8-lp-notifyrewardamount</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-9">#id-9</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-10-erc-20">#id-10-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-11">#id-11</a></td><td align="center"><code>High</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7">#id-7</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="reward.md#id-8-lp-notifyrewardamount">#id-8-lp-notifyrewardamount</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-9">#id-9</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-10-erc-20">#id-10-erc-20</a></td><td align="center"><code>Medium</code></td></tr></tbody></table>
 
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
@@ -646,56 +646,6 @@ function addIncentive(
     // ...
     // 토큰 전송 처리를 안전하게 수행할 수 있는 SafeERC20 라이브러리 함수 사용
     IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-    // ...
-}
-```
-
-***
-
-
-
-### 위협 11: 권한 없는 사용자의 인센티브 풀 무단 인출&#x20;
-
-인센티브 분배 관련 권한이 없는 사용자가 인센티브 풀을 무단으로 인출할 경우 사용자 인센티브 처리 과정에 문제가 발생할 수 있다.
-
-#### 가이드라인
-
-> * **인센티브 토큰과 연관된 스테이킹 토큰마다 별도의 보상 금고를 생성**
-> * **검증된 보상 금고만 운영할 수 있는 별도의 관리 기준 운영**
-> * **인센티브 토큰 보상 정보를 독립적으로 관리할 수 있는 로직 추가**
-> * **인센티브 토큰 지급 보상 금고 별 분산된 권한 관리를 위한 계층적 권한 구조 적용**
-
-#### Best Practice
-
-&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L54-L59)
-
-```solidity
-// 오프체인 거버넌스 포럼 검증을 통한 허가된 보상 금고만 인센티브 보상을 제공하는 방식 제공 (향후 온체인 구현 필요)
-// 각 인센티브 토큰 정보를 별도의 구조체(struct Incentive)로 관리
-
-struct Incentive {
-    uint256 minIncentiveRate;
-    uint256 incentiveRate;
-    uint256 amountRemaining;
-    address manager; // 인센티브 토큰 별 정확한 잔액 추적과 관리자 지정을 위한 구조체 내 변수 지정
-}
-
-// ...
-
-function initialize(
-    address _beaconDepositContract,
-    address _bgt,
-    address _distributor,
-    address _stakingToken
-)
-    external
-    initializer
-{
-    // 보상 에 필요한 계층적 권한 구조를 지정하여 관리자 역할 구분
-    __FactoryOwnable_init(msg.sender);
-    __Pausable_init();
-    __ReentrancyGuard_init();
-    __StakingRewards_init(_stakingToken, _bgt, 3 days);
     // ...
 }
 ```
