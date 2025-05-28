@@ -4,11 +4,15 @@ icon: honey-pot
 
 # PoL 보안 가이드라인: 오라클 및 HONEY
 
-<table><thead><tr><th width="618.2109375">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="591.7421875">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직
 
 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직(단일 소스 의존, 비대칭 처리 등)을 통해 HONEY 토큰의 민팅/리딤 과정에서 프로토콜 손실 또는 사용자 피해가 발생할 수 있다.
+
+#### 영향도
+
+`Medium`
 
 #### 가이드라인
 
@@ -80,63 +84,13 @@ contract MultiOracleSystem {
 
 ***
 
-### 위협 2: 지나치게 민감한 디페깅 기준 및 Basket 모드 활성화 조건 악용
-
-매우 낮은 수준의 가격 변동에도 디페깅으로 간주하는 기준은, 사소한 시장 변동성에도 Basket 모드를 빈번하게 활성화시켜 사용자 경험을 저해할 수 있다.&#x20;
-
-또한, 공격자가 의도적으로 특정 구성 스테이블 코인의 미세한 디페깅을 유도하여 Basket 모드를 발동시키고 사용자가 예측하지 못한 자산 구성 비율로 민트 또는 리딤하도록 유도할 가능성이 있다.&#x20;
-
-예를 들어, 복수의 구성 스테이블 코인 중 일부만 소폭 디페깅된 경우에도 Basket 모드에 의한 상환이 강제된다면 사용자는 정상 페깅 상태인 자산으로만 받기를 원했음에도 불구하고 원치 않는 디페깅 자산을 일부 수령하게 될 위험이 있다.
-
-#### 가이드라인
-
-> * **시장의 일반적인 변동성을 고려하여 디페깅 판단 기준의 민감도를 조정하고, 일시적인 미세 변동이 아닌 일정 시간 이상 지속되는 유의미한 가격 이탈 시에만 디페깅으로 간주하는 시간적 요소를 도입**
-> * **Basket 모드 활성화는 최후의 안정성 유지 수단으로 고려하며 페깅 자산의 안정성 회복을 우선시**
-> * **가능한 한 사용자가 선호하는 단일 페깅 자산으로 민팅/리딤할 수 있는 옵션을 우선적으로 제공하여 사용자 편의성과 예측 가능성 보장**
-
-#### Best Practice
-
-[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
-
-```solidity
-function isBasketModeEnabled(bool isMint) public view returns (bool) {
-    if (forcedBasketMode) return true;
-    
-    for (uint256 i = 0; i < registeredAssets.length; i++) {
-        address asset = registeredAssets[i];
-        if (isBadCollateralAsset[asset] || vaults[asset].paused()) continue;
-        if (isMint && !isPegged(asset)) return true;
-    }
-    return false;
-}
-```
-
-`커스텀 코드`&#x20;
-
-```solidity
-// 일시적인 가격 변동이 아닌 1시간 이상 지속되는 디페깅을 유효한 디페깅으로 인정하여 Basket 모드의 민감도를 낮추는 시간 기반 감지 시스템
-
-contract TimeBasedDepegDetection {
-    struct DepegRecord {
-        uint256 startTime;
-        bool isActive;
-    }
-    
-    mapping(address => DepegRecord) public depegRecords;
-    uint256 public constant MIN_DEPEG_DURATION = 1 hours;
-    
-    function checkSustainedDepeg(address asset) external view returns (bool) {
-        DepegRecord memory record = depegRecords[asset];
-        return record.isActive && block.timestamp >= record.startTime + MIN_DEPEG_DURATION;
-    }
-}
-```
-
-***
-
-### 위협 3: Basket 모드 내 가중치 결정 로직의 외부 영향 취약성 또는 예측 가능성
+### 위협 2: Basket 모드 내 가중치 결정 로직의 외부 영향 취약성 또는 예측 가능성
 
 Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환하거나 요구할 때 구성 비율 결정 로직이 외부 가격 피드의 일시적 오류, 특정 풀의 유동성 급변 등 외부 요인에 의해 공격자에게 유리하게 예측되거나 형성될 수 있다면, 공격자는 Basket 모드 활성화 시점 또는 특정 시장 상황을 노려 자신에게 유리한 조건으로 자산을 교환하려 시도할 수 있다.
+
+#### 영향도
+
+`Low`
 
 #### 가이드라인
 
@@ -201,11 +155,73 @@ contract TWAPBasedWeights {
 
 ***
 
+### 위협 3: 지나치게 민감한 디페깅 기준 및 Basket 모드 활성화 조건 악용
+
+매우 낮은 수준의 가격 변동에도 디페깅으로 간주하는 기준은, 사소한 시장 변동성에도 Basket 모드를 빈번하게 활성화시켜 사용자 경험을 저해할 수 있다.&#x20;
+
+또한, 공격자가 의도적으로 특정 구성 스테이블 코인의 미세한 디페깅을 유도하여 Basket 모드를 발동시키고 사용자가 예측하지 못한 자산 구성 비율로 민트 또는 리딤하도록 유도할 가능성이 있다.&#x20;
+
+예를 들어, 복수의 구성 스테이블 코인 중 일부만 소폭 디페깅된 경우에도 Basket 모드에 의한 상환이 강제된다면 사용자는 정상 페깅 상태인 자산으로만 받기를 원했음에도 불구하고 원치 않는 디페깅 자산을 일부 수령하게 될 위험이 있다.
+
+#### 영향도
+
+`Informational`
+
+#### 가이드라인
+
+> * **시장의 일반적인 변동성을 고려하여 디페깅 판단 기준의 민감도를 조정하고, 일시적인 미세 변동이 아닌 일정 시간 이상 지속되는 유의미한 가격 이탈 시에만 디페깅으로 간주하는 시간적 요소를 도입**
+> * **Basket 모드 활성화는 최후의 안정성 유지 수단으로 고려하며 페깅 자산의 안정성 회복을 우선시**
+> * **가능한 한 사용자가 선호하는 단일 페깅 자산으로 민팅/리딤할 수 있는 옵션을 우선적으로 제공하여 사용자 편의성과 예측 가능성 보장**
+
+#### Best Practice
+
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
+
+```solidity
+function isBasketModeEnabled(bool isMint) public view returns (bool) {
+    if (forcedBasketMode) return true;
+    
+    for (uint256 i = 0; i < registeredAssets.length; i++) {
+        address asset = registeredAssets[i];
+        if (isBadCollateralAsset[asset] || vaults[asset].paused()) continue;
+        if (isMint && !isPegged(asset)) return true;
+    }
+    return false;
+}
+```
+
+`커스텀 코드`&#x20;
+
+```solidity
+// 일시적인 가격 변동이 아닌 1시간 이상 지속되는 디페깅을 유효한 디페깅으로 인정하여 Basket 모드의 민감도를 낮추는 시간 기반 감지 시스템
+
+contract TimeBasedDepegDetection {
+    struct DepegRecord {
+        uint256 startTime;
+        bool isActive;
+    }
+    
+    mapping(address => DepegRecord) public depegRecords;
+    uint256 public constant MIN_DEPEG_DURATION = 1 hours;
+    
+    function checkSustainedDepeg(address asset) external view returns (bool) {
+        DepegRecord memory record = depegRecords[asset];
+        return record.isActive && block.timestamp >= record.startTime + MIN_DEPEG_DURATION;
+    }
+}
+```
+
+***
+
 ### 위협 4: 디페깅된 자산의 상환시 가치 평가 및 사용자 고지 불확실성
 
 "디페깅된 자산으로는 민팅이 불가능하다"는 정책은 사용자가 자산을 상환할 때, Basket 모드에 디페깅된 스테이블 코인이 포함될 경우 발생할 수 있는 문제다.&#x20;
 
 해당 디페깅된 자산이 어떤 가격으로 평가되어 사용자에게 반환되는지, 이 과정에서 사용자가 어느 정도의 잠재적 손실을 감수해야 하는지에 대한 기준과 고지가 명확하지 않다면 사용자는 예상치 못한 손실을 입을 수 있다.
+
+#### 영향도
+
+`Informational`
 
 #### 가이드라인
 

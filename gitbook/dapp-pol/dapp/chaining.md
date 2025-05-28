@@ -18,13 +18,51 @@ layout:
 
 # dApp 체이닝 보안 가이드라인
 
-<table><thead><tr><th width="616.01953125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1-dex-lsp-erc4626">#id-1-dex-lsp-erc4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chaining.md#id-2-honey">#id-2-honey</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chaining.md#id-3">#id-3</a></td><td align="center"><code>High</code></td></tr></tbody></table>
+<table><thead><tr><th width="616.01953125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1">#id-1</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="chaining.md#id-2-dex-lsp-erc4626">#id-2-dex-lsp-erc4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chaining.md#id-3-honey">#id-3-honey</a></td><td align="center"><code>Medium</code></td></tr></tbody></table>
 
-### 위협 1: DEX 풀 불균형 연쇄청산으로 인한 LSP ERC4626 인플레이션 공격
+### 위협 1: 개별 프로토콜 붕괴 시 연쇄 반응으로 인한 베라체인 생태계 붕괴
+
+인프라레드가 베라체인의 핵심 보상 분배 및 스테이킹 메커니즘을 상당 부분 담당하고 있으므로 만약 인프라레드 프로토콜이 붕괴된다면 스테이킹 보상 지급이 중단되거나 오류가 발생하고 검증인 및 위임자들의 신뢰가 급격히 하락할 것이다.
+
+이는 결국 베라체인 네트워크 보안 약화로 이어질 수 있으며 다른 연계된 dApp들의 정상적인 작동을 방해하여 생태계 전반의 불안정성을 증폭시킬 수 있다.
+
+#### 영향도
+
+`High`
+
+#### 가이드라인
+
+> * **모든 연계 프로토콜의 핵심 지표를 실시간 통합 모니터링**
+> * **위협 발생 시 사람의 개입 없이 자동으로 방어 메커니즘 실행. 서킷 브레이커로 자동으로 시스템 일시 정지**
+> * **프로토콜 간 상호 의존도 매핑 및 위험 전파 경로 사전 분석**
+
+#### Best Practice
+
+`커스텀 코드`
+
+```solidity
+// Circuit Breaker 예시
+function setSystemPause(bool _pause, string calldata _reason) external onlyOwner {
+    if (_pause) {
+        require(currentSystemStatus != SystemStatus.Paused, "System already paused");
+        currentSystemStatus = SystemStatus.Paused;
+        recoveryLevelPercentage = 0; // 일시 중지 시 운영 레벨 0%
+        emit SystemPaused(msg.sender, _reason);
+    }
+}
+```
+
+***
+
+### 위협 2: DEX 풀 불균형 연쇄청산으로 인한 LSP ERC4626 인플레이션 공격
 
 **배경: 베라체인 생태계의 복합적 취약점**
 
 * 베라버로우는 베라체인의 Proof-of-Liquidity(PoL) 메커니즘과 긴밀하게 통합되어 있으며, Infrared의 iBGT, iBERA 토큰과 Kodiak, BEX 등의 DEX LP 토큰을 담보로 사용한다. 이러한 복잡한 상호의존성은 LSP의 ERC4626 인플레이션 공격 취약점과 연쇄적으로 결합될 때 심각한 시스템 위험을 초래할 수 있다.
+
+#### 영향도
+
+`Medium`
 
 #### **공격 시나리오**
 
@@ -112,10 +150,14 @@ function _depositAndMint(/*...*/) private {
 
 ***
 
-### 위협 2: HONEY 가격 불안정으로 인한 대출 프로토콜 마비
+### 위협 3: HONEY 가격 불안정으로 인한 대출 프로토콜 마비
 
 HONEY의 시장 가격이 폭락했음에도 `PermissionlessPSM.sol`이 정적인 1:1 로 NECT를 민할 경우, 공격자는 저렴해진 HONEY로 대량의 NECT를 확보한다. \
 이후 이 NECT를 대출 프로토콜에서 고정된 가치로 담보 상환에 악용하여 프로토콜의 자산을 고갈시킨다.
+
+#### 영향도
+
+`Medium`
 
 #### 가이드라인
 
@@ -150,31 +192,3 @@ function repayDebtWithNect(uint256 _amountToRepay) external {
 ```
 
 ***
-
-### 위협 3: 개별 프로토콜 붕괴 시 연쇄 반응으로 인한 베라체인 생태계 붕괴
-
-인프라레드가 베라체인의 핵심 보상 분배 및 스테이킹 메커니즘을 상당 부분 담당하고 있으므로 만약 인프라레드 프로토콜이 붕괴된다면 스테이킹 보상 지급이 중단되거나 오류가 발생하고 검증인 및 위임자들의 신뢰가 급격히 하락할 것이다.
-
-이는 결국 베라체인 네트워크 보안 약화로 이어질 수 있으며 다른 연계된 dApp들의 정상적인 작동을 방해하여 생태계 전반의 불안정성을 증폭시킬 수 있다.
-
-#### 가이드라인
-
-> * **모든 연계 프로토콜의 핵심 지표를 실시간 통합 모니터링**
-> * **위협 발생 시 사람의 개입 없이 자동으로 방어 메커니즘 실행. 서킷 브레이커로 자동으로 시스템 일시 정지**
-> * **프로토콜 간 상호 의존도 매핑 및 위험 전파 경로 사전 분석**
-
-#### Best Practice
-
-`커스텀 코드`
-
-```solidity
-// Circuit Breaker 예시
-function setSystemPause(bool _pause, string calldata _reason) external onlyOwner {
-    if (_pause) {
-        require(currentSystemStatus != SystemStatus.Paused, "System already paused");
-        currentSystemStatus = SystemStatus.Paused;
-        recoveryLevelPercentage = 0; // 일시 중지 시 운영 레벨 0%
-        emit SystemPaused(msg.sender, _reason);
-    }
-}
-```
