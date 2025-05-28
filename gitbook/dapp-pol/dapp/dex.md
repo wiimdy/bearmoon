@@ -4,7 +4,7 @@ icon: rotate-reverse
 
 # dApp: DEX 보안 가이드라인
 
-<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="dex.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="dex.md#id-3-lp">#id-3-lp</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="dex.md#id-2-lp">#id-2-lp</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-5">#id-5</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 토큰 가격 조작 및 플래시론 공격
 
@@ -59,7 +59,71 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
 ***
 
-### 위협 2: 유동성 풀 불균형
+### 위협 2: LP 토큰 가치 계산 및 발행 오류
+
+풀에 유동성을 추가할 때 실제 풀 자산 가치와 발행되는 LP 토큰 가치가 일치하지 않아 신규 유동성 제공자가 과도한 이득이나 손실을 볼 수 있다.
+
+#### 가이드라인
+
+> * **정확한 가치 계산:**
+>   * **각 토큰의 현재 시장 가격 실시간 반영**
+>   * **가중 평균 가격 계산 시 유동성 비중 적용**
+>   * **새로운 유동성의 풀 전체 대비 정확한 비중 계산**
+> * **수치 정밀도 보장:**
+>   * **고정소수점 연산 라이브러리 필수 사용 (최소 18자리)**
+>   * **중간 계산 결과의 정밀도 검증 및 유지**
+>   * **반올림 오차 누적 방지를 위한 연산 순서 최적화**
+> * **실시간 검증:**
+>   * **계산된 LP 토큰 가치와 실제 풀 자산 가치 비교**
+>   * **발행 예정량과 실제 발행량 일치 확인**
+>   * **편차 임계값 초과 시 계산 로직 재검증**
+
+#### Best Practice
+
+[`ProtocolFeesWithdrawer.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/ProtocolFeesWithdrawer.sol#L187-L204)
+
+```solidity
+using FixedPoint for uint256;
+// ... 중략 ...
+polFeeCollectorFees[i] = amount.mulDown(polFeeCollectorPercentage);
+// ... 중략 ...
+feeReceiverFees[i] = amount.sub(polFeeCollectorFees[i]);
+// ... 중략 ...
+polFeeCollectorPercentage = FixedPoint.ONE; // 100%
+require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED");
+```
+
+***
+
+### 위협 3: 유동성 제거 타이밍 공격 및 최소 유동성 우회
+
+공격자가 가격이 급등락하는 순간을 노려 유동성을 제거해 풀 내 잔여 유동성이 기준치 이하로 떨어지거나 최소 보유 기간을 우회해 빠르게 이익을 실현할 수 있다.
+
+#### 가이드라인
+
+> * **최소 유동성 검증:**
+>   * **풀별 절대적 최소 유동성 임계값 설정**
+>   * **토큰 가치 기준 최소 유동성 검증**
+>   * **유동성 제거 시 잔여 유동성 임계값 사전 검증**
+> * **타이밍 공격 방지:**
+>   * **제거 요청 시점의 가격 고정 및 검증**
+>   * **다중 블록 평균 가격 활용으로 조작 방지**
+>   * **유동성 제공 후 최소 보유 기간 설정**
+
+#### Best Practice
+
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)
+
+```solidity
+// 최대 300% 불변량 증가 제한
+uint256 internal constant _MAX_INVARIANT_RATIO = 3e18;
+// 최소 70% 불변량 감소 제한
+uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
+```
+
+***
+
+### 위협 4: 유동성 풀 불균형
 
 특정 토큰에만 대량 입출금이 반복되면서 풀 내 토큰 비율이 심하게 무너지고 이로 인해 가격이 왜곡되거나 일부 토큰의 유동성이 고갈될 수 있다.
 
@@ -114,73 +178,9 @@ function addLiquiditySingle(
 
 ***
 
-### 위협 3: LP 토큰 가치 계산 및 발행 오류
-
-풀에 유동성을 추가할 때 실제 풀 자산 가치와 발행되는 LP 토큰 가치가 일치하지 않아 신규 유동성 제공자가 과도한 이득이나 손실을 볼 수 있다.
-
-#### 가이드라인
-
-> * **정확한 가치 계산:**
->   * **각 토큰의 현재 시장 가격 실시간 반영**
->   * **가중 평균 가격 계산 시 유동성 비중 적용**
->   * **새로운 유동성의 풀 전체 대비 정확한 비중 계산**
-> * **수치 정밀도 보장:**
->   * **고정소수점 연산 라이브러리 필수 사용 (최소 18자리)**
->   * **중간 계산 결과의 정밀도 검증 및 유지**
->   * **반올림 오차 누적 방지를 위한 연산 순서 최적화**
-> * **실시간 검증:**
->   * **계산된 LP 토큰 가치와 실제 풀 자산 가치 비교**
->   * **발행 예정량과 실제 발행량 일치 확인**
->   * **편차 임계값 초과 시 계산 로직 재검증**
-
-#### Best Practice
-
-[`ProtocolFeesWithdrawer.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/ProtocolFeesWithdrawer.sol#L187-L204)
-
-```solidity
-using FixedPoint for uint256;
-// ... 중략 ...
-polFeeCollectorFees[i] = amount.mulDown(polFeeCollectorPercentage);
-// ... 중략 ...
-feeReceiverFees[i] = amount.sub(polFeeCollectorFees[i]);
-// ... 중략 ...
-polFeeCollectorPercentage = FixedPoint.ONE; // 100%
-require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED");
-```
-
-***
-
-### 위협 4: 유동성 제거 타이밍 공격 및 최소 유동성 우회
-
-공격자가 가격이 급등락하는 순간을 노려 유동성을 제거해 풀 내 잔여 유동성이 기준치 이하로 떨어지거나 최소 보유 기간을 우회해 빠르게 이익을 실현할 수 있다.
-
-#### 가이드라인
-
-> * **최소 유동성 검증:**
->   * **풀별 절대적 최소 유동성 임계값 설정**
->   * **토큰 가치 기준 최소 유동성 검증**
->   * **유동성 제거 시 잔여 유동성 임계값 사전 검증**
-> * **타이밍 공격 방지:**
->   * **제거 요청 시점의 가격 고정 및 검증**
->   * **다중 블록 평균 가격 활용으로 조작 방지**
->   * **유동성 제공 후 최소 보유 기간 설정**
-
-#### Best Practice
-
-[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)
-
-```solidity
-// 최대 300% 불변량 증가 제한
-uint256 internal constant _MAX_INVARIANT_RATIO = 3e18;
-// 최소 70% 불변량 감소 제한
-uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
-```
-
-***
-
 ### 위협 5: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
 
-사용자가 슬리피지 한도를 1%로 설정했지만 대량 거래로 인해 실제 체결 가격이 5% 이상 불리하게 변동되어 예상보다 훨씬 적은 토큰을 받게 된다. 또는 최소 아웃풋 계산에 오류가 있어 사용자가 입력한 최소 수량보다 적은 토큰이 지급되어 손실이 발생할 수 있다.
+대량 거래로 인해 실제 체결 가격이 불리하게 변동되어 예상보다 훨씬 적은 토큰을 받게 된다. 또는 최소 아웃풋 계산에 오류가 있어 사용자가 입력한 최소 수량보다 적은 토큰이 지급되어 손실이 발생할 수 있다.
 
 #### 가이드라인
 
