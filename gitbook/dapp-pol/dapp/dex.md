@@ -4,7 +4,7 @@ icon: rotate-reverse
 
 # dApp: DEX 보안 가이드라인
 
-<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr><tr><td></td><td align="center"></td></tr></tbody></table>
+<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="dex.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="dex.md#id-3-lp">#id-3-lp</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td></td><td align="center"><code>Informational</code></td></tr><tr><td></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 토큰 가격 조작 및 플래시론 공격
 
@@ -250,44 +250,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 
 ***
 
-### 위협 6: 풀 상태 업데이트시 불일치
-
-풀 리밸런싱 도중 일부 토큰의 상태만 변경되고 중간에 트랜잭션이 실패하여 풀의 불변량이나 총 공급량이 맞지 않는 불일치 상태가 발생할 수 있다.
-
-#### 가이드라인
-
-> * **원자적 거래 보장:**
->   * **모든 관련 풀 상태 변경을 단일 트랜잭션 내 처리**
->   * **중간 단계 실패 시 전체 거래 롤백 메커니즘**
-> * **중간 상태 검증:**
->   * **각 풀 업데이트 후 `X * Y = K` 불변량 검증**
->   * **풀 간 가격 일관성 확인 및 총 토큰 공급량 보존 검증**
-> * **풀 상태 동기화:**
->   * **풀 간 상태 불일치 탐지 임계값 설정**
->   * **자동 재동기화 트리거 및 동기화 실패 시 풀 일시 중단**
-
-#### Best Practice
-
-[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L56-L74)
-
-```solidity
-// 가중치 기반 자동 리밸런싱 및 불변량 검증
-function _calculateInvariant(uint256[] memory normalizedWeights, uint256[] memory balances)
-    internal
-    pure
-    returns (uint256 invariant)
-{
-    invariant = FixedPoint.ONE;
-    for (uint256 i = 0; i < normalizedWeights.length; i++) {
-        invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
-    }
-    _require(invariant > 0, Errors.ZERO_INVARIANT);
-}
-```
-
-***
-
-### 위협 7: 수수료 관리 및 변경 취약점
+### 위협 6: 수수료 관리 및 변경 취약점
 
 관리자가 수수료 비율을 갑자기 크게 변경하거나 대량의 수수료를 즉시 인출해 유동성 제공자들이 예기치 못한 손실을 입을 수 있다.
 
@@ -321,5 +284,42 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
     ) = _checkWithdrawableTokensAndDistributeFees(tokens); // 수수료 분배 검증
     _protocolFeesCollector.withdrawCollectedFees(tokens, polFeeCollectorFees, polFeeCollector);
     _protocolFeesCollector.withdrawCollectedFees(tokens, feeReceiverFees, feeReceiver);
+}
+```
+
+***
+
+### 위협 7: 풀 상태 업데이트시 불일치
+
+풀 리밸런싱 도중 일부 토큰의 상태만 변경되고 중간에 트랜잭션이 실패하여 풀의 불변량이나 총 공급량이 맞지 않는 불일치 상태가 발생할 수 있다.
+
+#### 가이드라인
+
+> * **원자적 거래 보장:**
+>   * **모든 관련 풀 상태 변경을 단일 트랜잭션 내 처리**
+>   * **중간 단계 실패 시 전체 거래 롤백 메커니즘**
+> * **중간 상태 검증:**
+>   * **각 풀 업데이트 후 `X * Y = K` 불변량 검증**
+>   * **풀 간 가격 일관성 확인 및 총 토큰 공급량 보존 검증**
+> * **풀 상태 동기화:**
+>   * **풀 간 상태 불일치 탐지 임계값 설정**
+>   * **자동 재동기화 트리거 및 동기화 실패 시 풀 일시 중단**
+
+#### Best Practice
+
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L56-L74)
+
+```solidity
+// 가중치 기반 자동 리밸런싱 및 불변량 검증
+function _calculateInvariant(uint256[] memory normalizedWeights, uint256[] memory balances)
+    internal
+    pure
+    returns (uint256 invariant)
+{
+    invariant = FixedPoint.ONE;
+    for (uint256 i = 0; i < normalizedWeights.length; i++) {
+        invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
+    }
+    _require(invariant > 0, Errors.ZERO_INVARIANT);
 }
 ```
