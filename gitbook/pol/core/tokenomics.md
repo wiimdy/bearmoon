@@ -4,11 +4,15 @@ icon: coins
 
 # PoL 보안 가이드라인: 토크노믹스
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4">#id-4</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-queue">#id-5-queue</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-bgt">#id-6-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-7">#id-7</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-8-apr">#id-8-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-9-claimfees">#id-9-claimfees</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-10-dapp">#id-10-dapp</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-queue">#id-5-queue</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-bgt">#id-6-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-7">#id-7</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-8-apr">#id-8-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-9-claimfees">#id-9-claimfees</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-10-dapp">#id-10-dapp</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: BGT 리딤 시 네이티브 토큰 부족으로 인한 유동성 위기
 
 BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 토큰의 수량이 부족할 경우 일부 사용자는 보상을 받지 못하고 보상 수령 트랜잭션이 revert 되어 유동성 위기가 발생한다.
+
+#### 영향도
+
+`High`
 
 #### 가이드라인
 
@@ -61,6 +65,10 @@ function _invariantCheck() private view {
 
 운영자들이 담합하여 특정 보상 금고에만 BGT 보상을 몰아주면, 일부 보상 금고의 유동성이 고갈되고 타 프로토콜의 유동성도 줄어든다.
 
+#### 영향도
+
+`Medium`
+
 #### 가이드라인
 
 > * **여러 종류 보상 금고에게 나눠 주도록 강제**
@@ -87,73 +95,13 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ***
 
-### 위협 3: 인센티브 분배 대상 선정 로직 오류
-
-인센티브 분배기에서 분배 설정 시 누락 또는 미검증된 설정으로 인해 인센티브 분배 처리 과정에서 문제가 발생할 수 있다.
-
-#### 가이드라인
-
-> * **인센티브 분배기에 필요한 각종 기능에 대한 권한을 거버넌스 구조로 역할 분리**
-> * **인센티브 분배 설정 변경 시 이중 검증 실시**
-> * **설정 변경 후 실제 적용에 시간차를 두기 위한 시간 지연 로직 구현**
-
-#### Best Practice&#x20;
-
-&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L34-L35)&#x20;
-
-```solidity
-// 인센티브 분배기 역할별 권한 분리
-bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
-
-// ...
-function initialize(address _governance) external initializer {
-    __AccessControl_init();
-    __Pausable_init();
-    __ReentrancyGuard_init();
-    __UUPSUpgradeable_init();
-    if (_governance == address(0)) ZeroAddress.selector.revertWith();
-    _grantRole(DEFAULT_ADMIN_ROLE, _governance);
-    // ...
-}
-```
-
-&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)&#x20;
-
-```solidity
-function queueNewRewardAllocation(
-    bytes calldata valPubkey,
-    uint64 startBlock,
-    Weight[] calldata weights
-)
-    external
-    onlyOperator(valPubkey)
-{
-    // 인센티브 분배 설정 변경 후 실제 지연에 시간차를 두기 위한 시간 지연 로직 구현
-    if (startBlock <= block.number + rewardAllocationBlockDelay) {
-        InvalidStartBlock.selector.revertWith();
-    }
-    // ...
-}
-
-// 허용된 인센티브 분배 대상을 분류하기 위한 화이트리스트 토큰, 보상 금고 주소 관리
-function setVaultWhitelistedStatus(
-    address receiver,
-    bool isWhitelisted,
-    string memory metadata
-)
-    external
-    onlyOwner
-{
-    // ...
-}
-```
-
-***
-
-### 위협 4: 분배 비율 또는 기간 설정 오류로 인한 과도/과소 인센티브 지급
+### 위협 3: 분배 비율 또는 기간 설정 오류로 인한 과도/과소 인센티브 지급
 
 인센티브 분배 비율, 분배 기간 설정 과정에서 비정상적인 계산이 적용될 경우 인센티브가 과도/과소 지급될 가능성이 있다.
+
+#### 영향도
+
+`Low`
 
 #### 가이드라인
 
@@ -223,9 +171,13 @@ function _setRewardClaimDelay(uint64 _delay) internal {
 
 ***
 
-### 위협 5: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
+### 위협 4: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
 
 검증자 운영자가 인센티브 분배 직전 인센티브 분배 queue를 조작하여 보상을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
+
+#### 영향도
+
+`Low`
 
 #### 가이드라인
 
@@ -296,9 +248,13 @@ function _getOperatorCommission(bytes calldata valPubkey) internal view returns 
 
 ***
 
-### 위협 6: BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
+### 위협 5: BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
 
 BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출량 관련 수식 변수 요소에 대한 조작을 시도할 시 예상치를 벗어난 인플레이션 발생 가능성이 있다.
+
+#### 영향도
+
+`Low`
 
 #### 가이드라인
 
@@ -351,10 +307,14 @@ contract BlockRewardController {
 
 ***
 
-### 위협 7: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
+### 위협 6: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
 
 인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면 검증자의 부스트 보상이 급격히 감소한다. \
 보상금고의 인센티브 토큰 잔고를 실시간으로 확인할 수 없다면 검증자가 보상 감소를 사전에 인지하지 못한다.
+
+#### 영향도
+
+`Low`
 
 #### 가이드라인
 
@@ -527,9 +487,13 @@ contract IncentiveDashboard {
 
 ***
 
-### 위협 8: 인센티브 토큰이 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
+### 위협 7: 인센티브 토큰이 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
 
 인센티브 토큰이 고갈된 후, 인센티브 비율이 낮아져 해당 보상금고를 선택한 검증자의 부스트 APR이 감소한다. 권한 관리가 미흡하면, 임의로 인센티브 비율이 조정되어 피해가 발생할 수 있다.
+
+#### 영향도
+
+`Low`
 
 #### 가이드라인
 
@@ -573,9 +537,13 @@ function getReward(
 
 ***
 
-### 위협 9: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
+### 위협 8: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
 `claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상이 왜곡될 수 있다.
+
+#### 영향도
+
+`Low`
 
 #### 가이드라인
 
@@ -624,9 +592,13 @@ contract FeeCollector {
 
 ***
 
-### 위협 10: dApp 프로토콜의 수수료 송금 누락에 따른 사용자 보상 실패
+### 위협 9: dApp 프로토콜의 수수료 송금 누락에 따른 사용자 보상 실패
 
 dApp 프로토콜의 수수료 송금 누락 시 사용자가 `claimFees`를 호출해도 정상적인 보상을 받을 수 없어 호출을 하지 않게 되면 BGT Staker의 HONEY 보유량 감소로 이어져 BGT 예치자의 보상이 정상적으로 분배되지 못할 수 있다.
+
+#### 영향도
+
+`Informational`
 
 #### 가이드라인
 
