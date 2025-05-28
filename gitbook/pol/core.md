@@ -12,6 +12,10 @@ PoL 메커니즘의 핵심 구성요소는 시스템 전체의 안정성과 직�
 [reward.md](../reward.md)
 {% endcontent-ref %}
 
+{% content-ref url="core/tokenomics.md" %}
+[tokenomics.md](core/tokenomics.md)
+{% endcontent-ref %}
+
 {% content-ref url="../honey.md" %}
 [honey.md](../honey.md)
 {% endcontent-ref %}
