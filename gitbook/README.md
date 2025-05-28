@@ -32,5 +32,5 @@ layout:
 
 ### Impact Classification
 
-<table><thead><tr><th width="211.04296875" align="center">위협</th><th align="center">Low</th><th align="center">Medium</th><th align="center">High</th></tr></thead><tbody><tr><td align="center">분류</td><td align="center">작의만한 위협</td><td align="center">프로토콜적 위협</td><td align="center">체인 전반적인 위협</td></tr></tbody></table>
+<table><thead><tr><th width="92.0078125" align="center">위협</th><th align="center">Infomational</th><th align="center">Low</th><th align="center">Medium</th><th width="179.13671875" align="center">High</th></tr></thead><tbody><tr><td align="center">분류</td><td align="center">보안상 직접적인 영향은 없으나, 참고 사항</td><td align="center">시스템에 미치는 영향이 미미한 수준</td><td align="center">특정 기능 또는 일부 자산에 영향을 줄 수 있는 수준</td><td align="center">시스템 전체에 중대한 영향을 끼칠 수 있는 치명적 취약점</td></tr></tbody></table>
 
