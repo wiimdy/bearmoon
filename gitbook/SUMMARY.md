@@ -2,6 +2,7 @@
 
 * [머릿말](README.md)
 * [Berachain PoL 개요](berachain-pol.md)
+* [Impact Classification](impact-classification.md)
 
 ## PoL 메커니즘 보안 가이드라인
 
