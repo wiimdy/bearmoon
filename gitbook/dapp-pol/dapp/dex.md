@@ -12,7 +12,7 @@ icon: rotate-reverse
 
 #### 영향도&#x20;
 
-`High`
+`Medium`
 
 #### 가이드라인
 
@@ -63,6 +63,10 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
 풀에 유동성을 추가할 때 실제 풀 자산 가치와 발행되는 LP 토큰 가치가 일치하지 않아 신규 유동성 제공자가 과도한 이득이나 손실을 볼 수 있다.
 
+#### 영향도&#x20;
+
+`Low`
+
 #### 가이드라인
 
 > * **정확한 가치 계산:**
@@ -99,6 +103,10 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 
 공격자가 가격이 급등락하는 순간을 노려 유동성을 제거해 풀 내 잔여 유동성이 기준치 이하로 떨어지거나 최소 보유 기간을 우회해 빠르게 이익을 실현할 수 있다.
 
+#### 영향도&#x20;
+
+`Low`
+
 #### 가이드라인
 
 > * **최소 유동성 검증:**
@@ -126,6 +134,10 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 ### 위협 4: 유동성 풀 불균형
 
 특정 토큰에만 대량 입출금이 반복되면서 풀 내 토큰 비율이 심하게 무너지고 이로 인해 가격이 왜곡되거나 일부 토큰의 유동성이 고갈될 수 있다.
+
+#### 영향도&#x20;
+
+`Informational`
 
 #### 가이드라인
 
@@ -181,6 +193,10 @@ function addLiquiditySingle(
 ### 위협 5: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
 
 대량 거래로 인해 실제 체결 가격이 불리하게 변동되어 예상보다 훨씬 적은 토큰을 받게 된다. 또는 최소 아웃풋 계산에 오류가 있어 사용자가 입력한 최소 수량보다 적은 토큰이 지급되어 손실이 발생할 수 있다.
+
+#### 영향도&#x20;
+
+`Informational`
 
 #### 가이드라인
 
@@ -258,6 +274,10 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 
 관리자가 수수료 비율을 갑자기 크게 변경하거나 대량의 수수료를 즉시 인출해 유동성 제공자들이 예기치 못한 손실을 입을 수 있다.
 
+#### 영향도&#x20;
+
+`Informational`
+
 #### 가이드라인
 
 > * **자동화된 수수료 관리:**
@@ -296,6 +316,10 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
 ### 위협 7: 풀 상태 업데이트시 불일치
 
 풀 리밸런싱 도중 일부 토큰의 상태만 변경되고 중간에 트랜잭션이 실패하여 풀의 불변량이나 총 공급량이 맞지 않는 불일치 상태가 발생할 수 있다.
+
+#### 영향도&#x20;
+
+`Informational`
 
 #### 가이드라인
 

@@ -4,7 +4,7 @@ icon: d-and-d
 
 # dApp: LSD 보안 가이드라인
 
-<table><thead><tr><th width="594.08203125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lsd.md#id-1-ibera-bera">#id-1-ibera-bera</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lsd.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lsd.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lsd.md#id-4-bribe">#id-4-bribe</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lsd.md#id-5">#id-5</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="594.08203125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lsd.md#id-1-ibera-bera">#id-1-ibera-bera</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lsd.md#id-2">#id-2</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lsd.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lsd.md#id-4-bribe">#id-4-bribe</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: 대량 예치, 인출을 통한 iBERA/BERA 교환 비율 조작
 
@@ -188,31 +188,3 @@ function claimFees(
         uint256[] calldata _feeAmounts
     ) external onlyKeeper // 보상 수거 실행 권한 Keeper 한정
 ```
-
-***
-
-### 위협 5: 과도한 수수료 설정을 통한 사용자 이익 침해
-
-프로토콜이 제한 없이 과도하게 높은 수수료를 설정할 경우 사용자들은 서비스 이용 시 부당하게 많은 비용을 지불하게 되어 직접적인 경제적 손실을 입는다. \
-이는 결국 사용자의 프로토콜 참여를 위축시키고 이탈을 유도하여 생태계 전체의 활력을 떨어뜨린다.
-
-#### 가이드라인
-
-> * **수수료 변경 과정에서 수수료 한도 검증을 통한 최대 상한선 설정**
-
-#### Best Practice
-
-[`RewardLib.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/libraries/RewardsLib.sol#L258-L265)
-
-```solidity
-function updateFee(
-        RewardsStorage storage $,
-        ConfigTypes.FeeType _t,
-        uint256 _fee
-    ) external {
-        // 최대 수수료 한도를 통해 급격한 수수료 변경 피해 최소화
-        if (_fee > UNIT_DENOMINATOR) revert Errors.InvalidFee();
-        $.fees[uint256(_t)] = _fee;
-    }
-```
-
