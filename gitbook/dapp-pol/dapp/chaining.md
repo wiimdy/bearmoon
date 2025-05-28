@@ -18,13 +18,12 @@ layout:
 
 # dApp 체이닝 보안 가이드라인
 
-
-
 <table><thead><tr><th width="616.01953125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1-dex-lp">#id-1-dex-lp</a></td><td align="center"></td></tr><tr><td><a data-mention href="chaining.md#id-2-honey">#id-2-honey</a></td><td align="center"></td></tr><tr><td><a data-mention href="chaining.md#id-3">#id-3</a></td><td align="center"></td></tr></tbody></table>
 
 ### 위협 1: DEX 풀 불균형으로 LP 토큰 담보가치 급락 시 대출 대량 청산
 
-DEX 유동성 풀이 한쪽으로 치우치며 LP 토큰 가치가 폭락 시, 이를 담보로 한 대출들이 연쇄적으로 청산될 위험이 있다.
+DEX 유동성 풀이 한쪽으로 치우치며 LP 토큰 가치가 폭락 시, 이를 담보로 한 대출들이 연쇄적으로 청산될 위험이 있다.\
+이는 해당 담보 제공자들의 즉각적인 자산 손실로 이어진다.
 
 #### 가이드라인
 
@@ -87,6 +86,10 @@ function repayDebtWithNect(uint256 _amountToRepay) external {
 ***
 
 ### 위협 3: 개별 프로토콜 붕괴 시 연쇄 반응으로 인한 베라체인 생태계 붕괴
+
+인프라레드가 베라체인의 핵심 보상 분배 및 스테이킹 메커니즘을 상당 부분 담당하고 있으므로 만약 인프라레드 프로토콜이 붕괴된다면 스테이킹 보상 지급이 중단되거나 오류가 발생하고 검증인 및 위임자들의 신뢰가 급격히 하락할 것이다.
+
+&#x20;이는 결국 베라체인 네트워크 보안 약화로 이어질 수 있으며 다른 연계된 dApp들의 정상적인 작동을 방해하여 생태계 전반의 불안정성을 증폭시킬 수 있다.
 
 #### 가이드라인
 
