@@ -2,6 +2,9 @@
 
 * [머릿말](README.md)
 * [Berachain PoL 개요](berachain-pol.md)
+* [위협 모델링](undefined/README.md)
+  * [PoL 위협 모델링](undefined/pol.md)
+  * [dApp 위협 모델링](undefined/dapp.md)
 * [Impact Classification](impact-classification.md)
 
 ## PoL 메커니즘 보안 가이드라인
