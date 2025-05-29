@@ -56,40 +56,24 @@ function setSystemPause(bool _pause, string calldata _reason) external onlyOwner
 
 ### 위협 2: DEX 풀 불균형 연쇄청산으로 인한 LSP ERC-4626 인플레이션 공격
 
-**배경: 베라체인 생태계의 복합적 취약점**
+BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있으며, Infrared의 iBGT, iBERA 토큰과 Kodiak, BEX 등의 DEX LP 토큰을 담보로 사용한다. 이러한 복잡한 상호의존성은 LSP의 ERC-4626 인플레이션 공격 \
+취약점과 연쇄적으로 결합될 때 심각한 시스템 위험을 초래할 수 있다.
 
-* 베라버로우는 베라체인의 Proof-of-Liquidity(PoL) 메커니즘과 긴밀하게 통합되어 있으며, Infrared의 iBGT, iBERA 토큰과 Kodiak, BEX 등의 DEX LP 토큰을 담보로 사용한다. 이러한 복잡한 상호의존성은 LSP의 \
-  ERC-4626 인플레이션 공격 취약점과 연쇄적으로 결합될 때 심각한 시스템 위험을 초래할 수 있다.
+**구체적 공격 시나리오**
 
-#### 영향도
-
-`Medium`
-
-#### **공격 시나리오**
-
-**1단계: DEX 풀 불균형을 통한 LP 토큰 가치 조작**
-
-* 공격자가 베라체인 DEX에서 대량 거래를 통해 특정 유동성 풀의 불균형을 유발한다.&#x20;
-
-**2단계: 연쇄 청산 유발 및 LSP 자금 고갈**
-
-* LP 토큰 가치 하락으로 담보비율(ICR)이 최소담보비율(MCR) 이하로 떨어지면서 대량 청산이 시작된다. 청산 규모가 LSP의 NECT 잔액을 초과하면서 LSP 예치자들의 대량 인출 러시가 발생한다.
-
-**3단계: LSP totalSupply 최소화 상태 달성**
-
-* 연쇄 청산과 인출 러시로 LSP의 totalSupply가 거의 0에 가까운 상태에 도달한다. 베라버로우 LSP는 BaseCollateralVault와 달리 virtual accounting 메커니즘을 구현하지 않았으며, deposit/mint 함수에서 totalSupply=0 보호장치가 없다.
-
-**4단계: ERC-4626 인플레이션 공격 실행**
-
-* 공격자가 1 wei의 NECT를 예치하여 100% 지분을 획득한 후, NECT 토큰을 LSP 컨트랙트로 직접 대량 전송한다. DebtToken의 \_requireValidRecipient 함수는 LSP 주소를 차단하지 않으며, LSP의 totalAssets() 함수는 도네이션된 NECT를 자산 계산에 포함하지 않는다.
-
-**5단계: 후속 예치자 공격 및 이익 실현**
-
-* 후속 예치자가 NECT를 예치할 때 ERC-4626의 convertToShares 계산에서 Solidity 반올림으로 인해 0 shares를 받게 되고, 공격자는 전체 잔액을 인출하여 이익을 실현한다.
+1. 공격자가 베라체인 DEX에서 대량 거래를 통해 특정 유동성 풀의 불균형을 유발한다.&#x20;
+2. LP 토큰 가치 하락으로 담보비율(ICR)이 최소담보비율(MCR) 이하로 떨어지면서 대량 청산이 시작된다. 청산 규모가 LSP의 NECT 잔액을 초과하면서 LSP 예치자들의 대량 인출 러시가 발생한다.
+3. 연쇄 청산과 인출 러시로 LSP의 totalSupply가 거의 0에 가까운 상태에 도달한다. 베라버로우 LSP는 BaseCollateralVault와 달리 virtual accounting 메커니즘을 구현하지 않았으며, deposit/mint 함수에서 totalSupply=0 보호장치가 없다.
+4. 공격자가 1 wei의 NECT를 예치하여 100% 지분을 획득한 후, NECT 토큰을 LSP 컨트랙트로 직접 대량 전송한다. DebtToken의 \_requireValidRecipient 함수는 LSP 주소를 차단하지 않으며, LSP의 totalAssets() 함수는 도네이션된 NECT를 자산 계산에 포함하지 않는다.
+5. 후속 예치자가 NECT를 예치할 때 ERC-4626의 convertToShares 계산에서 Solidity 반올림으로 인해 0 shares를 받게 되고, 공격자는 전체 잔액을 인출하여 이익을 실현한다.
 
 **시스템적 위험**
 
 * 이 연쇄적 공격은 베라체인의 PoL 메커니즘과 베라버로우의 다중 담보 대출 시스템 간 상호의존성을 악용하여 단일 취약점을 시스템 전체 위험으로 확대시킨다. Infrared의 iBGT, iBERA 토큰들이 주요 담보로 사용되어 DEX 풀 불균형이 Infrared 스테이킹 플랫폼, 베라버로우 대출 시스템, LSP에 걸쳐 도미노 효과를 일으킬 수 있다. 따라서 LSP의 ERC-4626 인플레이션 공격 취약점은 단순한 스마트 컨트랙트 버그를 넘어 베라체인 생태계 전반의 시스템적 위험으로 평가되어야 한다.
+
+#### 영향도
+
+`Medium`
 
 #### 가이드라인
 
