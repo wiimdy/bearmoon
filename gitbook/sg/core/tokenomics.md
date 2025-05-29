@@ -4,7 +4,7 @@ icon: coins
 
 # PoL 보안 가이드라인: 토크노믹스
 
-<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4-queue">#id-4-queue</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-bgt">#id-5-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-7-apr">#id-7-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-8-claimfees">#id-8-claimfees</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-9-dapp">#id-9-dapp</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4-queue">#id-4-queue</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-boost-bgt">#id-5-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-7-apr">#id-7-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-8-claimfees">#id-8-claimfees</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-9-dapp">#id-9-dapp</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: BGT 리딤 시 네이티브 토큰 부족으로 인한 유동성 위기
 
@@ -248,9 +248,10 @@ function _getOperatorCommission(bytes calldata valPubkey) internal view returns 
 
 ***
 
-### 위협 5: BGT 토큰 배출량 계산 오류 및 가중치 조작을 통한 인플레이션 유발
+### 위협 5: 유동성 공급자들의 Boost 담합으로 인한 과도한 BGT 인플레이션
 
-BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출량 관련 수식 변수 요소에 대한 조작을 시도할 시 예상치를 벗어난 인플레이션 발생 가능성이 있다.
+유동성 공급자들이 사전에 담합하여 BGT boost를 모든 Validator들에게 유사한 비율\
+(Validator 69명을 기준으로 약 1.44%)로 하게된다면 프로토콜에서 설계한 인플레이션 비율을 훨씬 초과할 수 있다.
 
 #### 영향도
 
@@ -258,10 +259,10 @@ BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출
 
 #### 가이드라인
 
-> * **즉시 대응을 위한 긴급 조치 프로토콜 마련**
-> * **모든 중요 파라미터 변경은 거버넌스 투표를 통해서만 가능하도록 제한**
+> * **인플레이션에 대한 모니터링 필요**
+> * **동적인 보상 계산 파라미터를 통해 인플레이션에 대해서 유동적 대응**
+> * **BGT 흐름도 분석을 통한 인플레이션 비율 조정**
 > * **실시간 보상 배출량 모니터링 시스템 구축 및 이상 징후 감지 메커니즘 설정**
-> * **보상 계산 파라미터 변경 시 점진적 변화만 허용하도록 상한선 및 하한선 설정**
 > * **보상 계산식에 대한 명확한 문서화와 커뮤니티 이해를 위한 시각화 자료 제공**
 
 #### Best Practice&#x20;
@@ -269,39 +270,31 @@ BGT 토큰의 배출 계산식 자체에 결함이 발생하거나 보상 배출
 `커스텀 코드`
 
 ```solidity
-contract BlockRewardController {
-    // ... 기존 코드 ...
+// BGT 위임 시 순환 부스팅 방지
+mapping(address => mapping(address => uint256)) public vaultOriginBGT;
+mapping(address => uint256) public lastVaultRewardTime;
+
+function delegateBGT(address validator, uint256 amount) external {
+    // 30일 쿨다운 체크
+    require(block.timestamp > lastVaultRewardTime[msg.sender] + 30 days, "Cooldown period");
     
-    // 가이드라인 2: 파라미터 변경 제한
-    struct ParamLimits {
-        uint256 maxChangePerUpdate;  // 한 번에 변경 가능한 최대 크기
-        uint256 minUpdateInterval;   // 최소 업데이트 간격
-        uint256 lastUpdateTime;      // 마지막 업데이트 시간
-    }
+    // 셀프 부스팅 금지
+    address targetVault = validatorToVault[validator];
+    require(vaultOriginBGT[msg.sender][targetVault] == 0, "No self-boosting");
     
-    mapping(bytes32 => ParamLimits) public parameterLimits;
+    // 분산 위임 강제 (최대 20%)
+    uint256 totalBGT = bgtToken.balanceOf(msg.sender);
+    require(delegatedAmount[msg.sender][validator] + amount <= totalBGT * 20 / 100, "Max 20% per validator");
     
-    // 가이드라인 1: 거버넌스 투표 필수
-    function setBaseRate(uint256 _baseRate) 
-        external 
-        onlyGovernance 
-        validateParamChange("baseRate", _baseRate) 
-    {
-        // ... 기존 코드 ...
-        
-        // 가이드라인 3: 배출량 모니터링을 위한 이벤트
-        emit EmissionRateChanged( ... );
-    }
+    _delegate(validator, amount);
+}
+
+// 인플레이션 제어
+function checkInflationLimit() external view returns (bool) {
+    uint256 weeklyInflation = calculateWeeklyInflation();
+    uint256 targetWeekly = TARGET_ANNUAL_INFLATION / 52; // 10% / 52주
     
-    // 가이드라인 4: 긴급 조치 프로토콜
-    function emergencyPauseEmission() 
-        external 
-        onlyEmergencyCouncil         // 긴급 조치가 가능한 거버넌스 멤버 한정 실행
-        whenAbnormalEmissionDetected // 비정상 BGT 분배 행위 탐지 시에만 동작
-    {
-        _pauseEmission();
-        emit EmergencyPause(block.timestamp);
-    }
+    return weeklyInflation <= targetWeekly * 130 / 100; // 30% 여유분
 }
 ```
 
