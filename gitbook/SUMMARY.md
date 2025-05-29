@@ -2,27 +2,27 @@
 
 * [머릿말](README.md)
 * [Berachain PoL 개요](berachain-pol.md)
-* [위협 모델링](undefined/README.md)
-  * [PoL 위협 모델링](undefined/pol.md)
-  * [dApp 위협 모델링](undefined/dapp.md)
-* [Impact Classification](impact-classification.md)
 
-## PoL 메커니즘 보안 가이드라인
+## 위협모델링 <a href="#tm" id="tm"></a>
 
-* [🐻 PoL 보안 가이드라인](pol/core.md)
-  * [PoL 보안 가이드라인: 검증자](validator.md)
-  * [PoL 보안 가이드라인: 보상 분배](reward.md)
-  * [PoL 보안 가이드라인: 토크노믹스](pol/core/tokenomics.md)
-  * [PoL 보안 가이드라인: 오라클 및 HONEY](honey.md)
-  * [PoL 보안 가이드라인: 거버넌스](gov.md)
+* [위협 모델링 용어 정의](tm/undefined.md)
+* [PoL 위협 모델링](tm/pol.md)
+* [dApp 위협 모델링](tm/dapp.md)
 
-## dApp 빌더를 위한 보안 가이드라인
+## 보안 가이드라인 <a href="#sg" id="sg"></a>
 
-* [💸 dApp 보안 가이드라인](dapp/dapp/README.md)
-  * [dApp 보안 가이드라인: Lending](dapp/dapp/lending.md)
-  * [dApp 보안 가이드라인: DEX](dapp/dapp/dex.md)
-  * [dApp 보안 가이드라인: LSD](dapp/dapp/lsd.md)
-  * [dApp 보안 가이드라인: 체이닝](dapp/dapp/chaining.md)
+* [Impact Classification](sg/impact-classification.md)
+* [🐻 PoL 보안 가이드라인](sg/core/README.md)
+  * [PoL 보안 가이드라인: 검증자](sg/core/validator.md)
+  * [PoL 보안 가이드라인: 보상 분배](sg/core/reward.md)
+  * [PoL 보안 가이드라인: 토크노믹스](sg/core/tokenomics.md)
+  * [PoL 보안 가이드라인: 오라클 및 HONEY](sg/core/honey.md)
+  * [PoL 보안 가이드라인: 거버넌스](sg/core/gov.md)
+* [💸 dApp 보안 가이드라인](sg/dapp/README.md)
+  * [dApp 보안 가이드라인: Lending](sg/dapp/lending.md)
+  * [dApp 보안 가이드라인: DEX](sg/dapp/dex.md)
+  * [dApp 보안 가이드라인: LSD](sg/dapp/lsd.md)
+  * [dApp 보안 가이드라인: 체이닝](sg/dapp/chaining.md)
 
 ## 부록 <a href="#appendix" id="appendix"></a>
 
