@@ -8,7 +8,9 @@ icon: bee
 
 <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
-[https://excalidraw.com/#json=AhuGxmYMOzI2Bk0ADylZG,B1bMCVbqsQtQ7ABpIs34-A](https://excalidraw.com/#json=AhuGxmYMOzI2Bk0ADylZG,B1bMCVbqsQtQ7ABpIs34-A)
+{% embed url="https://excalidraw.com/#json=AhuGxmYMOzI2Bk0ADylZG,B1bMCVbqsQtQ7ABpIs34-A" %}
+DFD Link
+{% endembed %}
 
 ## Entity
 
