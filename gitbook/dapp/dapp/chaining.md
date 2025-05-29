@@ -56,12 +56,11 @@ function setSystemPause(bool _pause, string calldata _reason) external onlyOwner
 
 ### 위협 2: DEX 풀 불균형 연쇄청산으로 인한 LSP ERC-4626 인플레이션 공격
 
-BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있으며, Infrared의 iBGT, iBERA 토큰과 Kodiak, BEX 등의 DEX LP 토큰을 담보로 사용한다. 이러한 복잡한 상호의존성은 LSP의 ERC-4626 인플레이션 공격 \
-취약점과 연쇄적으로 결합될 때 심각한 시스템 위험을 초래할 수 있다.
+BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있으며, Infrared의 iBGT, iBERA 토큰과 Kodiak, BEX 등의 DEX LP 토큰을 담보로 사용한다. 이러한 복잡한 상호의존성은 LSP의 ERC-4626 인플레이션 공격 취약점과 연쇄적으로 결합될 때 심각한 시스템 위험을 초래할 수 있다.
 
-**구체적 공격 시나리오**
+**공격 시나리오**
 
-1. 공격자가 베라체인 DEX에서 대량 거래를 통해 특정 유동성 풀의 불균형을 유발한다.&#x20;
+1. 공격자가 베라체인 DEX에서 대량 거래를 통해, Beraborrow에서 담보로 사용되는 LP를 발행하는 유동성 풀(예: kodiak의 HONEY-BERA)의 불균형을 유발한다.&#x20;
 2. LP 토큰 가치 하락으로 담보비율(ICR)이 최소담보비율(MCR) 이하로 떨어지면서 대량 청산이 시작된다. 청산 규모가 LSP의 NECT 잔액을 초과하면서 LSP 예치자들의 대량 인출 러시가 발생한다.
 3. 연쇄 청산과 인출 러시로 LSP의 totalSupply가 거의 0에 가까운 상태에 도달한다. 베라버로우 LSP는 BaseCollateralVault와 달리 virtual accounting 메커니즘을 구현하지 않았으며, deposit/mint 함수에서 totalSupply=0 보호장치가 없다.
 4. 공격자가 1 wei의 NECT를 예치하여 100% 지분을 획득한 후, NECT 토큰을 LSP 컨트랙트로 직접 대량 전송한다. DebtToken의 \_requireValidRecipient 함수는 LSP 주소를 차단하지 않으며, LSP의 totalAssets() 함수는 도네이션된 NECT를 자산 계산에 포함하지 않는다.
@@ -138,6 +137,17 @@ function _depositAndMint(/*...*/) private {
 ### 위협 3: HONEY 가격 불안정으로 인한 대출 프로토콜 마비
 
 HONEY의 시장 가격이 폭락했음에도 `PermissionlessPSM.sol`이  1:1로 NECT를 민팅할 경우, 공격자는 저렴해진 HONEY로 대량의 NECT를 확보한다.  이후 이 NECT를 대출 프로토콜에서 고정된 가치로 담보 상환에 악용하여 프로토콜의 자산을 고갈시킨다.
+
+**핵심 취약점**
+
+NECT의 가격 결정 메커니즘: \_whitelistStable 함수 내에서 wadOffset = uint64(10 \*\* (nect.decimals() - stable.decimals()))로 HONEY와 NECT 간의 교환 비율 오프셋을 설정한다. 이는 단순히 두 토큰의 소수점 자릿수 차이를 보정하는 역할만 하며, HONEY의 실제 시장 가격을 반영하는 오라클과 연동되어 있지 않는다. 따라서 HONEY의 외부 시장 가격이 폭락하더라도 PermissionlessPSM.sol은 여전히 고정된 오프셋인 1:1로 NECT를 민팅해준다.
+
+공격 시나리오
+
+1. HONEY의 가격이 급락하여 공격자가 차익 거래 기회를 포착하고 HONEY를 대량 매집한다.&#x20;
+2. 이 HONEY를 가지고 PermissionlessPSM.sol의 deposit 함수를 호출하여 NECT를 대량 Mint한다.&#x20;
+3. 이때 wadOffset은 HONEY의 시장가격과 상관 없이 NECT를 1대1로 민팅해준다.
+4. 저가에 매수한 NECT로 빚을 상환하거나 sNECT로 교환 후 매도하여 수익을 실현한다.
 
 #### 영향도
 
