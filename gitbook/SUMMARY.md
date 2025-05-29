@@ -24,4 +24,5 @@
 ## 부록 <a href="#appendix" id="appendix"></a>
 
 * [용어집](appendix/glossary.md)
+* [Berachain 수식 검증](appendix/berachain.md)
 * [참고 문헌 및 외부 리소스](appendix/ref.md)
