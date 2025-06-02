@@ -4,6 +4,8 @@ icon: mobile-button
 
 # dApp 위협 모델링
 
+[Berachain dApp Threat Model](https://docs.google.com/document/d/1-nytRbRFWRu1UpnXHa7VFEFcJ26QfqEUogF5Eg6EPjw/edit?usp=sharing)
+
 ## DFD(Data Flow Diagrams)
 
 <figure><img src="../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
