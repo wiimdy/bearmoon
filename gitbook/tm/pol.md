@@ -4,6 +4,8 @@ icon: bee
 
 # PoL 위협 모델링
 
+[Berachain PoL Threat Model](https://docs.google.com/document/d/1h2JaDamk702OqXVFsZhCITaeuqfYESOLMztK7fe7g-8/edit?usp=sharing)
+
 ## DFD(Data Flow Diagrams)
 
 <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
