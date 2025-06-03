@@ -64,6 +64,7 @@ function distributeFor( ...
 
 &#x20;[`BeaconDeposit.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BeaconDeposit.sol#L84-L128)&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 // 첫 deposit시 operator가 zero address인지 검증
 function deposit( ...
@@ -88,6 +89,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
     emit OperatorUpdated(pubkey, newOperator, oldOperator);
 }
 ```
+{% endcode %}
 
 ***
 
