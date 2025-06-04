@@ -15,14 +15,23 @@ icon: user-check
 
 `Medium`&#x20;
 
-검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나, EIP-4788 기반 Merkle root 검증의 견고함이 공격 성공 가능성을 현저히 낮추므로 Medium으로 판단한다.
+검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나, EIP-4788 기반 Merkle root 검증의 견고함이 공격 성공 가능성을 현저히 낮추므로 Medium으로 평가된다.
 
 #### 가이드 라인
 
 > * **동일 timestamp 중복 처리 방지 메커니즘 구현**
-> * **Beacon block root과 proposer index/pubkey 의 암호학적 검증**
-> * **보상 분배 시 totalRewardDistributed 추적으로 누락/중복 방지**
-> * **블록 처리 상태를 기록하는 bitmap 또는 mapping을 통한 중복 처리 완전 차단**
+>   * timestamp를 eip-4788의 history\_buf\_length로 mod 연산을 하여 `_processedTimestampsBuffer`에 삽입.
+>   * 최소 4.55 시간 (8191 \* 2초)이 지나면 가장 오래된 타임스탬프 처리 기록이 새로운 기록으로 덮어씌워지며 중복 검증 진행
+> *   **Beacon block root과 proposer index/pubkey 의 암호학적 검증**
+>
+>     * SSZ.verifyProof 함수를 사용하여, 특정 타임스탬프의 비콘 루트(beacon root)를 기준으로 해당 제안자(proposer)의 보상 자격을 검증.
+>     * 검증 실패시 revert 발생
+>
+>     ```solidity
+>     if (!SSZ.verifyProof(proposerIndexProof, beaconBlockRoot, proposerIndexRoot, proposerIndexGIndex)) {
+>       InvalidProof.selector.revertWith();
+>     }
+>     ```
 
 #### Best Practice&#x20;
 
@@ -42,6 +51,33 @@ function distributeFor( ...
     _verifyValidatorPubkeyInBeaconBlock(beaconBlockRoot, pubkeyProof, pubkey, proposerIndex);
 ...
 }
+
+// _processedTimestampsBuffer를 사용하여 timestamp에 해당하는 보상 수령 체크
+function _processTimestampInBuffer(uint64 timestamp) internal returns (bytes32 parentBeaconBlockRoot) {
+  // First enforce the timestamp is in the Beacon Roots history buffer, reverting if not found.
+  parentBeaconBlockRoot = timestamp.getParentBlockRootAt();
+
+  // Mark the in buffer timestamp as processed if it has not been processed yet.
+  uint64 timestampIndex = timestamp % HISTORY_BUFFER_LENGTH;
+  if (timestamp == _processedTimestampsBuffer[timestampIndex]) TimestampAlreadyProcessed.selector.revertWith();
+  _processedTimestampsBuffer[timestampIndex] = timestamp;
+
+  // Emit the event that the timestamp has been processed.
+  emit TimestampProcessed(timestamp);
+}
+
+// merkle tree를 이용해서 보상자 검증
+function _verifyProposerIndexInBeaconBlock(
+  bytes32 beaconBlockRoot,
+  bytes32[] calldata proposerIndexProof,
+  uint64 proposerIndex
+) internal view {
+  bytes32 proposerIndexRoot = SSZ.uint64HashTreeRoot(proposerIndex);
+
+  if (!SSZ.verifyProof(proposerIndexProof, beaconBlockRoot, proposerIndexRoot, proposerIndexGIndex)) {
+    InvalidProof.selector.revertWith();
+  }
+}
 ```
 {% endcode %}
 
@@ -49,19 +85,24 @@ function distributeFor( ...
 
 ### 위협 2: 운영자 변경 프로세스 악용
 
-검증자가 설정한 운영자가 악의적으로 변경되거나 권한을 탈취당할 경우, 검증인에게 위임된 BGT가 부적절하게 관리될 수 있다. 이는 검증인의 직접적인 자산 손실은 물론 위임자들의 신뢰 하락 및 평판 실추로 이어져 프로토콜에서 받는 인센티브양도 감소한다.
+검증자가 설정한 운영자가 악의적으로 변경되거나 권한을 탈취당할 경우, 검증인에게 위임된 BGT가 부적절하게 관리될 수 있다. 이는 위임자들의 신뢰 하락 및 평판 실추로 이어져 BGT 위임량이 감소할 수 있다.
 
 #### 영향도
 
 `Low`&#x20;
 
-
+악의적 운영자로 인한 피해가 위임 자산의 직접적인 손실보다는, 평판 저하 및 미래의 BGT 위임으로 수익 감소에 국한되어 Low로 평가된다.
 
 #### 가이드라인
 
 > * **운영자 변경 시 queue 메커니즘과 시간 지연을 통한 급작스러운 변경 방지**
+>   * key = pubkey, value = new operator로 설정하여 운영자 변경 요청 queue 삽입
+>   * queue에 1 day 있어야 operator 변경 진행
 > * **거버넌스 또는 신뢰할 수 있는 제3자를 통한 운영자 강제 변경/취소 메커니즘**
+>   * `cancelOperatorChange` msg.sender를 현재 operator, governance 로 설정
+>   * operator의 의도적인 commission 상승, 하락 같은 행위에 페널티로 운영자 변경
 > * **운영자 변경 시 기존 예치 잔액에 대한 잠금 기간 설정 및 점진적 권한 이전**
+>   * 운영자에 대한 booster들의 판단이 진행 되도록 처음에는 보상 분배 권한만 진행 → unboost할 수 있는 시간을 주어진 후 commission 변경 권한 부여
 > * **운영자 주소가 zero address로 적용되지 않도록 방지**
 
 #### Best Practice&#x20;
@@ -103,7 +144,9 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 #### 영향도
 
-`Low`
+`Low`&#x20;
+
+자발적 출금 로직 부재로 자금이 일시적으로 동결되지만, 이는 자산의 직접적인 손실이나 탈취가 아니며 향후 검증자 자격(cap) 변동 시 회수 가능하므로 영향은 Low로 평가된다.
 
 #### 가이드라인&#x20;
 
