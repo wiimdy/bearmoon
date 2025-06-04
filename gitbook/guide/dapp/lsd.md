@@ -2,7 +2,7 @@
 icon: d-and-d
 ---
 
-# dApp: LSD 보안 가이드라인
+# dApp 보안 가이드라인: LSD
 
 <table><thead><tr><th width="594.08203125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lsd.md#id-1-ibera-bera">#id-1-ibera-bera</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lsd.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lsd.md#id-3-bribe">#id-3-bribe</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lsd.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
@@ -10,6 +10,10 @@ icon: d-and-d
 
 공격자가 iBERA/BERA 교환 비율을 대량 거래로 순간 조작하면 부당이득을 취하고 다른 사용자들은 손실을 보게 된다.\
 이는 결국 프로토콜의 자산을 감소시키고 사용자 신뢰를 저해하여 시스템 안정성을 해친다.
+
+#### 영향도&#x20;
+
+`Medium`
 
 #### 가이드라인
 
@@ -49,6 +53,10 @@ function mint(address receiver) public payable returns (uint256 shares) {
 
 악성 행위자가 프로토콜 수수료 변경 시점을 악용하여 변경 직전/직후에 보상을 대량으로 수확하면 정당한 보상 분배 시스템을 왜곡하여 자신은 부당 이익을 챙기고 다른 사용자나 프로토콜 재정에 손실을 입힐 수 있다. \
 이는 결국 시스템의 공정성과 신뢰도를 저해하는 결과를 낳는다.
+
+#### 영향도&#x20;
+
+`Low`&#x20;
 
 #### 가이드라인
 
@@ -93,6 +101,10 @@ function claimExternalVaultRewards(address _asset, address user)
 
 악성행위 가능성이 있는 토큰을 Bribe 시스템에 보상토큰으로 사용할 경우 Bribe 시스템의 신뢰성과 공정성이 훼손된다. \
 이는 결국 정직한 프로토콜의 경쟁력을 약화시키고 생태계의 건전한 인센티브 흐름을 방해한다.
+
+#### 영향도&#x20;
+
+`Low`&#x20;
 
 #### 가이드라인
 
@@ -139,6 +151,10 @@ function claimFees(
 
 소수의 검증자에게 자금이 과도하게 집중되면 이들이 대부분의 보상을 독점하여 다른 검증자들의 참여 의욕을 꺾고 신규 진입을 어렵게 만든다.\
 이는 결국 네트워크의 의사결정 권한마저 소수에게 편중시켜 탈중앙성을 해치고 시스템 전체의 안정성과 공정성을 저해하는 결과를 초래한다.
+
+#### 영향도&#x20;
+
+`Informational`&#x20;
 
 #### 가이드라인
 
