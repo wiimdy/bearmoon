@@ -13,7 +13,9 @@ icon: user-check
 
 #### 영향도
 
-`Medium`
+`Medium`&#x20;
+
+검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나, EIP-4788 기반 Merkle root 검증의 견고함이 공격 성공 가능성을 현저히 낮추므로 Medium으로 판단한다.
 
 #### 가이드 라인
 
@@ -51,7 +53,9 @@ function distributeFor( ...
 
 #### 영향도
 
-`Low`
+`Low`&#x20;
+
+
 
 #### 가이드라인
 
