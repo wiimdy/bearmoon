@@ -24,7 +24,7 @@ icon: rotate-reverse
 >   * **최소 2개 이상의 독립적 오라클 가격 소스 활용하여 오라클 간 가격 편차가 1.5%를 초과할 경우 해당거래 거부 또는 추가 검증 실시**
 >     * **Chainlink, Band Protocol 등의 오라클 네트워크에서 운용하는 임계값**
 >   * **Compound, Synthetix 등의 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지**\
->     $$\Delta P \approx \sigma \times \sqrt{t} \space {\scriptsize (\text{Example: } \sigma = 0.5\%, t = 3 \text{min} \implies \Delta P \approx 0.5\% \times \sqrt{3} \approx 0.866\%) }$$&#x20;
+>     $$\Delta P \approx \sigma \times \sqrt{t}  \\\space {\scriptsize (\text{Example: } \sigma = 0.5\%, t = 3 \text{min} \implies \Delta P \approx 0.5\% \times \sqrt{3} \approx 0.866\%) }$$&#x20;
 >   * **TWAP(Time-Weighted Average Price) 등 평균 가격을 사용해 단일 거래의 가격 조작 영향 최소화**
 > * **최소 유동성 요구사항:**
 >   *   **Balancer 기준 각 풀의 최근 N일 평균 거래량의 10% 또는 1만 달러 중 큰 값 이상을 최소 유동성으로 요구하며 이는 프로토콜 별 거버넌스에 따라 차이가 발생**
