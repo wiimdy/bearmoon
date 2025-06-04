@@ -4,15 +4,17 @@ icon: honey-pot
 
 # PoL 보안 가이드라인: 오라클 및 HONEY
 
-<table><thead><tr><th width="591.7421875">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="591.7421875">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직
 
-외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직(단일 소스 의존, 비대칭 처리 등)을 통해 HONEY 토큰의 민팅/리딤 과정에서 프로토콜 손실 또는 사용자 피해가 발생할 수 있다.
+외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직(단일 오라클 의존, 비대칭 처리 등)을 통해 HONEY 토큰의 민팅/리딤 과정에서 프로토콜 손실 또는 사용자 피해가 발생할 수 있다.
 
 #### 영향도
 
-`Medium`
+`Low`
+
+단일 오라클에 의존하거나 디페깅시에 사용자에게 명확히 안내하지 못할 경우 사용자 피해로 이어질 수 있으며 Flash Loan을 통한 가격 조작에 취약할 가능성이 있어 `Low` 로 평가
 
 #### 가이드라인
 
@@ -47,6 +49,9 @@ icon: honey-pot
 &#x20;[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)&#x20;
 
 ```solidity
+uint256 private constant DEFAULT_PEG_OFFSET = 0.002e18;
+uint256 private constant MAX_PEG_OFFSET = 0.02e18;
+
 // 페깅 로직 확인
 function isPegged(address asset) public view returns (bool) {
     if (!priceOracle.priceAvailable(asset)) return false;
@@ -59,7 +64,7 @@ function isPegged(address asset) public view returns (bool) {
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)&#x20;
 
 ```solidity
-// 오라클에서 최신 가격을 가져오도록 설
+// 오라클에서 최신 가격을 가져오도록 설계
 function setMaxFeedDelay(uint256 maxTolerance) external {
     _checkRole(MANAGER_ROLE);
     if (maxTolerance > MAX_PRICE_FEED_DELAY_TOLERANCE) {
@@ -73,32 +78,63 @@ function setMaxFeedDelay(uint256 maxTolerance) external {
 `커스텀 코드`&#x20;
 
 ```solidity
-// 여러 오라클에서 가격을 수집하여 가중 평균으로 최종 가격을 계산하는 다중 오라클 집계 시스템
-
-contract MultiOracleSystem {
+contract EnhancedMultiOracleSystem {
     struct OracleData {
         address oracle;
         uint256 weight;
         bool isActive;
+        bool isEmergencyPaused;
+    }
+
+// 가이드라인: 긴급 중단 기능
+    function emergencyPause(address asset) external onlyManager {
+        emergencyPaused[asset] = true;
     }
     
-    mapping(address => OracleData[]) public assetOracles;
-    
+// 가이드라인: 편차 검사 + 가중평균 계산
     function getAggregatedPrice(address asset) external view returns (uint256) {
-        OracleData[] memory oracles = assetOracles[asset];
-        uint256 totalWeight = 0;
-        uint256 weightedSum = 0;
+        require(!emergencyPaused[asset], "Emergency paused");
         
+        OracleData[] memory oracles = assetOracles[asset];
+        require(oracles.length >= MIN_ORACLES, "Insufficient oracles");
+        
+        uint256[] memory prices = new uint256[](oracles.length);
+        uint256[] memory weights = new uint256[](oracles.length);
+        uint256 validCount = 0;
+        
+        // 1. 가격 수집
         for (uint256 i = 0; i < oracles.length; i++) {
-            if (oracles[i].isActive) {
-                uint256 price = IPriceOracle(oracles[i].oracle).getPrice(asset);
-                weightedSum += price * oracles[i].weight;
-                totalWeight += oracles[i].weight;
+            if (oracles[i].isActive && !oracles[i].isEmergencyPaused) {
+                try IPriceOracle(oracles[i].oracle).getPrice(asset) returns (uint256 price) {
+                    prices[validCount] = price;
+                    weights[validCount] = oracles[i].weight;
+                    validCount++;
+                } catch {}
             }
         }
         
-        return totalWeight > 0 ? weightedSum / totalWeight : 0;
+        require(validCount >= MIN_ORACLES, "Not enough valid oracles");
+        
+        // 2. 중앙값 계산 및 편차 검사
+        uint256 median = _calculateMedian(prices, validCount);
+        uint256 totalWeight = 0;
+        uint256 weightedSum = 0;
+        
+        for (uint256 i = 0; i < validCount; i++) {
+            uint256 deviation = _calculateDeviation(prices[i], median);
+            
+            // 0.15% 초과 편차 시 제외
+            if (deviation <= DEVIATION_THRESHOLD) {
+                weightedSum += prices[i] * weights[i];
+                totalWeight += weights[i];
+            }
+        }
+        
+        require(totalWeight > 0, "No valid prices after filtering");
+        
+        return weightedSum / totalWeight;
     }
+
 }
 ```
 
@@ -144,8 +180,7 @@ function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) int
 
 `커스텀 코드`&#x20;
 
-```solidity
-// 1시간 동안의 시간 가중 평균 가격을 계산하여 단기적인 가격 조작을 방지하고 안정적인 가중치 결정을 위한 스무딩 시스템
+<pre class="language-solidity"><code class="lang-solidity">// 1시간 동안의 시간 가중 평균 가격을 계산하여 단기적인 가격 조작을 방지하고 안정적인 가중치 결정을 위한 스무딩 시스템
 
 contract TWAPBasedWeights {
     struct TWAPData {
@@ -171,7 +206,9 @@ contract TWAPBasedWeights {
         }
     }
 }
-```
+
+<strong>
+</strong></code></pre>
 
 ***
 
