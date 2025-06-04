@@ -85,7 +85,7 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 >   * **연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 계산 결과의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지**
 >   * **덧셈/곱셈 순서를 바꿔 작은 값이 먼저 반올림 되는것을 방지하기 위해 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산 순서 최적화**
 > * **실시간 검증:**
->   *   $$\text{LP Total Supply} \times \text{Current LP Token Vaule}  \approx \text{LP Pool TVL}$$**아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교**
+>   *   **아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교**
 >
 >       $$\text{LP Total Supply} \times \text{Current LP Token Vaule}  \approx \text{LP Pool TVL}$$
 >   * **유동성 추가 트랜잭션 실행 직후 계산된 발행 예정량과 실제 발행 LP 토큰 수량이 일치하는지 확인**
@@ -162,7 +162,7 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 > * **자동 리밸런싱 메커니즘:**
 >   *   **Uniswap, Curve 등의 AMM 서비스와 같이 유동성 풀 내 자산 가치 비율 유지를 위한 목표 비율 대비 편차 임계값 설정하여 초과 시 리밸런싱을 트리거 하도록 실시**
 >
->       $$\text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A + \text{Value}_B} \\ {(\scriptsize |\text{Ratio}_A - \text{Target Ratio}_A| > \text{Threshold} \implies \text{Rebalance Trigger})}$$
+>       $$\text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A + \text{Value}_B} \\ {\scriptsize (|\text{Ratio}_A - \text{Target Ratio}_A| > \text{Threshold} \implies \text{Rebalance Trigger})}$$
 >   * **Uniswap의 x\*y=k 곡선과 같이 편차 발생 시 스마트 컨트랙트에서 시 자동 리밸런싱하는 트리거를 제공하여 가격 균형 회복 유도**
 > * **불균형 모니터링:**
 >   * **기존 DEX 서비스와 유사하게 풀내 자산 비율, TVL 등의 주요 지표를 실시간 대시보드에서 추적 및 계산하는 기능 제공 필요**
@@ -312,15 +312,15 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 > * **자동화된 수수료 관리:**
 >   *   **Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 자동 수집 트리거되도록 프로토콜 레벨에서 처리**
 >
->       $$(\text{Example: AccumulatedFees} \geq \text{Threshold})$$
+>       $$\scriptsize (\text{Example: AccumulatedFees} \geq \text{Threshold})$$
 >   *   **Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지**\
->       $$(\text{Example: Current Time} - \text{Last Collection Time} \geq \text{Collection Interval})$$
+>       $$\scriptsize (\text{Example: Current Time} - \text{Last Collection Time} \geq \text{Collection Interval})$$
 >
 >
 > * **권한 및 변경 관리:**
 >   *   **대량 인출 또는 민감한 관리자 함수 실행 시  타임락 적용을 아래 수식과 같이 적용**
 >
->       $$\text{(Example: Execute Time} = \text{Request Time} + \text{Time} - \text{Lock Period})$$
+>       $$\scriptsize \text{(Example: Execute Time} = \text{Request Time} + \text{Time} - \text{Lock Period})$$
 >   * **Uniswap, Curve 등과 같이 수수료 변경 시 한 번에 적용하는 것이 아닌 단계적으로 수수료 적용 (예: 0.05%) \[출처:** [**Uniswap Docs**](https://docs.uniswap.org/concepts/protocol/fees)**]**
 
 #### Best Practice
