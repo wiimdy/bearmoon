@@ -2,7 +2,7 @@
 icon: rotate-reverse
 ---
 
-# dApp: DEX 보안 가이드라인
+# dApp 보안 가이드라인: DEX
 
 <table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="dex.md#id-2-lp">#id-2-lp</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-5">#id-5</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
@@ -17,16 +17,20 @@ icon: rotate-reverse
 #### 가이드라인
 
 > * **플래시론 공격 방지:**
->   * **거래 전후 가격 변동률 제한**
->   * **플래시론 사용 탐지 시 추가 수수료 자동 부과**
->   * **동일 블록 내 복수 거래 수수료 누적 계산**
+>   * **프로토콜 수준에서 단일 거래가 유동성 풀 가격에 미칠 수 있는 최대 변동률을 하드캡으로 강제**
+>   * **트랜잭션 내 플래시론 제공 함수 호출 또는 대규모 차입-스왑-상환 패턴 감지 시 기본 스왑 수수료 외 1%의 추가 수수료 부과**
+>   * **동일 블록 내 반복 플래시론 거래 시 거래 횟수에 따라 누적 수수료 적용 (ex: 1회 1%, 2회 2% 등)**
 > * **오라클 가격 검증:**
->   * **최소 2개 이상 독립적 오라클 가격 소스 활용**
->   * **오라클 간 가격 편차 임계값 설정**
->   * **가격 업데이트 주기 검증**
+>   * **최소 2개 이상 독립적 오라클 가격 소스 활용하여 오라클 간 가격 편차가 1.5%를 초과할 경우 해당거래 거부 또는 추가 검증 실시**
+>   * **일반적인 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지**\
+>     $$\Delta P \approx \sigma \times \sqrt{t} \space {\scriptsize (\text{Example: } \sigma = 0.5\%, t = 3 \text{min} \implies \Delta P \approx 0.5\% \times \sqrt{3} \approx 0.866\%) }$$ \
+>     일반적인 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 삼으며 3분 이상 지날 시&#x20;
+>   * **TWAP(Time-Weighted Average Price) 등 평균 가격을 사용해 단일 거래의 가격 조작 영향 최소화**
 > * **최소 유동성 요구사항:**
->   * **풀 별 최소 유동성 임계값 동적 설정**
->   * **유동성 대비 거래량 비율 제한**
+>   *   **각 풀의 최근 7일 평균 거래량의 10% 또는 1만 달러 중 큰 값 이상을 최소 유동성으로 요구**
+>
+>       $$\text{MinLiquidity} = \max\left( \text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha \right) \\ {\scriptsize ( \text{Example: } \text{MinLiquidity} = \max(10{,}000,\  150{,}000 \times 0.1 ) = 15{,}000)}$$
+>   * **단일 거래가 풀 잔고의 최대 10%를 넘지 못하도록 제한 (시장 상황에 따라 5 \~ 15% 범위 내에서 조정)**
 
 #### Best Practice
 
