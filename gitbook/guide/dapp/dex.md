@@ -18,18 +18,20 @@ icon: rotate-reverse
 
 > * **플래시론 공격 방지:**
 >   * **프로토콜 수준에서 단일 거래가 유동성 풀 가격에 미칠 수 있는 최대 변동률을 하드캡으로 강제**
->   * **트랜잭션 내 플래시론 제공 함수 호출 또는 대규모 차입-스왑-상환 패턴 감지 시 기본 스왑 수수료 외 1%의 추가 수수료 부과**
->   * **동일 블록 내 반복 플래시론 거래 시 거래 횟수에 따라 누적 수수료 적용 (ex: 1회 1%, 2회 2% 등)**
+>   * **트랜잭션 내 플래시론 제공 함수 호출 또는 대규모 차입-스왑-상환 패턴 감지 시 Uniswap, Balancer와 유사하게 기본 스왑 수수료 외 1%의 추가 수수료 부과하여 공격 성공시의 실익 감소 유도**
+>   * **동일 트랜잭션 내에서 플래시론 실행 함수 재진입을 통한 공격을 방지하기 위해 lock 제한자 적용**
 > * **오라클 가격 검증:**
->   * **최소 2개 이상 독립적 오라클 가격 소스 활용하여 오라클 간 가격 편차가 1.5%를 초과할 경우 해당거래 거부 또는 추가 검증 실시**
->   * **일반적인 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지**\
+>   * **최소 2개 이상의 독립적 오라클 가격 소스 활용하여 오라클 간 가격 편차가 1.5%를 초과할 경우 해당거래 거부 또는 추가 검증 실시**
+>     * **Chainlink, Band Protocol 등의 오라클 네트워크에서 운용하는 임계값**
+>   * **Compound, Synthetix 등의 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지**\
 >     $$\Delta P \approx \sigma \times \sqrt{t} \space {\scriptsize (\text{Example: } \sigma = 0.5\%, t = 3 \text{min} \implies \Delta P \approx 0.5\% \times \sqrt{3} \approx 0.866\%) }$$&#x20;
 >   * **TWAP(Time-Weighted Average Price) 등 평균 가격을 사용해 단일 거래의 가격 조작 영향 최소화**
 > * **최소 유동성 요구사항:**
->   *   **각 풀의 최근 7일 평균 거래량의 10% 또는 1만 달러 중 큰 값 이상을 최소 유동성으로 요구**
+>   *   **Balancer 기준 각 풀의 최근 N일 평균 거래량의 10% 또는 1만 달러 중 큰 값 이상을 최소 유동성으로 요구하며 이는 프로토콜 별 거버넌스에 따라 차이가 발생**
 >
 >       $$\text{MinLiquidity} = \max\left( \text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha \right) \\ {\scriptsize ( \text{Example: } \text{MinLiquidity} = \max(10{,}000,\  150{,}000 \times 0.1 ) = 15{,}000)}$$
->   * **단일 거래가 풀 잔고의 최대 10%를 넘지 못하도록 제한 (시장 상황에 따라 5 \~ 15% 범위 내에서 조정)**
+>   * **Uniswap, KyberSwap 등의 AMM에서 슬리피지에 의한 시장 가격 왜곡을 방지하기 위해 단일 거래가 풀 잔고의 최대 10%를 넘지 못하도록 제한 (시장 상황에 따라 5 \~ 15% 범위 내에서 조정)**\
+>     $$\text{Price Impact}=1-\frac{x}{x+\Delta x} \\ {\scriptsize (\text{Example:}1-\frac{1}{1.1} \approx 0.0909 \approx 9.1 \% (x = 0.1))}$$
 
 #### Best Practice
 
@@ -73,17 +75,21 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 #### 가이드라인
 
 > * **정확한 가치 계산:**
->   * **각 토큰의 현재 시장 가격 실시간 반영**
->   * **가중 평균 가격 계산 시 유동성 비중 적용**
+>   * **Chainlink, Uniswap Twap 등 신뢰할 수 있는 오라클에서 각 토큰의 현재 시장 가격 실시간 반영하여 최소 1분 \~ 최대 3분 이내로 갱신된 데이터만 사용하며, 참고하는 오라클 간 가격 편차가 1.5% 이상이면 추가 검증**
+>   *   **토큰별 유동성 비율을 곱해 가가중 평균 가격 계산 시 유동성 비중 적용**
+>
+>       $$\text{Pool Value} = (\text{tokenA}_amount \times \text{priceA}) + (\text{tokenB}_amount \times \text{priceB})$$
 >   * **새로운 유동성의 풀 전체 대비 정확한 비중 계산**
 > * **수치 정밀도 보장:**
->   * **고정소수점 연산 라이브러리 필수 사용 (최소 18자리)**
->   * **중간 계산 결과의 정밀도 검증 및 유지**
->   * **반올림 오차 누적 방지를 위한 연산 순서 최적화**
+>   * **Solady, Solmate 등과 같은 고정소수점 연산 라이브러리 필수 사용하여 최소 18자리의 소수점 연산 정밀도 사용**
+>   * **연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 계산 결과의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지**
+>   * **덧셈/곱셈 순서를 바꿔 작은 값이 먼저 반올림 되는것을 방지하기 위해 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산 순서 최적화**
 > * **실시간 검증:**
->   * **계산된 LP 토큰 가치와 실제 풀 자산 가치 비교**
->   * **발행 예정량과 실제 발행량 일치 확인**
->   * **편차 임계값 초과 시 계산 로직 재검증**
+>   *   $$\text{LP Total Supply} \times \text{Current LP Token Vaule}  \approx \text{LP Pool TVL}$$**아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교**
+>
+>       $$\text{LP Total Supply} \times \text{Current LP Token Vaule}  \approx \text{LP Pool TVL}$$
+>   * **유동성 추가 트랜잭션 실행 직후 계산된 발행 예정량과 실제 발행 LP 토큰 수량이 일치하는지 확인**
+>   * **Uniswap 등의 기존 DeFi 서비스와 동일하게 LP 토큰 가치와 풀 자산 가치의 편차가 0.1% 이상으로 편차 임계값 초과 시 계산 로직 재검증**
 
 #### Best Practice
 
@@ -113,13 +119,22 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 #### 가이드라인
 
 > * **최소 유동성 검증:**
->   * **풀별 절대적 최소 유동성 임계값 설정**
->   * **토큰 가치 기준 최소 유동성 검증**
->   * **유동성 제거 시 잔여 유동성 임계값 사전 검증**
+>   *   **유동성 제거 전 풀별 절대적 최소 유동성 임계값을 아래와 같이 스마트 컨트랙트에 적용하여 검증**
+>
+>       $$\text{MinLiquidity} = \max(\text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha) \\ {\scriptsize (\text{Pool Vaule}_\text {after removal} \geq \text{MinLiquidity})}$$
+>   *   **풀 내 각 토큰의 잔고 x 시장 가격의 합이 일정 수준 이하로 떨어지면 가격 조작/MEV 공격에 취약해지므로 유동성 제거 시점의 오라클 가격 기준으로 토큰 가치 기준 합산 후 임계값 이상인지 실시간 검증**
+>
+>       $$\text{Pool Value} = \sum_{i=1}^{n} (\text{Token}_i\, \text{Balance} \times \text{Token}_i\, \text{Price}) \\ {\scriptsize (\text{Pool Vaule}_\text {after removal} \geq \text{MinLiquidity})}$$
 > * **타이밍 공격 방지:**
->   * **제거 요청 시점의 가격 고정 및 검증**
->   * **다중 블록 평균 가격 활용으로 조작 방지**
->   * **유동성 제공 후 최소 보유 기간 설정**
+>   *   **Uniswap V3 등의 사례와 같이 유동성 제거 요청 시점의 오라클/TWAP 가격을 고정을 고정하여 실제 제거가 처리될 때까지 최초 요청 가격을 기준으로 정산 검증**
+>
+>       $$\text{Remove Value} = \text{Liquidity Amount} \times \text{Price}_{\text{request}}$$
+>   *   **유동성 제거 시, 최근 N 블록의 평균 가격(TWAP)을 정산 기준으로 활용하여 일시적 가격 조작 방지**
+>
+>       $$\text{TWAP} = \frac{1}{N} \sum_{j=1}^{N} \text{Price}_{\text{block }j} \space {\scriptsize (N= \text{Block Number})}$$
+>   *   **Curve, Balancer 등과 같이 프로토콜 레벨에서 유동성 제공 후 LP 토큰 수령 시 최소 보유 기간이 지나야만 유동성 제거가 가능하도록 조건 추가**
+>
+>       $$\text{Example: } \text{Current Time} - \text{LP Mint Time} \geq \text{Min Hold Period}$$
 
 #### Best Practice
 
@@ -145,8 +160,10 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 #### 가이드라인
 
 > * **자동 리밸런싱 메커니즘:**
->   * **목표 비율 대비 편차 임계값 설정**
->   * **편차 발생 시 자동 리밸런싱 트리거 실행**
+>   *   **Uniswap, Curve 등의 AMM 서비스와 같이 유동성 풀 내 자산 가치 비율 유지를 위한 목표 비율 대비 편차 임계값 설정하여 초과 시 리밸런싱을 트리거 하도록 실시**
+>
+>       $$\text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A + \text{Value}_B} \\ {(\scriptsize |\text{Ratio}_A - \text{Target Ratio}_A| > \text{Threshold} \implies \text{Rebalance Trigger})}$$
+>   * **Uniswap의 x\*y=k 곡선과 같이 편차 발생 스마트 컨트랙트에서 시 자동 리밸런싱 트리거 실행**
 > * **불균형 모니터링:**
 >   * **실시간 풀 비율 추적 및 편차 계산**
 >   * **편차 단계별 경고 시스템**
