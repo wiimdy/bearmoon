@@ -600,8 +600,13 @@ function checkInflationLimit() external view returns (bool) {
 #### 가이드라인
 
 > * **보상 금고 내의 인센티브 토큰 최소 보유량을 제한**
-> * **검증자의 경우 BGT를 분배할 보상 금고를 선택할때 인센티브 토큰이 충분히 남아있는지 확인**
-> * **보상 금고에 인센티브 토큰 얼마나 남았는지 확인하는 대시보드 제작**
+>   * minimumIncentiveThreshold 상태 변수 추가
+>   * setter로 변경 가능
+>   * 이벤트 추가
+>   * 현재 보상금고의 인센티브 토큰 잔액을 알 수 있는 getCurrentIncentiveBalance() 함수 추가
+> * **검증자의 경우 BGT를 분배할 보상 금고를 선택할때 인센티브 토큰이 해당 보유량 보다 낮은 보상금고에는 보상 할당 불가**
+>   * \_validateWeights, \_checkIfStillValid 함수에서\
+>     각 금고의 인센티브 잔액이 threshold 미만이면 reward allocation에 포함 불가(revert)
 
 #### Best Practice&#x20;
 
@@ -609,161 +614,92 @@ function checkInflationLimit() external view returns (bool) {
 
 ```solidity
 // 기존 RewardVault.sol 개선
-contract RewardVault is ... {
-    // ... 기존 코드 ...
-    
-    // 가이드라인 1: 최소 보유량 제한
-    mapping(address => uint256) public minIncentiveReserve; // 토큰별 최소 보유량
-    uint256 constant DEFAULT_MIN_RESERVE = 1000e18; // 기본 최소 보유량
-    
-    // 기존 addIncentive 함수 개선
-    function addIncentive(
-        address token,
-        uint256 amount,
-        uint256 incentiveRate
-    ) external nonReentrant onlyWhitelistedToken(token) {
-        // ... 기존 검증 로직 ...
-        
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-        incentive.amountRemaining = amountRemainingBefore + amount;
-        
-        // 가이드라인 1: 최소 보유량 경고
-        uint256 minReserve = minIncentiveReserve[token] > 0 ? 
-            minIncentiveReserve[token] : DEFAULT_MIN_RESERVE;
-            
-        if (incentive.amountRemaining < minReserve) {
-            emit IncentiveLowReserveWarning(token, incentive.amountRemaining, minReserve);
-        }
-        
-        // ... 나머지 코드 ...
-    }
-    
-    // 가이드라인 2: 인센티브 충분성 확인 함수
-    function isIncentiveSufficient(address token) external view returns (bool) {
-        Incentive storage incentive = incentives[token];
-        uint256 minReserve = minIncentiveReserve[token] > 0 ? 
-            minIncentiveReserve[token] : DEFAULT_MIN_RESERVE;
-            
-        // 최소 7일치 인센티브가 있는지 확인
-        uint256 estimatedDailyUsage = incentive.incentiveRate * 86400; // 일일 예상 사용량
-        uint256 requiredAmount = estimatedDailyUsage * 7; // 7일치
-        
-        return incentive.amountRemaining >= Math.max(minReserve, requiredAmount);
-    }
-    
-    // 가이드라인 3: 대시보드용 상세 정보 제공
-    function getIncentiveStatus(address token) 
-        external 
-        view 
-        returns (
-            uint256 remaining,
-            uint256 rate,
-            uint256 estimatedDaysLeft,
-            bool isHealthy
-        ) 
-    {
-        Incentive storage incentive = incentives[token];
-        remaining = incentive.amountRemaining;
-        rate = incentive.incentiveRate;
-        
-        // 예상 소진 일수 계산
-        if (rate > 0) {
-            estimatedDaysLeft = remaining / (rate * 86400);
-        } else {
-            estimatedDaysLeft = type(uint256).max; // 무한대
-        }
-        
-        // 건강 상태: 7일 이상 남았는지
-        isHealthy = estimatedDaysLeft >= 7;
-    }
-    
-    // 최소 보유량 설정 (관리자 전용)
-    function setMinIncentiveReserve(address token, uint256 minReserve) 
-        external 
-        onlyFactoryOwner 
-    {
-        minIncentiveReserve[token] = minReserve;
-        emit MinReserveUpdated(token, minReserve);
-    }
-    
-    // ... 기존 코드 ...
+// RewardVault.sol
+
+uint256 public minimumIncentiveThreshold;
+
+event MinimumIncentiveThresholdUpdated(uint256 newThreshold);
+
+function setMinimumIncentiveThreshold(uint256 _threshold) external onlyFactoryOwner {
+    minimumIncentiveThreshold = _threshold;
+    emit MinimumIncentiveThresholdUpdated(_threshold);
 }
+
+// 예시: rewardToken이 하나라면 아래처럼 작성
+function getCurrentIncentiveBalance() external view returns (uint256) {
+    return incentives[rewardToken].amountRemaining;
+}
+
+// 여러 토큰 지원 시
+function getCurrentIncentiveBalance(address token) external view returns (uint256) {
+    return incentives[token].amountRemaining;
+}
+
 ```
 
 ```solidity
 // BeraChef 또는 Validator 선택 로직 개선
-contract ValidatorRewardSelection {
-    // 가이드라인 2: 벨리데이터의 vault 선택 시 인센티브 확인
-    function selectRewardVault(address[] calldata vaults) 
-        external 
-        view 
-        returns (address bestVault) 
-    {
-        uint256 bestScore = 0;
-        
-        for (uint256 i = 0; i < vaults.length; i++) {
-            IRewardVault vault = IRewardVault(vaults[i]);
-            
-            // 인센티브 토큰들의 상태 확인
-            address[] memory tokens = vault.getWhitelistedTokens();
-            uint256 healthyTokens = 0;
-            
-            for (uint256 j = 0; j < tokens.length; j++) {
-                if (vault.isIncentiveSufficient(tokens[j])) {
-                    healthyTokens++;
-                }
-            }
-            
-            // 건강한 인센티브가 많은 vault 선택
-            uint256 score = healthyTokens * 1000 + vault.totalSupply() / 1e18;
-            
-            if (score > bestScore) {
-                bestScore = score;
-                bestVault = vaults[i];
-            }
-        }
+function _validateWeights(bytes memory valPubkey, Weight[] calldata weights) internal {
+    if (weights.length > maxNumWeightsPerRewardAllocation) {
+        TooManyWeights.selector.revertWith();
     }
-}
-```
+    _checkForDuplicateReceivers(valPubkey, weights);
 
-```solidity
-// 가이드라인 3: 대시보드 데이터 집계
-contract IncentiveDashboard {
-    struct VaultIncentiveInfo {
-        address vault;             // 보상 금고
-        address token;             // 토큰 주소
-        uint256 remaining;         // 남아있는 토큰 수
-        uint256 estimatedDaysLeft; // 대시보드 재집계 주기
-        bool needsRefill;          // 채워야 하는 토큰 수
-    }
-    
-    function getAllVaultIncentiveStatus(address[] calldata vaults) 
-        external 
-        view 
-        returns (VaultIncentiveInfo[] memory infos) 
-    {
-        // ... 모든 vault의 인센티브 상태 수집 ...
-        
-        for (uint256 i = 0; i < vaults.length; i++) {
-            IRewardVault vault = IRewardVault(vaults[i]);
-            address[] memory tokens = vault.getWhitelistedTokens();
-            
-            for (uint256 j = 0; j < tokens.length; j++) {
-                (uint256 remaining, , uint256 daysLeft, bool isHealthy) = 
-                    vault.getIncentiveStatus(tokens[j]);
-                    
-                // 7일 미만 남은 경우 리필 필요
-                infos[index++] = VaultIncentiveInfo({
-                    vault: vaults[i],
-                    token: tokens[j],
-                    remaining: remaining,
-                    estimatedDaysLeft: daysLeft,
-                    needsRefill: !isHealthy
-                });
-            }
+    uint96 totalWeight;
+    for (uint256 i; i < weights.length;) {
+        Weight calldata weight = weights[i];
+
+        if (weight.percentageNumerator == 0 || weight.percentageNumerator > maxWeightPerVault) {
+            InvalidWeight.selector.revertWith();
         }
+
+        // 기존: 화이트리스트 체크
+        if (!isWhitelistedVault[weight.receiver]) {
+            NotWhitelistedVault.selector.revertWith();
+        }
+
+        // **추가: 인센티브 임계값 체크**
+        address vault = weight.receiver;
+        uint256 threshold = RewardVault(vault).minimumIncentiveThreshold();
+        uint256 incentiveBalance = RewardVault(vault).getCurrentIncentiveBalance();
+
+        if (incentiveBalance < threshold) {
+            // 인센티브 부족한 vault는 reward allocation에 포함 불가
+            InvalidWeight.selector.revertWith();
+        }
+
+        totalWeight += weight.percentageNumerator;
+        unchecked { ++i; }
+    }
+    if (totalWeight != ONE_HUNDRED_PERCENT) {
+        InvalidRewardAllocationWeights.selector.revertWith();
     }
 }
+
+function _checkIfStillValid(Weight[] memory weights) internal view returns (bool) {
+    uint256 length = weights.length;
+    if (length > maxNumWeightsPerRewardAllocation) {
+        return false;
+    }
+    for (uint256 i; i < length;) {
+        address vault = weights[i].receiver;
+        if (weights[i].percentageNumerator > maxWeightPerVault) {
+            return false;
+        }
+        if (!isWhitelistedVault[vault]) {
+            return false;
+        }
+        // **추가: 인센티브 임계값 체크**
+        uint256 threshold = RewardVault(vault).minimumIncentiveThreshold();
+        uint256 incentiveBalance = RewardVault(vault).getCurrentIncentiveBalance();
+        if (incentiveBalance < threshold) {
+            return false;
+        }
+        unchecked { ++i; }
+    }
+    return true;
+}
+
 ```
 
 ***
@@ -776,9 +712,14 @@ contract IncentiveDashboard {
 
 `Low`
 
+인센티브 비율 조정으로 일부 검증자의 부스트 APR이 감소하더라도, 이는 제한적이고 일시적인 손실에 그치며, 시스템 전체의 안정성이나 운영에는 큰 영향을 미치지 않기 때문입니다.
+
 #### 가이드라인
 
 > * **각 함수 및 중요 데이터에 대해 명확한 역할(Owner, Admin, User 등)을 정의, 역할에 따른 접근 권한을 엄격히 부여**
+>   * Owner: 컨트랙트 설정, 인센티브 토큰 관리, 관리자 지정, 일시정지/해제, 잘못된 토큰 회수 등
+>   * Admin: 인센티브 추가/정산(토큰별 manager), 보상 기간 설정(RewardDurationManager)
+>   * User: 스테이킹/언스테이킹, 보상 수령, 위임, 운영자 지정(자신의 운영자만 지정가능)등
 > * **`onlyOwner`, `onlyRole` 등의 modifier를 명확히 사용**
 > * **관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅**
 
