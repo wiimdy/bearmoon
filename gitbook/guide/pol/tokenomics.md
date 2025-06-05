@@ -4,7 +4,7 @@ icon: coins
 
 # PoL 보안 가이드라인: 토크노믹스
 
-<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4-queue">#id-4-queue</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-boost-bgt">#id-5-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-7-apr">#id-7-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-8-claimfees">#id-8-claimfees</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-9-dapp">#id-9-dapp</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3-queue">#id-3-queue</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4-boost-bgt">#id-4-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-apr">#id-6-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-7-claimfees">#id-7-claimfees</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: BGT 리딤 시 네이티브 토큰 부족으로 인한 유동성 위기
 
@@ -95,83 +95,7 @@ function _validateWeights(Weight[] calldata weights) internal view {
 
 ***
 
-### 위협 3: 분배 비율 또는 기간 설정 오류로 인한 과도/과소 인센티브 지급
-
-인센티브 분배 비율, 분배 기간 설정 과정에서 비정상적인 계산이 적용될 경우 인센티브가 과도/과소 지급될 가능성이 있다.
-
-#### 영향도
-
-`Low`
-
-#### 가이드라인
-
-> * **시간 기반 분배 로직 처리 과정에서 블록 타임스탬프 의존성 최소화**
-> * **인센티브 연산 과정에서 안전한 시간 연산을 위해 검증된 수학 계산 라이브러리 사용**
-
-#### Best Practice&#x20;
-
-&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L108-L112)
-
-```solidity
-function _notifyRewardAmount(uint256 reward) internal virtual updateReward(address(0)) {
-    reward = reward * PRECISION;
-    
-    // 조건부 시간 계산을 위해 안전성이 보장된 상황에서만 시간 차이를 계산
-    if (totalSupply != 0 && block.timestamp < periodFinish) {
-        reward += _computeLeftOverReward();
-    }
-    
-    // ...
-}
-
-function rewardPerToken() public view virtual returns (uint256) {
-    //...
-    // 리워드 최솟값과 토큰 계산 과정에서 안전한 연산을 위한 FixedPointMathLib 라이브러리 사용
-    uint256 _newRewardPerToken = 
-    FixedPointMathLib.fullMulDiv(rewardRate, timeDelta, _totalSupply);
-    return rewardPerTokenStored + _newRewardPerToken;
-}
-```
-
-[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L241-L243)
-
-```solidity
-function queueNewRewardAllocation(
-    bytes calldata valPubkey,
-    uint64 startBlock,
-    Weight[] calldata weights
-)
-    external
-    onlyOperator(valPubkey)
-{
-    // 블록 번호 기반 지연 처리를 이용한 타임스탬프 조작 공격 방지
-    if (startBlock <= block.number + rewardAllocationBlockDelay) {
-        InvalidStartBlock.selector.revertWith();
-    }
-    // ...
-}
-```
-
-&#x20;[`BGTIncentiveDistributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BGTIncentiveDistributor.sol#L204-L206)
-
-```solidity
-uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
-
-// ...
-
-function _setRewardClaimDelay(uint64 _delay) internal {
-    // 보상 획득 지연시간 지정을 통한 타임스탬프 기반 지연 시간 최소화
-    if (_delay > MAX_REWARD_CLAIM_DELAY) {
-        InvalidRewardClaimDelay.selector.revertWith();
-    }
-    rewardClaimDelay = _delay;
-    emit RewardClaimDelaySet(_delay);
-}
-```
-
-***
-
-### 위협 4: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
+### 위협 3: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
 
 검증자 운영자가 인센티브 분배 직전 인센티브 분배 queue를 조작하여 보상을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
 
@@ -248,7 +172,7 @@ function _getOperatorCommission(bytes calldata valPubkey) internal view returns 
 
 ***
 
-### 위협 5: 유동성 공급자들의 Boost 담합으로 인한 과도한 BGT 인플레이션
+### 위협 4: 유동성 공급자들의 Boost 담합으로 인한 과도한 BGT 인플레이션
 
 유동성 공급자들이 사전에 담합하여 BGT boost를 모든 Validator들에게 유사한 비율\
 (Validator 69명을 기준으로 약 1.44%)로 하게된다면 프로토콜에서 설계한 인플레이션 비율을 훨씬 초과할 수 있다.
@@ -300,7 +224,7 @@ function checkInflationLimit() external view returns (bool) {
 
 ***
 
-### 위협 6: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
+### 위협 5: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
 
 인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면 검증자의 부스트 보상이 급격히 감소한다. \
 보상금고의 인센티브 토큰 잔고를 실시간으로 확인할 수 없다면 검증자가 보상 감소를 사전에 인지하지 못한다.
@@ -480,7 +404,7 @@ contract IncentiveDashboard {
 
 ***
 
-### 위협 7: 인센티브 토큰이 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
+### 위협 6: 인센티브 토큰이 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
 
 인센티브 토큰이 고갈된 후, 인센티브 비율이 낮아져 해당 보상금고를 선택한 검증자의 부스트 APR이 감소한다. 권한 관리가 미흡하면, 임의로 인센티브 비율이 조정되어 피해가 발생할 수 있다.
 
@@ -530,7 +454,7 @@ function getReward(
 
 ***
 
-### 위협 8: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
+### 위협 7: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
 `claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상이 왜곡될 수 있다.
 
@@ -579,73 +503,6 @@ contract FeeCollector {
             blockNumber,
             feeTokens
         );
-    }
-}
-```
-
-***
-
-### 위협 9: dApp 프로토콜의 수수료 송금 누락에 따른 사용자 보상 실패
-
-dApp 프로토콜의 수수료 송금 누락 시 사용자가 `claimFees`를 호출해도 정상적인 보상을 받을 수 없어 호출을 하지 않게 되면 BGT Staker의 HONEY 보유량 감소로 이어져 BGT 예치자의 보상이 정상적으로 분배되지 못할 수 있다.
-
-#### 영향도
-
-`Informational`
-
-#### 가이드라인
-
-> * **FeeCollector와 dApp 간 수수료 정산 상태(누적/미정산)를 주기적으로 확인하는 오프체인 모니터링 시스템 도입**
-> * **일정 기간 동안 수수료 송금이 누락된 dApp은 해당 보상 금고의 인센티브 대상에서 제외하거나 거버넌스를 통해 보상 삭감/정지 등의 제재가 가능하도록 설계**
-> * **`claimFees()` 호출 시, 지급량이 200 HONEY(=1%) 이하일 경우 revert 및 UI 피드백 제공**
-
-#### Best Practice&#x20;
-
-`커스텀 코드`
-
-```solidity
-contract FeeCollector {
-    // ... 기존 코드 ...
-    
-    // 가이드라인 2: dApp 상태 관리
-    struct DAppInfo {
-        uint256 lastFeeTimestamp;
-        bool isActive;
-        uint256 totalFeesAccumulated;
-    }
-    
-    mapping(address => DAppInfo) public dappInfo;
-    uint256 public constant MIN_HONEY_AMOUNT = 200e18; // 200 HONEY
-    
-    function claimFees(
-        address _recipient, 
-        address[] calldata _feeTokens
-    ) external whenNotPaused {
-        // 가이드라인 3: 최소 HONEY 수량 체크
-        uint256 honeyBalance = IERC20(payoutToken).balanceOf(address(this));
-        if (honeyBalance <= MIN_HONEY_AMOUNT) {
-            revert InsufficientHoneyForClaim();
-        }
-        
-        // ... 기존 코드 ...
-        
-        // 가이드라인 1: 수수료 정산 상태 기록
-        _updateDAppFeeStatus(msg.sender);
-        
-        emit FeeSettlementUpdated(
-            msg.sender,
-            block.timestamp,
-            honeyBalance
-        );
-    }
-    
-    // 가이드라인 2: 비활성 dApp 제재
-    function penalizeDApp(address dapp) external onlyRole(MANAGER_ROLE) {
-        DAppInfo storage info = dappInfo[dapp];
-        if (block.timestamp - info.lastFeeTimestamp > 7 days) {
-            info.isActive = false;
-            emit DAppPenalized(dapp);
-        }
     }
 }
 ```
