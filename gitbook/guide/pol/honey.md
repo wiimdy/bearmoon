@@ -142,7 +142,7 @@ contract EnhancedMultiOracleSystem {
 
 ### 위협 2: Basket 모드 내 가중치 결정 로직의 외부 영향 취약성 또는 예측 가능성
 
-Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환하거나 요구할 때 구성 비율 결정 로직이 외부 가격 피드의 일시적 오류, 특정 풀의 유동성 급변 등 외부 요인에 의해 공격자에게 유리하게 예측되거나 형성될 수 있다면, 공격자는 Basket 모드 활성화 시점 또는 특정 시장 상황을 노려 자신에게 유리한 조건으로 자산을 교환하려 시도할 수 있다.
+Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환하거나 요구할 때 구성 비율 결정 로직이 외부 가격 피드의 일시적 오류, 특정 풀의 유동성 급변 등 외부 요인에 의해 공격자에게 유리하게 예측되거나 형성될 수 있다면, 공격자는 Basket 모드 활성화 시점 또는 특정 시장 상황을 노려 자신에게 유리한 조건으로 자산을 교환하려 시도할 수 있다
 
 #### 영향도
 
@@ -150,15 +150,18 @@ Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환
 
 #### 가이드라인
 
-> * **외부 오라클 가격을 참조해야 할 경우, 다수 오라클의 평균값을 사용하고 급격한 변동을 방지하기 위한 스무딩 메커니즘을 도입하여 외부 공격에 대한 저항성 증대.**
-> * **가중치 결정 로직을 투명하게 공개하며 실시간 외부 변수에 과도하게 의존하여 공격 표면을 넓히지 않도록 설계.**
-> * **TWAP 또는 VWAP을 사용하여 단기적인 가격 조작 공격 방어.**
+> * **오라클 가격을 참조할 때 3개 이상의 평균값을 사용하며 스무딩 메커니즘을 도입하여 급격한 변동 방지**
+>   * 스무딩 메커니즘: 시간 가중 평균(TWAP), 거래량 가중 평균 가격(VWAP) 등을 사용해서 급격한 가격\
+>     변동을 방지하는 메커니즘
+> * **각 오라클 별 가중치를 실시간으로 공개하고 가중치 변경 등에 관해서는 문서화 시켜 관리**
 
 #### Best Practice
 
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L664-L693)&#x20;
 
 ```solidity
+// _getWeights 는 지분 개수 기반 상대적 비율 계산 되므로 외부 오라클 가격에 직접 의존하지 않음
+
 function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) internal view returns (uint256[] memory weights) {
     weights = new uint256[](registeredAssets.length);
     uint256 sum = 0;
@@ -167,6 +170,7 @@ function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) int
         if (filterBadCollaterals && isBadCollateralAsset[registeredAssets[i]]) continue;
         if (filterPausedCollateral && vaults[registeredAssets[i]].paused()) continue;
         
+        // 순담보지분 계산 : vault지분 - 수수료지분 (오라클조작 저항성)
         weights[i] = _getSharesWithoutFees(registeredAssets[i]);
         sum += weights[i];
     }
@@ -181,7 +185,6 @@ function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) int
 `커스텀 코드`&#x20;
 
 <pre class="language-solidity"><code class="lang-solidity">// 1시간 동안의 시간 가중 평균 가격을 계산하여 단기적인 가격 조작을 방지하고 안정적인 가중치 결정을 위한 스무딩 시스템
-
 contract TWAPBasedWeights {
     struct TWAPData {
         uint256 cumulativePrice;
