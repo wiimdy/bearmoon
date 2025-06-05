@@ -4,7 +4,7 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-4-erc-20">#id-4-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7">#id-7</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8-lp-notifyrewardamount">#id-8-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-9">#id-9</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc-20">#id-3-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
@@ -436,7 +436,9 @@ contract StakingRewards is ... {
 
 #### 영향도
 
-`Low`
+`Low`&#x20;
+
+공격은 특정 조건(Lp 토큰 0)에서 발생하며, 보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생한다. 사용자에게 제공될 보상이 사라지나 발생 확률이 매우 적기 때문에 영향도를 Low로 평가한다.
 
 #### 가이드라인
 
@@ -558,7 +560,9 @@ contract RewardVault is RewardVault {
 
 #### 영향도
 
-`Low`
+`Low`&#x20;
+
+보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 읽게 된다. 하지만 관리자는 거버넌스에 의해 관리하므로 발생가능성이 적어 영향도를 Low로 평가한다.
 
 #### 가이드라인
 
