@@ -4,7 +4,7 @@ icon: coins
 
 # PoL 보안 가이드라인: 토크노믹스
 
-<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3-queue">#id-3-queue</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4-boost-bgt">#id-4-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-apr">#id-6-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-7-claimfees">#id-7-claimfees</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3-boost-bgt">#id-3-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-apr">#id-5-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-claimfees">#id-6-claimfees</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: BGT 리딤 시 네이티브 토큰 부족으로 인한 유동성 위기
 
@@ -761,53 +761,63 @@ function getReward(
 
 ### 위협 6: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
-`claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상이 왜곡될 수 있다.
+`claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상을 수령하지 못했지만 HONEY를 지불해야해서 손해가 발생할 수 있다.
 
 #### 영향도
 
 `Low`
 
+claimFees() 프론트 러닝으로 일부 사용자의 수수료 보상이 일시적으로 왜곡될 수 있지만, 이는 개별 사용자에게 제한적으로 발생하며 시스템 전체의 안정성이나 운영에는 큰 영향을 미치지 않기 때문입니다.
+
 #### 가이드라인
 
-> * **`claimFees()` 호출 시 프론트 러닝 방지를 위해 수수료 계산 기준이 되는 블록 넘버/타임스탬프를 내부 저장하고 호출자 기준으로 고정하여 외부 간섭 방지 or 클레임 대상 사용자 주소 명시 필드 활용**
-> * **HONEY 등 수수료 잔고가 급변할 경우 이상 징후 탐지 및 임시 정지 로직 활성화**
-> * **수수료 누적/청구/소진 과정은 이벤트 로그를 통한 추적이 가능해야 하며, 이상 징후 발생 시 자동 경고를 발생시키는 보상 모니터링 시스템 구축**
-> * **클레임 가능한 수수료 토큰 종류는 허용된 화이트 리스트기반으로 제한**
+> * **수수료 수령 이전에 계산 기준이 되는 수수료의 잔액 상태와 사용자의 기대 보상을 비교하여 실제 수령 가능 수수료가 더 적은 경우 revert**
+>   * 기존에는 수령은 원하는 수수료 토큰의 주소 배열만 인자로 넘기는 식으로 수령
+>   * 추가적으로 각 수수료 토큰별 기대 수량을 함께 배열로 만들어 인자로 넘겨 현재 캰트랙트에 해당 수수료 토큰이 기대치에 못미치면 revert
 
 #### Best Practice&#x20;
 
 `커스텀 코드`
 
 ```solidity
-contract FeeCollector {
-    // ... 기존 코드 ...
+function claimFees(
+    address _recipient,
+    address[] calldata _feeTokens,
+    uint256[] calldata _expectedAmounts
+) external whenNotPaused {
+    // _feeTokens와 _expectedAmounts의 길이가 일치하는지 확인 (입력 검증)
+    require(_feeTokens.length == _expectedAmounts.length, "FeeCollector: Length mismatch");
 
-    // 가이드라인 1: 프론트러닝 방지를 위한 블록 넘버 기반 수수료 계산
-    function claimFees(
-        address recipient, 
-        address[] calldata feeTokens,
-        uint256 blockNumber  // 클레임 기준 블록
-    ) external whenNotPaused {
-        // ... 기존 코드 ...
-        
-        // 가이드라인 2: HONEY 등 수수료 잔고 급변 감지
-        if (_isAbnormalBalanceChange(feeTokens)) {
-            emit AbnormalBalanceChange(feeTokens);
-            _pause();
-            return;
-        }
+    // payoutToken을 msg.sender가 rewardReceiver로 전송 (수수료 지급을 위한 토큰 이동)
+    IERC20(payoutToken).safeTransferFrom(msg.sender, rewardReceiver, payoutAmount);
 
-        // 가이드라인 4: 화이트리스트 기반 토큰 제한
-        require(_isWhitelistedTokens(feeTokens), "Non-whitelisted token");
+    // rewardReceiver(BGTStaker 컨트랙트)에 보상 지급 알림
+    BGTStaker(rewardReceiver).notifyRewardAmount(payoutAmount);
 
-        // ... 기존 코드 ...
+    // 각 feeToken별로 수수료를 _recipient에게 전송
+    for (uint256 i; i < _feeTokens.length;) {
+        address feeToken = _feeTokens[i];
+        uint256 expectedAmount = _expectedAmounts[i];
 
-        // 가이드라인 3: 수수료 처리 이벤트 기록
-        emit FeesProcessed(
-            recipient,
-            blockNumber,
-            feeTokens
-        );
+        // 현재 컨트랙트가 보유한 feeToken의 잔액 확인
+        uint256 feeTokenAmountToTransfer = IERC20(feeToken).balanceOf(address(this));
+
+        // 기대한 수수료 수량 이상 잔액이 존재하는지 확인
+        require(feeTokenAmountToTransfer >= expectedAmount, "FeeCollector: Insufficient fee token amount");
+
+        // _recipient에게 feeToken 전송
+        IERC20(feeToken).safeTransfer(_recipient, feeTokenAmountToTransfer);
+
+        // 수수료 클레임 이벤트 발생
+        emit FeesClaimed(msg.sender, _recipient, feeToken, feeTokenAmountToTransfer);
+
+        unchecked { ++i; }
     }
+
+    // 전체 수수료 클레임 이벤트 발생
+    emit FeesClaimed(msg.sender, _recipient);
+
+    // queuedPayoutAmount가 남아있으면 payoutAmount를 재설정
+    if (queuedPayoutAmount != 0) _setPayoutAmount();
 }
 ```
