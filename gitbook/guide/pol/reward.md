@@ -564,47 +564,125 @@ contract RewardVault is RewardVault {
 
 #### 가이드라인
 
-> * **`removeIncentiveToken` 함수의 호출 조건에 제한 로직 추가**&#x20;
-> * **인센티브 토큰 제거 또는 교체는 거버넌스 승인을 요구하도록 설계**
-> * **인센티브 토큰 제거 전, 해당 보상 금고의 남은 분배량 및 종료 일정 공지**
-> * **토큰 제거 시 이벤트 로그 기록 필수 및 대시보드 상 실시간 반영**
+> * **인센티브 토큰 제거 또는 교체는 큐를 이용하여 딜레이 이후 반영.**
+>   *   딜레이는 3시간으로 설정
+>
+>       * BGTIncentiveDistributor에서 보상 청구 대기시간의 최대치인 MAX\_REWARD\_CLAIM\_DELAY를 3시간으로 설정하여 통일하기 위함
+>
+>       ```solidity
+>       // BGTIncentiveDistributor.sol
+>       uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
+>       ```
+>   * 큐에 넣기 위해서는 제한 로직 통과해야함
+>     * 인센티브 토큰 제거
+>       * 현재 해당 인센티브 토큰의 잔액이 없어야함
+>       * FactoryVaultManager 여야함
+>       * 제거할 토큰이 화이트리스트에 등록되어있는 토큰이어야함
+>         * 그래야 제거 가능
+>     * 인센티브 토큰 추가
+>       * FactoryOwner만 추가가능
+>   * 제거 큐에 들어가있는 토큰에는 addIncentive 불가
 > * **보상 금고의 보상 구조 변경(토큰 추가/제거)은 사용자에게 사전 고지 및 명확한 UI 표시**
-> * **보상 토큰 변경 이력은 감사 로그로 저장, 분기별 커뮤니티 감사 진행**
+>   * IncentiveTokenWhitelisted와 IncentiveTokenRemoved 이벤트를 읽어오는 봇을 만들어서 변화가 생기면 BEX에 팝업
 
 #### Best Practice&#x20;
 
 `커스텀 코드`
 
 ```solidity
-contract RewardVault {
-    // ... 기존 코드 ...
-
-    // 가이드라인 1: 토큰 제거 조건 제한
-    function removeIncentiveToken(address token) 
-        external 
-        onlyFactoryVaultManager 
-        onlyWhitelistedToken(token) 
-        onlyAfterTimelock 
-        requiresGovernanceApproval 
-    {
-        // ... 기존 코드 ...
-        
-        // 가이드라인 3,4: 토큰 제거 이벤트 기록
-        emit IncentiveTokenRemovalScheduled(
-            token,
-            incentives[token].amountRemaining,
-            block.timestamp + REMOVAL_NOTICE_PERIOD
-        );
-        
-        // ... 기존 코드 ...
-    }
-
-    // 가이드라인 6: 토큰 변경 이력 기록
-    event IncentiveTokenAuditLog(
-        address indexed token,
-        string action,
-        uint256 timestamp,
-        address initiator
-    );
+// 1. 상태변수 및 구조체 선언
+// 추가 요청 구조체
+struct AddIncentiveTokenRequest {
+    uint256 minIncentiveRate;
+    address manager;
+    uint256 requestTimestamp;
+    bool exists;
 }
+
+// 제거 요청 구조체
+struct RemoveIncentiveTokenRequest {
+    uint256 requestTimestamp;
+    bool exists;
+}
+
+// 각각의 큐(매핑)
+mapping(address => AddIncentiveTokenRequest) public addIncentiveTokenQueue;
+mapping(address => RemoveIncentiveTokenRequest) public removeIncentiveTokenQueue;
+
+// 딜레이 기간(예: 2일)
+uint256 public constant INCENTIVE_TOKEN_REQUEST_DELAY = 2 days;
+
+// 큐에 넣는 함수들
+// 인센티브 토큰 추가 요청
+function queueAddIncentiveToken(address token, uint256 minIncentiveRate, address manager) external onlyFactoryOwner {
+    require(!addIncentiveTokenQueue[token].exists, "RewardVault: Add request already queued");
+    require(!removeIncentiveTokenQueue[token].exists, "RewardVault: Remove request pending");
+    addIncentiveTokenQueue[token] = AddIncentiveTokenRequest({
+        minIncentiveRate: minIncentiveRate,
+        manager: manager,
+        requestTimestamp: block.timestamp,
+        exists: true
+    });
+    emit IncentiveTokenAddQueued(token, minIncentiveRate, manager, block.timestamp);
+}
+
+// 인센티브 토큰 제거 요청
+function queueRemoveIncentiveToken(address token) external onlyFactoryVaultManager onlyWhitelistedToken(token) {
+    require(!removeIncentiveTokenQueue[token].exists, "RewardVault: Remove request already queued");
+    require(incentives[token].amountRemaining == 0, "RewardVault: Incentive token has remaining balance");
+    removeIncentiveTokenQueue[token] = RemoveIncentiveTokenRequest({
+        requestTimestamp: block.timestamp,
+        exists: true
+    });
+    emit IncentiveTokenRemoveQueued(token, block.timestamp);
+}
+
+// 3. 실행 함수
+// 추가 요청 실행
+function executeAddIncentiveToken(address token) external {
+    AddIncentiveTokenRequest storage req = addIncentiveTokenQueue[token];
+    require(req.exists, "RewardVault: No add request");
+    require(block.timestamp >= req.requestTimestamp + INCENTIVE_TOKEN_REQUEST_DELAY, "RewardVault: Delay not passed");
+
+    _whitelistIncentiveToken(token, req.minIncentiveRate, req.manager);
+
+    delete addIncentiveTokenQueue[token];
+}
+
+// 제거 요청 실행
+function executeRemoveIncentiveToken(address token) external {
+    RemoveIncentiveTokenRequest storage req = removeIncentiveTokenQueue[token];
+    require(req.exists, "RewardVault: No remove request");
+    require(block.timestamp >= req.requestTimestamp + INCENTIVE_TOKEN_REQUEST_DELAY, "RewardVault: Delay not passed");
+
+    _removeIncentiveToken(token);
+
+    delete removeIncentiveTokenQueue[token];
+}
+
+// 4. 내부 실제 처리함수
+function _whitelistIncentiveToken(address token, uint256 minIncentiveRate, address manager) internal {
+    // 기존 whitelistIncentiveToken 내용
+}
+
+function _removeIncentiveToken(address token) internal {
+    // 기존 removeIncentiveToken 내용
+}
+
+// 5. addIncentive에서 제거 큐 체크
+function addIncentive(
+    address token,
+    uint256 amount,
+    uint256 incentiveRate
+)
+    external
+    nonReentrant
+    onlyWhitelistedToken(token)
+{
+    // 제거 큐에 들어간 토큰은 인센티브 추가 불가
+    require(!removeIncentiveTokenQueue[token].exists, "RewardVault: Token is pending removal");
+    // ... 이하 기존 로직 ...
+}
+
+
 ```
