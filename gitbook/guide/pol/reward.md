@@ -330,7 +330,7 @@ function getReward(
 
 `Low`&#x20;
 
-사용자의 보상이 예상보다 적게 들어온다. 즉 컨트랙트의 로직 문제로 제공하기로 한 보상을 주지 않아 영향도를 Low로 평가한다.
+사용자의 보상이 예상보다 적게 들어 올 수 있다. 즉 컨트랙트의 로직 문제로 제공하기로 한 보상을 주지 않아 영향도를 Low로 평가한다.
 
 #### 가이드라인
 
@@ -355,30 +355,32 @@ contract RewardVault is ... {
     function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
         // ... 기존 코드 ...
         
-        for (uint256 i; i < whitelistedTokensCount; ++i) {
-            // ...
-            
-            // 기존: uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
-            // 개선: 정밀도 유지 + 최소값 보장
-            uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
-            
-            // 가이드라인 2: 최소 수량 보장 (dust 방지)
-            if (amount > 0 && amount < MIN_INCENTIVE_AMOUNT) {
-                amount = MIN_INCENTIVE_AMOUNT;
-            }
-            
-            uint256 amountRemaining = incentive.amountRemaining;
-            amount = FixedPointMathLib.min(amount, amountRemaining);
-            
-            // 가이드라인 1: 교차 검증 추가
-            uint256 validatorShare;
-            if (amount > 0) {
-                validatorShare = beraChef.getValidatorIncentiveTokenShare(pubkey, amount);
+        unchecked {
+            for (uint256 i; i < whitelistedTokensCount; ++i) {
+                // ...
                 
-                // 검증: validator share가 전체 amount를 초과하지 않는지 확인
-                require(validatorShare <= amount, "Invalid share calculation");
+                // 기존: uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
+                // 개선: 정밀도 유지 + 최소값 보장
+                uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
                 
-                amount -= validatorShare;
+                // 가이드라인 2: 최소 수량 보장 (dust 방지)
+                if (amount > 0 && amount < MIN_INCENTIVE_AMOUNT) {
+                    amount = MIN_INCENTIVE_AMOUNT;
+                }
+                
+                uint256 amountRemaining = incentive.amountRemaining;
+                amount = FixedPointMathLib.min(amount, amountRemaining);
+                
+                // 가이드라인 1: 교차 검증 추가
+                uint256 validatorShare;
+                if (amount > 0) {
+                    validatorShare = beraChef.getValidatorIncentiveTokenShare(pubkey, amount);
+                    
+                    // 검증: validator share가 전체 amount를 초과하지 않는지 확인
+                    require(validatorShare <= amount, "Invalid share calculation");
+                    
+                    amount -= validatorShare;
+                }
             }
             
             // ... 나머지 코드 ...
