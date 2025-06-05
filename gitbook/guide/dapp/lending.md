@@ -98,14 +98,45 @@ function setParameters(IFactory.DeploymentParams calldata params) public  {
 #### 가이드라인
 
 > * **Virtual Shares 메커니즘 구현:**
->   * **초기 배포 시 최소 1000 wei의 가상 지분 및 자산 설정**
->   * **OpenZeppelin의 decimal offset 적용 (최소 6자리)**
->   * **최소 예치금 임계값 설정**&#x20;
+>   * **초기 배포 시 가상 지분 및 자산 설정**
+>   * [**OpenZeppelin의 decimal offset 9자리 적용**](https://github.com/OpenZeppelin/openzeppelin-contracts/pull/3979)
+>   * **최소 예치금 임계값으로 1이상 설정**&#x20;
 > * **부트스트랩 기간 보호 강화:**
 >   * **`deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용**
 >   * **`totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화**
 
 #### Best Practice
+
+#### [`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Beraborrow/src/core/LiquidStabilityPool.sol#L131-L134)&#x20;
+
+```solidity
+modifier whenNotBootstrapPeriod() {
+        _whenNotBootstrapPeriod();
+        _;
+    }
+```
+
+[`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Beraborrow/src/core/LiquidStabilityPool.sol#L136-L149)
+
+```solidity
+function _whenNotBootstrapPeriod() internal view {
+    // BoycoVaults should be able to unwind in the case ICR closes MCR
+    ILiquidStabilityPool.LSPStorage storage $ = _getLSPStorage();
+        
+    if (
+        block.timestamp < $.metaBeraborrowCore.lspBootstrapPeriod()
+        && !$.boycoVault[msg.sender]
+    ) revert BootstrapPeriod();
+}
+```
+
+[`BaseCollateralVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Beraborrow/src/core/vaults/BaseCollateralVault.sol#L101C4-L103C6)
+
+```solidity
+function _decimalsOffset() internal view override virtual returns (uint8) {
+        return 18 - assetDecimals();
+    }
+```
 
 `커스텀 코드`
 
