@@ -41,9 +41,9 @@ icon: plane-arrival
 
 3. N개 오라클 가격 피드 사용 및 통합:
 
-* 최소 요건: 각 담보에 대해 최소 2개, 권장 3개 이상의 독립적인 가격 소스를 사용한다. (Chainlink, Redstone, Pyth 등 평판 좋은 오라클 조합).
+* 최소 요건: 각 담보에 대해 최소 2개, 권장 3개 이상의 독립적인 가격 소스를 사용한다.&#x20;
 * 통합 방식:
-  * 중간값(Medianizer) 방식: N개의 오라클로부터 가격을 받아 정렬 후 중간값을 최종 가격으로 사용. 이는 극단적인 가격을 제시하는 단일 오라클의 영향을 제거한다.
+  * 중간값 방식: N개의 오라클로부터 가격을 받아 정렬 후 중간값을 최종 가격으로 사용. 이는 극단적인 가격을 제시하는 단일 오라클의 영향을 제거한다.
   * 가중 평균 방식: 각 오라클의 신뢰도, 업데이트 빈도 등을 고려하여 가중치를 부여하고 가중 평균을 사용할 수 있으나, 가중치 설정의 객관성 확보가 중요하다.
 
 
@@ -62,8 +62,8 @@ icon: plane-arrival
   * 대응 조치:
     * 경고 및 로깅: 편차가 임계값을 초과하면 시스템에 즉시 경고를 발생시키고 관련 데이터를 로깅한다.
     * 일시적 운영 중단 (Circuit Breaker): 해당 담보를 사용한 신규 대출 및 청산 실행을 일시적으로 중단한다.
-      * BeraBorrow 참고: DenManager.sol의 setPaused(bool \_paused) 와 유사한 기능을 담보별로 두거나, BeraborrowCore.sol의 setNewCCR 호출과 연계하여 해당 담보의 CCR을 일시적으로 매우 높게 설정하여 사실상 중단시키는 방안 고려.
-    * 보수적 가격 사용: 편차가 발생한 오라클을 제외하고 가격을 다시 계산하거나, 가장 낮은 가격을 사용한다.
+      * BeraBorrow DenManager.sol의 setPaused(bool \_paused) 와 유사한 기능을 담보별로 두거나, BeraborrowCore.sol의 setNewCCR 호출과 연계하여 해당 담보의 CCR을 일시적으로 매우 높게 설정하여 사실상 중단시키는 방안 고려.
+    * 보수적 가격 사용: 편차가 발생한 오라클을 제외하고 가격을 다시 계산한다.
     * TWAP 의존도 증가: 실시간 가격 대신 TWAP 가격을 일시적으로 사용하거나, TWAP 반영 비중을 높인다.
     * 거버넌스 개입: 심각한 편차 발생 시, 거버넌스를 통해 해당 오라클을 교체하거나 문제를 해결할 때까지 담보 자격을 정지시킨다.
 
@@ -100,7 +100,7 @@ function setParameters(IFactory.DeploymentParams calldata params) public  {
 > * **Virtual Shares 메커니즘 구현:**
 >   * **초기 배포 시 가상 지분 및 자산 설정**
 >   * [**OpenZeppelin의 decimal offset 9자리 적용**](https://github.com/OpenZeppelin/openzeppelin-contracts/pull/3979)
->   * **최소 예치금 임계값으로 1이상 설정**&#x20;
+>   * **최소 예치금 임계값으로 $NECT 처럼 69개 이상 share 받도록 강제 설정(**[**오픈제플린 권장사항**](https://docs.openzeppelin.com/contracts/5.x/erc4626)**: 최소 100개 이상의 share)**&#x20;
 > * **부트스트랩 기간 보호 강화:**
 >   * **`deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용**
 >   * **`totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화**
