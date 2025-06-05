@@ -4,7 +4,7 @@ icon: square-poll-vertical
 
 # PoL 보안 가이드라인: 거버넌스
 
-<table><thead><tr><th width="591.765625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8">#ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91">#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8">#ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c">#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="591.765625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8">#ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91">#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8">#ec-9c-84-ed-98-916-ea-b1-b0-eb-b2-84-eb-84-8c-ec-8a-a4-ec-a0-9c-ec-95-88-ea-b2-80-ec-a6-9d-eb-af-b8</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c">#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 악성 컴포넌트 승인 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
 
@@ -12,13 +12,22 @@ icon: square-poll-vertical
 
 #### 영향도
 
-`Medium`
+`Low`
+
+거버넌스에서 취약한 토큰이나 금고를 화이트리스팅 할 경우 프로토콜 전체의 자산이 위협받을 수 있지만 확률은 낮기에 `Low` 로 평가
 
 #### 가이드라인
 
-> * **보상 금고 및 인센티브 토큰 제안에 대해 기술적 검토, 경제적 영향 분석, 보안 감사를 포함한 다층적 검증 프로세스를 의무화하고 각 단계별로 독립적인 검토자 그룹을 배정.**
-> * **사전에 검증된 컨트랙트 템플릿이나 표준을 기반으로 한 제안만 허용하고 새로운 형태의 컴포넌트는 추가적인 보안 감사와 테스트넷 검증을 거치도록 함.**
-> * **새로운 컴포넌트는 제한된 규모로 시작하여 점진적으로 확장하는 방식으로 배포하여 잠재적 피해를 최소화.**
+> * **보상 금고 및 인센티브 토큰 제안에 대해 기술적 검토, 경제적 영향 분석, 보안 감사를 포함한 다층적 검증 프로세스를 의무화하고 각 단계별로 독립적인 검토자 그룹을 배정**
+>   * 각 단계별 검토자 그룹을 리뷰어 지정
+>     * 리뷰어의 경우는 거버넌스 투표로 산출하며 기술, 경제 분야를 나누어 지정
+>     * 프로토콜과 이해관계에 대한 검증도 거버넌스 과정에서 진행
+> * **사전에 검증된 컨트랙트 템플릿이나 표준을 기반으로 한 제안만 허용하고 새로운 형태의 컴포넌트는 추가적인 보안 감사와 테스트넷 검증을 거치도록 함**
+>   * **표준 템플릿:** 기본 검토 절차
+>   * **개선 및 혁신형 템플릿:** 기본 검토 절차에 더해 오딧 절차 및 리뷰 절차 확대
+> * **새로운 컴포넌트는 제한된 규모로 시작하여 점진적으로 확장하는 방식으로 배포하여 잠재적 피해를 최소화**
+>   * 제한은 화이트 리스팅 된 토큰 및 금고에 대해 TVL 한도, 참여자 수 제한을 통한 단계적 검증 절차
+>   * 생태계 참여자들의 의견을 수렴할 수 있는 최소한의 기한(2\~3주)를 거쳐 정식 토큰 및 금고로 등록
 
 #### Best Practice
 
@@ -64,11 +73,18 @@ contract ComponentValidator {
 
 `Low`
 
+재단입장에서 사익을 추구하게 되면 사용자의 손실로 이어질 가능성이 높기에 `Low`로 평가
+
 #### 가이드라인
 
-> * **모든 제안 거부 시 구체적이고 객관적인 사유를 공개하고 커뮤니티가 이에 대해 이의제기할 수 있는 메커니즘 제공.**
-> * **재단이나 가디언즈의 결정에 대해 독립적으로 검토할 수 있는 중재 위원회를 구성하여 견제와 균형 확보.**
-> * **거버넌스 참여자들의 이해관계를 투명하게 공개하고 직접적인 이해관계가 있는 제안에 대해서는 투표 참여를 제한.**
+> * **모든 제안 거부 시 구체적이고 객관적인 사유를 공개하고 커뮤니티가 이에 대해 이의제기 메커니즘 제공**
+>   * **이의제기 메커니즘: 독립적인 중재 위원회(리뷰어 선출 과정과 동일)를 구성하여 다음 권한 부여**
+>     * 재단이나 가디언즈의 결정에 대해 독립적으로 검토 및 교체 제안&#x20;
+>     * 부결된 안건에 대한 재상정&#x20;
+>     * 부당한 결정 및 권한행사에 대한 챌린지&#x20;
+> * **거버넌스 참여자들의 이해관계를 투명하게 공개하고 직접적인 이해관계가 있는 제안에 대해서는 투표 참여 제한 또는 약화**
+>   * 프로토콜에 관한 투표의 경우 프로토콜 관련자 투표 참여 제한
+>   * 코어에 관한 투표의 경우 재단 및 재단 물량 벨리데이터의 참여가능 BGT 물량 30%로 제한
 
 #### Best Practice
 
