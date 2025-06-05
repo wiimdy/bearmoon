@@ -151,7 +151,7 @@ Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환
 #### 가이드라인
 
 > * **오라클 가격을 참조할 때 3개 이상의 평균값을 사용하며 스무딩 메커니즘을 도입하여 급격한 변동 방지**
->   * 스무딩 메커니즘: 시간 가중 평균(TWAP), 거래량 가중 평균 가격(VWAP) 등을 사용해서 급격한 가격\
+>   * **스무딩 메커니즘:** 시간 가중 평균(TWAP), 거래량 가중 평균 가격(VWAP) 등을 통 급격한 가격\
 >     변동을 방지하는 메커니즘
 > * **각 오라클 별 가중치를 실시간으로 공개하고 가중치 변경 등에 관해서는 문서화 시켜 관리**
 
@@ -229,9 +229,12 @@ contract TWAPBasedWeights {
 
 #### 가이드라인
 
-> * **시장의 일반적인 변동성을 고려하여 디페깅 판단 기준의 민감도를 조정하고, 일시적인 미세 변동이 아닌 일정 시간 이상 지속되는 유의미한 가격 이탈 시에만 디페깅으로 간주하는 시간적 요소를 도입**
-> * **Basket 모드 활성화는 최후의 안정성 유지 수단으로 고려하며 페깅 자산의 안정성 회복을 우선시**
-> * **가능한 한 사용자가 선호하는 단일 페깅 자산으로 민팅/리딤할 수 있는 옵션을 우선적으로 제공하여 사용자 편의성과 예측 가능성 보장**
+> * **민감도 조정 기준:** 민팅과 리딤시에 각각 따로 basket 모드가 따로 동작하는 것이 아니라 가격 변동률 차이별로 basket 모드의 단계를 나누어 적용
+>   * 경고 단계 (0.1%): 1분 지속 시 사용자 알림
+>   * (일시적 디페깅) 제한 단계 (0.2%): 1분 지속 시 해당 자산 민팅 제한 및 교환비 조정
+>   * (디페깅) Basket 단계 (0.5%): 1분 지속 시 즉시 Basket 모드 활성화
+> * **Basket 모드 활성화는 최후의 안정성 유지 수단으로 고려하며 페깅 자산의 안정성 회복 시 자동 해제**
+>   * **안정성 회복:** 1시간 연속 안정(0.2% 미만) 시 자동으로 정상 모드 복귀
 
 #### Best Practice
 
@@ -253,20 +256,39 @@ function isBasketModeEnabled(bool isMint) public view returns (bool) {
 `커스텀 코드`&#x20;
 
 ```solidity
-// 일시적인 가격 변동이 아닌 1시간 이상 지속되는 디페깅을 유효한 디페깅으로 인정하여 Basket 모드의 민감도를 낮추는 시간 기반 감지 시스템
-
-contract TimeBasedDepegDetection {
-    struct DepegRecord {
-        uint256 startTime;
-        bool isActive;
+contract StabilityRecovery {
+    struct RecoveryState {
+        uint256 recoveryStartTime;
+        uint256 stableCount;          // 연속 안정 카운트
+        bool isRecovering;
     }
     
-    mapping(address => DepegRecord) public depegRecords;
-    uint256 public constant MIN_DEPEG_DURATION = 1 hours;
+    uint256 public constant RECOVERY_CONFIRMATION_PERIOD = 30 minutes;  // 30분 연속 안정
+    uint256 public constant STABILITY_CHECK_INTERVAL = 1 minutes;       // 1분마다 체크
     
-    function checkSustainedDepeg(address asset) external view returns (bool) {
-        DepegRecord memory record = depegRecords[asset];
-        return record.isActive && block.timestamp >= record.startTime + MIN_DEPEG_DURATION;
+    // 🔄 자동 회복 로직
+    function checkAutoRecovery(address asset) external returns (bool) {
+        if (isPriceStable(asset)) {
+            if (!recoveryStates[asset].isRecovering) {
+                // 회복 시작
+                recoveryStates[asset].recoveryStartTime = block.timestamp;
+                recoveryStates[asset].isRecovering = true;
+                recoveryStates[asset].stableCount = 1;
+            } else {
+                // 연속 안정성 증가
+                recoveryStates[asset].stableCount++;
+                
+                // 30분 연속 안정 시 자동 해제
+                if (block.timestamp >= recoveryStates[asset].recoveryStartTime + RECOVERY_CONFIRMATION_PERIOD) {
+                    _resetToNormalMode(asset);
+                    return true;
+                }
+            }
+        } else {
+            // 불안정 감지 시 회복 상태 리셋
+            _resetRecoveryState(asset);
+        }
+        return false;
     }
 }
 ```
