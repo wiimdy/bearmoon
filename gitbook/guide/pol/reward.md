@@ -4,7 +4,7 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-4-erc-20">#id-4-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7">#id-7</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8-lp-notifyrewardamount">#id-8-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-9">#id-9</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-4-erc-20">#id-4-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7">#id-7</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8-lp-notifyrewardamount">#id-8-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-9">#id-9</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
 
@@ -14,36 +14,37 @@ icon: sack-dollar
 
 `Medium`&#x20;
 
-ㅇ
+공격자가 악의적인 토큰을 인센티브 토큰에 추가하면 검증자 및 사용자의 보상을 가로챌 수 있다. 또한 인센티브율을 증가시켜 프로토콜의 인센티브 토큰을 빠르게 감소 시킬 수 있어 Medium으로 평가한다.
 
 #### 가이드라인
 
-* **인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**
-  * **인센티브 토큰 추가 권한:** Factory Owner
-  * 인센티브 토큰 제거 권한: Factory Vault Manager
-  * 현재 인센티브 토큰 최대 3개 등록 가능
-*   **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
-
-    * **인센티브 토큰 추가 시** `minIncentive > 0`  검증 진행
-
-    <pre class="language-solidity"><code class="lang-solidity">// validate `minIncentiveRate` value
-    <strong>if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
-    </strong>if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
-    </code></pre>
-
-    * 인센티브 비율 변경시 최소 비율보다 높게 설정
-
-    ```solidity
-    // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
-    if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
-
-    // The incentive rate should be greater than or equal to the `minIncentiveRate`.
-    if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
-    ```
-
-    * 현재 incentive manager 권한
-      * `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
-* **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
+> * **인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**
+>   * **인센티브 토큰 추가 권한: Factory Owner**
+>   * **인센티브 토큰 제거 권한: Factory Vault Manager**
+>   * **현재 인센티브 토큰 최대 3개 등록 가능**
+> *   **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
+>
+>     * **인센티브 토큰 추가 시** `minIncentive > 0`  검증 진행
+>
+>     ```solidity
+>     // validate `minIncentiveRate` value
+>     if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
+>     if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
+>     ```
+>
+>     * **인센티브 비율 변경시 최소 비율보다 높게 설정**
+>
+>     ```solidity
+>     // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
+>     if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
+>
+>     // The incentive rate should be greater than or equal to the `minIncentiveRate`.
+>     if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
+>     ```
+>
+>     * **현재 incentive manager 권한**
+>       * **`addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능**
+> * **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
 
 #### Best Practice&#x20;
 
@@ -92,7 +93,9 @@ function whitelistIncentiveToken(
 
 #### 영향도
 
-`Medium`
+`Medium`&#x20;
+
+재진입 공격 성공 시 특정 사용자가 정당한 보상 이상을 중복으로 인출하여 프로토콜 또는 다른 사용자들에게 직접적인 재정적 손실을 야기할 수 있다. 따라서 영향도를 Medium으로 평가한다.
 
 #### 가이드라인
 
@@ -136,118 +139,15 @@ function _getReward(address account, address recipient)
 
 ***
 
-### 위협 3: 보상 금고 팩토리 관리자가 악의적인 분배자 생성 시 사용자 보상 시스템 문제 발생
+### 위협 3: 토큰 승인 검증 부재 및 ERC-20 표준 미검증으로 인한 위협
 
-보상 금고 팩토리 관리자가 악의적으로 분배자를 변경할 경우 사용자 보상 시스템이 즉시 영향을 받아 보상 분배 흐름이 비정상적으로 바뀌어 피해가 발생할 수 있다.
-
-#### 영향도
-
-`Medium`
-
-#### 가이드라인
-
-> * **악의적인 분배자 변경이 즉각 반영되는 것을 방지하기 위한 타임락 등의 추가 보안 절차 반영 필요**
-> * **변경시 다중 서명 거버넌스 필요**
-
-#### Best Practice&#x20;
-
-`커스텀 코드`
-
-```solidity
-// 기존 RewardVault.sol의 setDistributor 함수 개선
-contract RewardVault is ... {
-    // ... 기존 코드 ...
-    
-    // 가이드라인 1: 타임락 추가
-    struct PendingDistributor {
-        address newDistributor; // 신규 distributor
-        uint256 executeAfter;   // Timelock 해제 시간 지정
-    }
-    
-    PendingDistributor public pendingDistributor; // Timelock을 위한 구조체 변수
-    uint256 constant TIMELOCK_DELAY = 2 days; // Timelock 기간
-    
-    // 기존 함수 수정: 즉시 변경 대신 타임락 적용
-    /// @inheritdoc IRewardVault
-    function setDistributor(address _rewardDistribution) external onlyFactoryOwner {
-        if (_rewardDistribution == address(0)) ZeroAddress.selector.revertWith();
-        
-        // 기존: distributor = _rewardDistribution;  // 즉시 변경
-        // 개선: 타임락 적용
-        pendingDistributor = PendingDistributor({
-            newDistributor: _rewardDistribution,
-            executeAfter: block.timestamp + TIMELOCK_DELAY
-        });
-        
-        emit DistributorChangeRequested(_rewardDistribution, block.timestamp + TIMELOCK_DELAY);
-    }
-    
-    // 새로운 함수: 타임락 경과 후 실행
-    function executeDistributorChange() external {
-        require(pendingDistributor.executeAfter != 0, "No pending change");
-        require(block.timestamp >= pendingDistributor.executeAfter, "Timelock active");
-        
-        distributor = pendingDistributor.newDistributor;
-        emit DistributorSet(pendingDistributor.newDistributor);
-        
-        delete pendingDistributor;
-    }
-    
-    // ... 나머지 코드 ...
-}
-```
-
-```solidity
-// 가이드라인 2: RewardVaultFactory에 다중서명 추가
-contract RewardVaultFactory is ... {
-    // ... 기존 코드 ...
-    
-    // 다중서명을 위한 추가 상태 변수
-    // vault => governor => approved
-    mapping(address => mapping(address => bool)) public distributorApprovals; 
-    
-    // vault => count
-    mapping(address => uint256) public approvalCount; 
-    
-    // 기존 AccessControl 역할 활용
-    bytes32 public constant GOVERNOR_ROLE = keccak256("GOVERNOR_ROLE");
-
-    // 거버넌스 정족 수 확인
-    uint256 constant REQUIRED_APPROVALS = 2;
-    
-    // RewardVault의 distributor 변경 승인
-    function approveDistributorChange(address vault) external onlyRole(GOVERNOR_ROLE) {
-        RewardVault rewardVault = RewardVault(vault);
-        
-        // distributor 주소 zero address 여부 확인
-        require(rewardVault.pendingDistributor().newDistributor != address(0), "No pending change");
-        // distributor 승인 여부 확인
-        require(!distributorApprovals[vault][msg.sender], "Already approved");
-        
-        // distributor 승인 처리
-        distributorApprovals[vault][msg.sender] = true;
-        // 현재 보상 금고의 distributor 승인 수 증가
-        approvalCount[vault]++;
-        
-        // 2/3 승인 달성 시 실행 가능
-        if (approvalCount[vault] >= REQUIRED_APPROVALS) {
-            emit DistributorChangeApproved(vault);
-        }
-    }
-    
-    // ... 나머지 코드 ...
-}
-```
-
-***
-
-### 위협 4: 토큰 승인 검증 부재 및 ERC-20 표준 미검증으로 인한 위협
-
-화이트리스트 토큰에 대한 ERC20 표준 준수 여부 등의 검증 절차 누락 시 네트워크 보상 처리 과정에서 승인량 불일치나 전송 실패로 인해 자산 손실이 발생할 수 있다.
+인센티브 토큰에 대한 ERC20 표준 준수 여부 등의 검증 절차 누락 시 네트워크 보상 처리 과정에서 승인량 불일치나 전송 실패로 인해 자산 손실이 발생할 수 있다.
 
 #### 영향도
 
-`Medium`
+`Medium`&#x20;
+
+ERC-20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션에서 의도치 않은 토큰 전송 실패, 수량 불일치 등을 유발하여 부분적인 자산 손실이나 기능 장애를 초래할 수 있다. 따라서 영향도를 Medium으로 평가한다.
 
 **가이드라인**
 
@@ -294,13 +194,15 @@ function addIncentive(
 
 ***
 
-### 위협 5: 컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류
+### 위협 4: 컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류
 
 컨트랙트 초기 배포 과정에서 필수 검증 절차와 필터링 기능 누락 시 잘못된 설정으로 인한 시스템 오류 발생 가능성이 존재한다.
 
 #### 영향도
 
-`Low`
+`Low`&#x20;
+
+잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다 일시적인 기능이 정지되어 피해를 볼 수 있어 Low로 평가한다.
 
 #### 가이드라인
 
@@ -358,19 +260,24 @@ bytes32 public genesisDepositsRoot;
 
 ***
 
-### 위협 6: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
+### 위협 5: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
 
 컨트랙트 접근 제어를 정확하게 처리하지 못할 경우 의도하지 않은 악성 사용자의 접근으로 인한 보상 인출 또는 조작 발생 가능성이 존재한다.
 
 #### 영향도
 
-`Low`
+`Low`&#x20;
+
+공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이다. 하지만 실제 발생하기엔 검증 절차가 modifier, msg.sender으로 진행되고 있어 영향도를 Low로 평가한다.
 
 #### 가이드라인
 
-> * **각 함수 및 중요 데이터에 대해 명확한 역할(Owner, Admin, User 등)을 정의, 역할에 따른 접근 권한을 엄격히 부여**
-> * **`onlyOwner`, `onlyRole`등의 modifier를 명확히 사용**&#x20;
 > * **관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅**
+> * **각 주소, 역할 또는 컴포넌트에는 해당 작업을 수행하는 데 필요한 최소한의 권한만 부여.**&#x20;
+> * **시스템 내 주요 역할(예: Owner, User, Operator 등)을 명확히 정의하고, 각 역할이 수행할 수 있는 기능과 접근 가능한 데이터를 명시적으로 구분.**
+> * **`onlyOwner`, `onlyDistributor`등 modifier를 명확히 사용**&#x20;
+
+<table><thead><tr><th width="135.546875" align="center">Role</th><th width="556.265625">Responsibilities &#x26; Permissions</th><th data-hidden>관련 함수 예시 (Example Functions)</th></tr></thead><tbody><tr><td align="center">Owner</td><td>- 컨트랙트의 전체 소유권 보유<br>- Admin 역할 임명 및 해임<br>- 컨트랙트의 가장 핵심적인 파라미터 설정 (예: 인센트브 토큰 추가, 일시 중지/재개 권한 위임 등)<br>- 컨트랙트 업그레이드 실행 (프록시 패턴 사용 시)</td><td>transferOwnership(address newOwner), addAdmin(address admin), removeAdmin(address admin), setProtocolFee(uint256 fee), pause(), unpause(), upgradeTo(address newImplementation)</td></tr><tr><td align="center">Operator </td><td>- 일상적인 시스템 운영 작업 수행 (Owner 보다 제한된, 특정 기능 실행 권한)<br>- 주기적인 프로세스 실행 (예: 보상 분배 로직 트리거, 오라클 가격 정보 업데이트)<br>- 시스템 상태 모니터링 및 관련 데이터 기록</td><td>triggerRewardDistribution(), updatePriceOracle(address asset, uint256 price), recordSystemMetrics()</td></tr><tr><td align="center">User </td><td>- 프로토콜의 핵심 기능 사용 (예: 자산 예치, 스왑, 대출, 상환)<br>- 자신의 계정 관련 정보 조회 및 관리 (예: 잔액 확인, 보상 청구)<br>- 거버넌스 참여 (토큰 홀더의 경우, 투표 등)</td><td>deposit(address asset, uint256 amount), withdraw(address asset, uint256 amount), claimRewards(), getBalance(address user, address asset), voteOnProposal(uint256 proposalId, bool support)</td></tr></tbody></table>
 
 #### Best Practice&#x20;
 
@@ -392,6 +299,13 @@ function addIncentive(
     // ...
 }
 
+modifier onlyOperatorOrUser(address account) {
+    if (msg.sender != account) {
+        if (msg.sender != _operators[account]) NotOperator.selector.revertWith();
+    }
+    _;
+}
+
 function getReward(
     address account,
     address recipient
@@ -408,13 +322,15 @@ function getReward(
 
 ***
 
-### 위협 7: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
+### 위협 6: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
 
 보상 분배 계산 중 나눗셈 정밀도 오류로 인해, 일부 사용자의 보상이 소수점 이하로 계속 손실되어 누적된다.
 
 #### 영향도
 
-`Low`
+`Low`&#x20;
+
+사용자의 보상이 예상보다 적게 들어온다. 즉 컨트랙트의 로직 문제로 제공하기로 한 보상을 주지 않아 영향도를 Low로 평가한다.
 
 #### 가이드라인
 
@@ -511,7 +427,7 @@ contract StakingRewards is ... {
 
 ***
 
-### 위협 8: LP 토큰 전량 인출 및 notifyRewardAmount 호출로 인한 보상 중복 누적
+### 위협 7: LP 토큰 전량 인출 및 notifyRewardAmount 호출로 인한 보상 중복 누적
 
 `notifyRewardAmount` 호출 후 모든 LP 토큰을 인출해 잔고를 0으로 만들면 보상 잔액이 두 번 누적되어 보상 총액 기록이 비정상적으로 증가할 수 있다.&#x20;
 
@@ -636,7 +552,7 @@ contract RewardVault is RewardVault {
 
 ***
 
-### 위협 9: 정상적인 인센티브 토큰 제거에 따른 보상 중단
+### 위협 8: 정상적인 인센티브 토큰 제거에 따른 보상 중단
 
 정상적인 인센티브 토큰 제거 시 갑작스러운 사용자 보상 중단으로 인한 사용자 혼란이 발생할 수 있고 보상 구조의 변경으로 인한 문제 발생 가능성이 존재한다.
 
