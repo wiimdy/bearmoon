@@ -4,7 +4,7 @@ icon: plane-arrival
 
 # dApp 보안 가이드라인: Lending
 
-<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-4-recovery-mode">#id-4-recovery-mode</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-5-owner">#id-5-owner</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-6-redeemcollateral">#id-6-redeemcollateral</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-8">#id-8</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-4-recovery-mode">#id-4-recovery-mode</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-5-owner">#id-5-owner</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
 
@@ -208,22 +208,13 @@ Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제
 
 #### 가이드라인
 
-> * **담보 비율 검증 강화**
->   * **모든 포지션 변경 시 개별 ICR과 시스템 TCR 동시 검증**
->   * **Recovery Mode 진입 시 새로운 차용 완전 차단**
->   * **담보 인출 시 최소 ICR 설정**
-> * **시간 기반 제한**
->   * **포지션 조정 후 24시간 내 재조정 제한**
->   * **대량 담보 인출 시 48시간 타임락 적용**
->   * **급격한 담보 비율 변화 시 추가 검증 요구**
+> * **모든 포지션 변경 시 개별 ICR(개별 담보 비율)과 시스템 TCR(총 담보율) 동시 검증**
 > * **Recovery Mode 개선:**
 >   * **Recovery Mode 진입 시 자동 MCR 상향 조정**&#x20;
->   * **시장 안정화까지 새로운 차용 완전 차단**
->   * **Recovery Mode 지속 시간에 따른 단계적 대응 강화**
+>   * **Recovery Mode 진입 시 담보 인출 차단**
 > * **Mode Transition 안정성:**
 >   * **TCR 계산 시 최신 가격 및 이자 반영 보장**
 >   * **Mode 전환 시 모든 포지션 상태 일괄 업데이트**
->   * **Recovery Mode 탈출 후 24시간 모니터링 기간 설정**
 
 #### Best Practice
 
@@ -298,57 +289,7 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 ***
 
-### 위협 6: redeemCollateral()을 통한 선택적 상환으로 건전한 포지션 타겟팅
-
-공격자가 `redeemCollateral()`함수를 악용하여 담보 비율이 높은 건전한 포지션만을 골라 청산하면, 해당 사용자들은 자신의 담보물을 시장 가격보다 저렴하게 빼앗기는 부당한 손실을 입게 된다.
-
-#### 영향도&#x20;
-
-`Low`
-
-#### 가이드라인
-
-> * **상환 공정성 보장:**
->   * **상환 시 최저 ICR 포지션부터 강제 순서 적용**
->   * **상환 수수료 설정 및 동적 조정**
->   * **대량 상환 시 일일 한도 적용**
-> * **상환 baseRate 보호:**
->   * **baseRate 급등 방지를 위한 점진적 증가 메커니즘**
->   * **상환 수수료 수익을 Stability Pool에 배분하여 인센티브 정렬**
-
-#### Best Practice
-
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L487-L508)
-
-```solidity
-function _updateBaseRateFromRedemption(
-        uint256 _collateralDrawn,
-        uint256 _price,
-        uint256 _totalDebtSupply
-    ) internal returns (uint256) {
-        uint256 decayedBaseRate = _calcDecayedBaseRate();
-
-        /* Convert the drawn collateral back to debt at face value rate (1 debt:1 USD), in order to get
-         * the fraction of total supply that was redeemed at face value. */
-        uint256 redeemedDebtFraction = (_collateralDrawn * _price) / _totalDebtSupply;
-
-        uint256 newBaseRate = decayedBaseRate + (redeemedDebtFraction / BETA);
-        newBaseRate = BeraborrowMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
-
-        // Update the baseRate state variable
-        baseRate = newBaseRate;
-        emit BaseRateUpdated(newBaseRate);
-
-        _updateLastFeeOpTime();
-
-        return newBaseRate;
-    }
-
-```
-
-***
-
-### 위협 7: 이자율 조작을 통한 부당한 이자 부과
+### 위협 6: 이자율 조작을 통한 부당한 이자 부과
 
 공격자 또는 악의적인 거버넌스가 이자율을 부당하게 조작하면, 차용자는 과도한 이자를 지불하게 되어 직접적인 경제적 손실을 입거나, 예치자는 기대했던 수익을 얻지 못하게 된다.
 
@@ -383,7 +324,7 @@ if (newInterestRate != interestRate) {
 
 ***
 
-### 위협 8: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
+### 위협 7: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
 대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들에게 과도한 슬리피지로 인한 자산 손실을 강요한다.&#x20;
 
