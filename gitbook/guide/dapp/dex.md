@@ -12,7 +12,9 @@ icon: rotate-reverse
 
 #### 영향도&#x20;
 
-`Medium`
+`Medium`&#x20;
+
+플래시론을 이용해 단일 거래 내 대규모 자금으로 유동성 풀 가격을 인위적으로 조작할 수 있으며 일반 사용자의 거래에 직접적인 영향을 미칠 수 있는 이유로 `Medium`으로 평가
 
 #### 가이드라인
 
@@ -70,7 +72,9 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
 #### 영향도&#x20;
 
-`Low`
+`Low`&#x20;
+
+LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자가 실제 풀 자산 가치와 불일치하는 LP 토큰을 받을 경우 일부 사용자가 제한적으로 손실이나 이득을 볼 수 있으므로 Low로 평가
 
 #### 가이드라인
 
@@ -81,7 +85,7 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 >       $$\text{Pool Value} = (\text{tokenA}_amount \times \text{priceA}) + (\text{tokenB}_amount \times \text{priceB})$$
 >   * **새로운 유동성의 풀 전체 대비 정확한 비중 계산**
 > * **수치 정밀도 보장:**
->   * **Solady, Solmate 등과 같은 고정소수점 연산 라이브러리 필수 사용하여 최소 18자리의 소수점 연산 정밀도 사용**
+>   * **SafeMath, FixedPointMathLib 등과 같은 고정소수점 연산 라이브러리 필수 사용하여 최소 18자리의 소수점 연산 정밀도 사용**
 >   * **연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 계산 결과의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지**
 >   * **덧셈/곱셈 순서를 바꿔 작은 값이 먼저 반올림 되는것을 방지하기 위해 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산 순서 최적화**
 > * **실시간 검증:**
@@ -114,7 +118,9 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 
 #### 영향도&#x20;
 
-`Low`
+`Low`.
+
+가격 급등락 시점에 공격자가 유동성을 제거해 풀 내 잔여 유동성이 기준치 이하로 떨어지거나 최소 보유 기간을 우회해 이익을 실현할 수 있으나 풀 전체에 미치는 영향이 제한적이므로 `Low`로 평가
 
 #### 가이드라인
 
@@ -155,7 +161,9 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 
 #### 영향도&#x20;
 
-`Informational`
+`Informational`.
+
+특정 토큰에만 대량 입출금이 반복되어 풀 내 자산 비율이 심하게 무너질 경우, 가격 왜곡이나 일부 토큰 유동성 고갈이 발생할 수 있으나 시스템 전체의 보안이나 직접적 손실로 이어지지 않아 `Informational`로 평가
 
 #### 가이드라인
 
@@ -220,7 +228,9 @@ function addLiquiditySingle(
 
 #### 영향도&#x20;
 
-`Informational`
+`Informational`&#x20;
+
+대량 거래로 인해 슬리피지가 급격히 커지거나 최소 아웃풋 계산 오류로 사용자가 입력한 최소 수량보다 적은 토큰을 받을 수 있으나, 이는 주로 개별 거래자의 불리한 체결로 이어지고 시스템 전체의 보안에는 직접적인 영향을 미치지 않는 이유로 `Informational`로 평가
 
 #### 가이드라인
 
@@ -238,7 +248,7 @@ function addLiquiditySingle(
 > * **실시간 가격 모니터링 및 검증:**
 >   * **DEX Screener, Aggregator 등과 같이 거래 실행 직전 오라클/풀 가격 재조회 및 가격 변동 임계값 초과 시 재계산 또는 예외처리 실시**
 >   * **Chainlink, Band 등의 여러 오라클에서 가격을 받아 다중 가격 소스 활용 및 교차 검증하고 편차가 크면 거래 취소 또는 대체 소스 전환**
->   *   **아래 수식과 같은 방식으로 현재 유동성 기반 실시간 슬리피지 예측 공식**
+>   *   **아래 수식과 같은 방식으로 현재 유동성 기반 실시간 슬리피지 예측 공식 적용하여 모니터링 및 검증 실시**
 >
 >       $$\text{Price Impact} = 1 - \frac{x}{x + \Delta x} \scriptsize {(x = PoolAmount, \Delta x =\text{TradeSize})}$$
 
@@ -305,7 +315,9 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 
 #### 영향도&#x20;
 
-`Informational`
+`Informational`&#x20;
+
+관리자가 수수료 비율을 갑자기 변경하거나 대량의 수수료를 인출할 경우 유동성 제공자에게 예기치 않은 손실이 발생할 수 있으나 시스템 전체의 보안에 직접적인 영향을 미치지 않는 운영상 이슈인 이유로 `Informational`로 평가
 
 #### 가이드라인
 
@@ -355,7 +367,9 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
 
 #### 영향도&#x20;
 
-`Informational`
+`Informational`&#x20;
+
+풀 리밸런싱 과정에서 일부 토큰 상태만 변경되고 트랜잭션이 실패할 경우 풀의 불변량이나 총 공급량 불일치가 발생할 수 있으나 이는 주로 운영상 오류로 시스템 전체 보안에는 직접적인 영향을 미치지 않기 때문에 `Informational`로 평가
 
 #### 가이드라인
 
