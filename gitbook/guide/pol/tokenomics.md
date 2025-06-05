@@ -166,8 +166,6 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 
 #### 가이드라인
 
->
->
 > * **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
 >   * Weight 구조체를 통해 보상 금고 주소 관리
 >   * 보상 금고 주소(receiver)는 보상을 받기 위해서는 whitelist에 등록되어야함&#x20;
@@ -536,84 +534,7 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 
 ***
 
-### 위협 3: 검증자의 운영자의 인센티브 분배 직전 queue 조작을 통한 보상 탈취 및 사용자 분배 손실
-
-검증자 운영자가 인센티브 분배 직전 인센티브 분배 queue를 조작하여 보상을 탈취하게 될 경우 분배될 사용자 인센티브에 대해 손해가 발생할 수 있다.
-
-#### 영향도
-
-`Low`
-
-#### 가이드라인
-
-> * **인센티브 분배 로그 분석을 통한 현황 추적**
-> * **악의적인 검증자 슬래싱**
-
-#### Best Practice&#x20;
-
-&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L485-L487)
-
-```solidity
-function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
-    // ...
-    // BGT 부스터와 검증자 몫에 대한 로깅을 이중으로 수행
-    // 인센티브 처리 성공/실패 이력 모두 로깅 수행
-    unchecked {
-        // ...
-            if (validatorShare > 0) {
-                // ...
-                
-                if (success) {
-                    // ... 
-                    emit IncentivesProcessed(pubkey, token, bgtEmitted, validatorShare);
-                } else {
-                    emit IncentivesProcessFailed(pubkey, token, bgtEmitted, validatorShare);
-                }
-            }
-        // ...
-            if (amount > 0) {
-                // ...
-                if (success) {
-                    // ...
-                    if (success) {
-                        amountRemaining -= amount;
-                        emit BGTBoosterIncentivesProcessed(pubkey, token, bgtEmitted, amount);
-                    } else {
-                        // ...
-                        emit BGTBoosterIncentivesProcessFailed(pubkey, token, bgtEmitted, amount);
-                    }
-                }
-                else {
-                    emit BGTBoosterIncentivesProcessFailed(pubkey, token, bgtEmitted, amount);
-                }
-            }
-        / /...
-    }
-    
-    // ...
-}
-```
-
-&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L290)
-
-```solidity
-function activateQueuedValCommission(bytes calldata valPubkey) external {
-    // ...
-    // 악의적인 검증자 탐지를 위한 ValCommissionSet 등의 이벤트 처리기로 이력 추적 진행    
-    emit ValCommissionSet(valPubkey, oldCommission, commissionRate);
-    // ...
-}
-
-function _getOperatorCommission(bytes calldata valPubkey) internal view returns (uint96) {
-    // 검증자의 공개키로 인센티브 수량 계산 전 수령 유효성 확인
-    CommissionRate memory operatorCommission = valCommission[valPubkey];
-    // ...
-}
-```
-
-***
-
-### 위협 4: 유동성 공급자들의 Boost 담합으로 인한 과도한 BGT 인플레이션
+### 위협 3: 유동성 공급자들의 Boost 담합으로 인한 과도한 BGT 인플레이션
 
 유동성 공급자들이 사전에 담합하여 BGT boost를 모든 Validator들에게 유사한 비율\
 (Validator 69명을 기준으로 약 1.44%)로 하게된다면 프로토콜에서 설계한 인플레이션 비율을 훨씬 초과할 수 있다.
@@ -665,7 +586,7 @@ function checkInflationLimit() external view returns (bool) {
 
 ***
 
-### 위협 5: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
+### 위협 4: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
 
 인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면 검증자의 부스트 보상이 급격히 감소한다. \
 보상금고의 인센티브 토큰 잔고를 실시간으로 확인할 수 없다면 검증자가 보상 감소를 사전에 인지하지 못한다.
@@ -673,6 +594,8 @@ function checkInflationLimit() external view returns (bool) {
 #### 영향도
 
 `Low`
+
+인센티브 토큰 고갈 시 검증자 보상이 일시적으로 감소하더라도, 시스템 전체의 안정성이나 운영에는 직접적인 치명적 영향이 없고, 추가 공급 등으로 비교적 쉽게 복구가 가능하기 때문
 
 #### 가이드라인
 
@@ -845,7 +768,7 @@ contract IncentiveDashboard {
 
 ***
 
-### 위협 6: 인센티브 토큰이 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
+### 위협 5: 인센티브 토큰이 고갈 된 후 보상 비율을 낮춰 해당 보상 금고를 선택한 검증자의 부스트 APR 감소
 
 인센티브 토큰이 고갈된 후, 인센티브 비율이 낮아져 해당 보상금고를 선택한 검증자의 부스트 APR이 감소한다. 권한 관리가 미흡하면, 임의로 인센티브 비율이 조정되어 피해가 발생할 수 있다.
 
@@ -895,7 +818,7 @@ function getReward(
 
 ***
 
-### 위협 7: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
+### 위협 6: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
 `claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상이 왜곡될 수 있다.
 
