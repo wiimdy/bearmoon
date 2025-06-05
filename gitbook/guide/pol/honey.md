@@ -148,6 +148,8 @@ Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환
 
 `Low`
 
+소수의 오라클에서 단순로직으로 가격을 가져와서 가격을 결정하는 로직은 오라클 조작 가능성이나 디페깅 예측 가능성을 줄 수 있어 `Low` 로 평가
+
 #### 가이드라인
 
 > * **오라클 가격을 참조할 때 3개 이상의 평균값을 사용하며 스무딩 메커니즘을 도입하여 급격한 변동 방지**
@@ -227,6 +229,8 @@ contract TWAPBasedWeights {
 
 `Informational`
 
+디페깅 기준치는 프로토콜이 결정하는 것이나 민팅과 리딤 로직의 basket 모드가 각각 따로 동작한다면 혼란을 가중시킬 수 있으며, 세분화된 basket 모드를 통해 사용자 편의성을 올리는 편을 권고하기 위해 `Informational` 로 평가
+
 #### 가이드라인
 
 > * **민감도 조정 기준:** 민팅과 리딤시에 각각 따로 basket 모드가 따로 동작하는 것이 아니라 가격 변동률 차이별로 basket 모드의 단계를 나누어 적용
@@ -255,8 +259,7 @@ function isBasketModeEnabled(bool isMint) public view returns (bool) {
 
 `커스텀 코드`&#x20;
 
-```solidity
-contract StabilityRecovery {
+<pre class="language-solidity"><code class="lang-solidity">contract StabilityRecovery {
     struct RecoveryState {
         uint256 recoveryStartTime;
         uint256 stableCount;          // 연속 안정 카운트
@@ -279,8 +282,8 @@ contract StabilityRecovery {
                 recoveryStates[asset].stableCount++;
                 
                 // 30분 연속 안정 시 자동 해제
-                if (block.timestamp >= recoveryStates[asset].recoveryStartTime + RECOVERY_CONFIRMATION_PERIOD) {
-                    _resetToNormalMode(asset);
+<strong>                if (block.timestamp >= recoveryStates[asset].recoveryStartTime + RECOVERY_CONFIRMATION_PERIOD) {
+</strong>                    _resetToNormalMode(asset);
                     return true;
                 }
             }
@@ -291,7 +294,7 @@ contract StabilityRecovery {
         return false;
     }
 }
-```
+</code></pre>
 
 ***
 
@@ -302,6 +305,8 @@ contract StabilityRecovery {
 #### 영향도
 
 `Informational`
+
+사용자 편의성 측면에서의 위협이기에`Informational` 로 평가
 
 #### 가이드라인
 
