@@ -12,13 +12,38 @@ icon: sack-dollar
 
 #### 영향도
 
-`Medium`
+`Medium`&#x20;
+
+ㅇ
 
 #### 가이드라인
 
-> * **인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**
-> * **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
-> * **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
+* **인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**
+  * **인센티브 토큰 추가 권한:** Factory Owner
+  * 인센티브 토큰 제거 권한: Factory Vault Manager
+  * 현재 인센티브 토큰 최대 3개 등록 가능
+*   **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
+
+    * **인센티브 토큰 추가 시** `minIncentive > 0`  검증 진행
+
+    <pre class="language-solidity"><code class="lang-solidity">// validate `minIncentiveRate` value
+    <strong>if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
+    </strong>if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
+    </code></pre>
+
+    * 인센티브 비율 변경시 최소 비율보다 높게 설정
+
+    ```solidity
+    // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
+    if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
+
+    // The incentive rate should be greater than or equal to the `minIncentiveRate`.
+    if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
+    ```
+
+    * 현재 incentive manager 권한
+      * `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
+* **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
 
 #### Best Practice&#x20;
 
@@ -26,10 +51,16 @@ icon: sack-dollar
 
 ```solidity
 function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
-    //recoverERC20에서 인센티브 토큰과 예치 토큰 회수 방지
-    if (tokenAddress == address(stakeToken)) CannotRecoverStakingToken.selector.revertWith();
-
-    // ...
+    // incentive token 현재 활성화 상태 체크
+    if (incentives[tokenAddress].minIncentiveRate != 0) CannotRecoverIncentiveToken.selector.revertWith();
+    
+    // stake token 체크
+    if (tokenAddress == address(stakeToken)) {
+        uint256 maxRecoveryAmount = IERC20(stakeToken).balanceOf(address(this)) - totalSupply;
+        if (tokenAmount > maxRecoveryAmount) {
+            NotEnoughBalance.selector.revertWith();
+        }
+    }
 }
 
 function whitelistIncentiveToken(
