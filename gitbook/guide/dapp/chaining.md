@@ -18,7 +18,7 @@ layout:
 
 # dApp 보안 가이드라인: 체이닝
 
-<table><thead><tr><th width="616.01953125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1">#id-1</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="chaining.md#id-2-dex-lsp-erc-4626">#id-2-dex-lsp-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chaining.md#id-3-honey">#id-3-honey</a></td><td align="center"><code>Medium</code></td></tr></tbody></table>
+<table><thead><tr><th width="616.01953125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1">#id-1</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="chaining.md#id-2-dex-lsp-erc-4626">#id-2-dex-lsp-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chaining.md#id-3-honey-beraborrow">#id-3-honey-beraborrow</a></td><td align="center"><code>Medium</code></td></tr></tbody></table>
 
 ### 위협 1: 개별 프로토콜 붕괴 시 연쇄 반응으로 인한 체인 역플라이휠 발생
 
