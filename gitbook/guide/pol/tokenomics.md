@@ -14,37 +14,78 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 
 `High`
 
+네이티브 토큰 부족으로 인해 다수 사용자의 리딤(보상 수령) 트랜잭션이 실패(revert)하면 신뢰도 하락과 대규모 자금 이탈, 시스템 전반의 유동성 위기로 직결될 수 있기 때문
+
 #### 가이드라인
 
-> * **BGT 리딤 시 컨트랙트 잔액 검증 및 충분한 네이티브 토큰 보유량 확보**
+> * **BGT 리딤 시 유효성 검증**
+>   * 컨트랙트 잔액 확인
+>     * redeem 함수에서 BERA transfer시 safeTransferETH사용하여 잔액 부족 시 revert
+>   * 리딤 요청량 검증
+>     * checkUnboostedBalance 함수를 이용하여 사용자의 리딤 요청량이 unboost한 BGT 수량보다 적거나 같은지 검증
+> * **컨트랙트 내 충분한 네이티브 토큰 보유량 확보**
+>   * 리딤 이후 최종성 보장
+>     * \_invariantCheck를 통해 리딤 과정이 종료된 뒤 현재 BGT 총 발행량과 보유 네이티브 토큰 수량을 비교하여 충분한 양의 네이티브 토큰을 보유하고 있는지 검증
+>   *   체인 스펙 상 BERA발행 설정
+>
+>       ```toml
+>       # Deneb1 value changes
+>       # BGT 토큰 컨트랙트 주소로 블록당 5.75 BERA 발행
+>       evm-inflation-address-deneb-one = "0x656b95E550C07a9ffe548bd4085c72418Ceb1dba"
+>       evm-inflation-per-block-deneb-one = 5_750_000_000
+>       ```
 > * **초과 토큰 보유량 관리 및 적절한 버퍼 유지**
-> * **BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출**
+>   * **BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출**
+>     * BlockRewardController의 computeReward 함수에 boostPower로 100%를 입력하여 한 블록당 나올 수 있는 BGT 최대치를 계산
+>     * EIP-4788에 맞게 HISTORY\_BUFFER\_LENGTH를 8191로 설정
+>     * 위의 두 값으로 잠재적 BGT 발행량을 계산한 뒤, 현재 BGT 발행량에 더해 outstandingRequiredAmount를 계산
+>     * 네이티브 토큰 잔액이 outstandingRequiredAmount값을 넘으면 burnExceedingReserves 함수를 통해 초과한 양 만큼 zero address로 보내 burn
 
 #### Best Practice&#x20;
 
 &#x20;[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L369)
 
 ```solidity
+/// @inheritdoc IBGT
 function redeem(
     address receiver,
     uint256 amount
 )
     external
     invariantCheck
-    // 사용자 잔액 검증
     checkUnboostedBalance(msg.sender, amount)
 {
-    // ...
+    /// Burn the BGT token from the msg.sender account and reduce the total supply.
+    super._burn(msg.sender, amount);
+    /// Transfer the Native token to the receiver.
+    SafeTransferLib.safeTransferETH(receiver, amount);
+    emit Redeem(msg.sender, receiver, amount);
 }
 
+
+function _checkUnboostedBalance(address sender, uint256 amount) private view {
+    if (unboostedBalanceOf(sender) < amount) NotEnoughBalance.selector.revertWith();
+}
+
+
+function unboostedBalanceOf(address account) public view returns (uint256) {
+    UserBoost storage userBoost = userBoosts[account];
+    (uint128 boost, uint128 _queuedBoost) = (userBoost.boost, userBoost.queuedBoost);
+    return balanceOf(account) - boost - _queuedBoost;
+}
+
+/// @inheritdoc IBGT
 function burnExceedingReserves() external {
-    // ...
-    // 잠재적 민팅량 계산
+    IBlockRewardController br = IBlockRewardController(_blockRewardController);
     uint256 potentialMintableBGT = HISTORY_BUFFER_LENGTH * br.getMaxBGTPerBlock();
-    // ...
-    // 현재 잔액과 요구량 비교
+    uint256 currentReservesAmount = address(this).balance;
+    uint256 outstandingRequiredAmount = totalSupply() + potentialMintableBGT;
     if (currentReservesAmount <= outstandingRequiredAmount) return;
-    // ...
+
+    uint256 excessAmountToBurn = currentReservesAmount - outstandingRequiredAmount;
+    SafeTransferLib.safeTransferETH(address(0), excessAmountToBurn);
+
+    emit ExceedingReservesBurnt(msg.sender, excessAmountToBurn);
 }
 
 // 컨트랙트 상태 일관성 검증
@@ -57,6 +98,58 @@ modifier invariantCheck() {
 function _invariantCheck() private view {
     if (address(this).balance < totalSupply()) InvariantCheckFailed.selector.revertWith();
 }
+```
+
+[`BlockRewardController.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BlockRewardController.sol#L167-L210)
+
+```solidity
+/// @inheritdoc IBlockRewardController
+function computeReward(
+    uint256 boostPower,
+    uint256 _rewardRate,
+    uint256 _boostMultiplier,
+    int256 _rewardConvexity
+)
+    public
+    pure
+    returns (uint256 reward)
+{
+    // On conv == 0, mathematical result should be max reward even for boost == 0 (0^0 = 1)
+    // but since BlockRewardController enforces conv > 0, we're not adding code for conv == 0 case
+    if (boostPower > 0) {
+        // Compute intermediate parameters for the reward formula
+        uint256 one = FixedPointMathLib.WAD;
+
+        if (boostPower == one) {
+            // avoid approx errors in the following code
+            reward = FixedPointMathLib.mulWad(_rewardRate, _boostMultiplier);
+        } else {
+            // boost^conv ∈ (0, 1]
+            uint256 tmp_0 = uint256(FixedPointMathLib.powWad(int256(boostPower), _rewardConvexity));
+            // 1 + mul * boost^conv ∈ [1, 1 + mul]
+            uint256 tmp_1 = one + FixedPointMathLib.mulWad(_boostMultiplier, tmp_0);
+            // 1 - 1 / (1 + mul * boost^conv) ∈ [0, mul / (1 + mul)]
+            uint256 tmp_2 = one - FixedPointMathLib.divWad(one, tmp_1);
+
+            // @dev Due to splitting fixed point ops, [mul / (1 + mul)] * (1 + mul) may be slightly > mul
+            uint256 coeff = FixedPointMathLib.mulWad(tmp_2, one + _boostMultiplier);
+            if (coeff > _boostMultiplier) coeff = _boostMultiplier;
+
+            reward = FixedPointMathLib.mulWad(_rewardRate, coeff);
+        }
+    }
+}
+// boostpower = 100%일 경우 발행되는 BGT양
+/// @inheritdoc IBlockRewardController
+function getMaxBGTPerBlock() public view returns (uint256 amount) {
+    amount = computeReward(FixedPointMathLib.WAD, rewardRate, boostMultiplier, rewardConvexity);
+    if (amount < minBoostedRewardRate) {
+        amount = minBoostedRewardRate;
+    }
+    amount += baseRate;
+}
+
+
 ```
 
 ***
