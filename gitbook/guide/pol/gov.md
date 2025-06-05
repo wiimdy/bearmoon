@@ -84,7 +84,10 @@ contract ComponentValidator {
 >     * 부당한 결정 및 권한행사에 대한 챌린지&#x20;
 > * **거버넌스 참여자들의 이해관계를 투명하게 공개하고 직접적인 이해관계가 있는 제안에 대해서는 투표 참여 제한 또는 약화**
 >   * 프로토콜에 관한 투표의 경우 프로토콜 관련자 투표 참여 제한
->   * 코어에 관한 투표의 경우 재단 및 재단 물량 벨리데이터의 참여가능 BGT 물량 30%로 제한
+>   * 코어에 관한 투표의 경우 재단 및 재단 물량 검증자의 참여가능 BGT 물량 30%로 제한
+> * 재단 후원 검증자로 인한 중앙화 우려 해소
+>   * **재단으로부터 물량을 받은 검증자의 재단 물량 공개 및 재단 보유량 대쉬보드 제공**
+>   * **각 검증자의 운영 주체, 재단과의 관계 투명하게 공개**
 
 #### Best Practice
 
@@ -128,11 +131,16 @@ contract TransparentGovernance {
 
 `Informational`
 
+프로토콜 역시 온체인 거버넌스를 구현할 계획을 가지고 있지만 현재 구현이 안된 상태이기에 `Informational` 평가
+
 #### 가이드라인
 
-> * **온체인 구현 전까지 포럼 투표와 snapshot 등을 결합한 하이브리드 시스템으로 투표의 투명성과 검증 가능성 확보.**
-> * **거버넌스 참여에 대한 적절한 인센티브를 제공하여 투표율을 높여야함.**
-> * **시빌 공격을 통해 포럼의 여론을 조작하려는 행위를 방지하는 메커니즘 도입.**
+> * **온체인 구현 전까지 포럼 투표에 대해 투명성과 검증 가능성 확보**
+>   * 포럼 투표에 대한 데이터를 모아 온체인 데이터로 올려 누구나 볼 수 있게 구현
+>   * 투표과정에 대해서도 5분단위의 스냅샷을 활용하여 결과 발표까지 실시간으로 반영되게 구현
+> * **시빌 공격 방지 메커니즘 도입**
+>   * 최소한의 BGT 제한 도입(100 BGT)
+>   * 동일 IP/디바이스 다중 계정 추적 및 차단
 
 #### Best Practice
 
@@ -173,71 +181,34 @@ InitialGovernorParameters memory params = InitialGovernorParameters({
 `커스텀 코드`&#x20;
 
 ```solidity
-// 거버넌스 투표 참여자에게 토큰 보상을 지급하여 투표율을 높이고 커뮤니티 참여를 장려하는 인센티브 시스템
-
-contract ParticipationIncentive {
-    mapping(address => uint256) public participationRewards;
-    uint256 public constant VOTE_REWARD = 10e18;
+// 포럼 투표 투명성 및 시빌 저항성을 위한 온체인 검증 시스템
+contract ForumVoteTracker {
+    struct VoteSnapshot {
+        uint256 timestamp;
+        uint256 forVotes;
+        uint256 againstVotes;
+        bytes32 dataHash;
+    }
     
-    function castVoteWithReward(uint256 proposalId, bool support) external {
-        require(getBGTBalance(msg.sender) > 0, "No voting power");
-        participationRewards[msg.sender] += VOTE_REWARD;
-        emit VoteCast(proposalId, msg.sender, support);
+    mapping(uint256 => VoteSnapshot[]) public proposalSnapshots;
+    mapping(address => uint256) public minBGTRequired;
+    
+    function recordSnapshot(uint256 proposalId, uint256 forVotes, uint256 againstVotes) external {
+        require(getBGTBalance(msg.sender) >= 100e18, "Insufficient BGT");
+        
+        proposalSnapshots[proposalId].push(VoteSnapshot({
+            timestamp: block.timestamp,
+            forVotes: forVotes,
+            againstVotes: againstVotes,
+            dataHash: keccak256(abi.encode(forVotes, againstVotes, block.timestamp))
+        }));
     }
 }
 ```
 
 ***
 
-### 위협 4: 재단 후원 기반 검증자로 인한 중앙화 우려 <a href="#ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8" id="ec-9c-84-ed-98-914-ec-9e-ac-eb-8b-a8-ed-9b-84-ec-9b-90-ea-b8-b0-eb-b0-98-validator-eb-a1-9c-ec-9d-b8"></a>
-
-검증자의 자산이 재단 물량일 경우 검증자가 재단에 종속받는 구조가 되므로 거버넌스 투표가 재단에 의해 중앙화될 우려가 있다.
-
-#### 영향도
-
-`Informational`
-
-#### 가이드라인
-
-> * **검증자 운영에 필요한 자산의 출처를 다양화하고, 재단 의존도를 점진적으로 줄이는 계획 수립.**
-> * **각 검증자의 운영 주체, 재단과의 관계를 투명하게 공개하여 커뮤니티가 정보에 기반한 선택을 할 수 있도록 함.**
-> * **재단으로부터 물량을 받은 경우 비율을 공개하여 중앙화 우려를 해소해야함.**
-
-#### Best Practice
-
-&#x20;[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L42-L43)
-
-```solidity
-// Check if the token implements ERC20Votes and ERC20 metadata
-_checkIfERC20Votes(token);
-```
-
-`커스텀 코드`&#x20;
-
-```solidity
-// 검증자의 재단 의존도를 모니터링하고 30% 이하로 제한하여 중앙화를 방지하는 독립성 점수 시스템
-
-contract ValidatorIndependence {
-    struct ValidatorInfo {
-        uint256 foundationStake;
-        uint256 communityStake;
-        uint256 independenceScore;
-    }
-    
-    mapping(address => ValidatorInfo) public validators;
-    uint256 public constant MAX_FOUNDATION_RATIO = 30e16; // 30%
-    
-    function registerValidator(address validator, uint256 foundationStake, uint256 communityStake) external {
-        uint256 ratio = (foundationStake * 1e18) / (foundationStake + communityStake);
-        require(ratio <= MAX_FOUNDATION_RATIO, "Excessive foundation dependency");
-        validators[validator] = ValidatorInfo(foundationStake, communityStake, 1e18 - ratio);
-    }
-}
-```
-
-***
-
-### 위협 5: BGT 독점에 의한 거버넌스 조작 <a href="#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91" id="ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91"></a>
+### 위협 4: BGT 독점에 의한 거버넌스 조작 <a href="#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91" id="ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91"></a>
 
 대규모 프로토콜이 사용자를 독점할 경우 전체 BGT 중 20% 이상을 얻을 수 있고 하나의 프로토콜이 BGT를 대량 보유할 경우 투표를 조작하여 프로토콜에 유리한 정책을 강제할 수 있다.
 
