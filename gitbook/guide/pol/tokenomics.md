@@ -162,29 +162,377 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 
 `Medium`
 
+일부 금고에 유동성이 집중되면 타 금고 및 프로토콜의 유동성 고갈로 시장 왜곡과 서비스 불균형이 발생할 수 있지만, 전체 시스템의 즉각적인 마비나 치명적 손실로 직결되지는 않기 때문
+
 #### 가이드라인
 
-> * **여러 종류 보상 금고에게 나눠 주도록 강제**
-> * **운영자/검증자 보상 할당 변경 시 투명한 로그 기록 및 모니터링**
-> * **담합 의심 시 거버넌스/커뮤니티 신고 및 감사 프로세스 마련**
-> * **금고별 TVL, APR, 유동성 집중도 실시간 대시보드 제공**
+>
+>
+> * **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
+>   * Weight 구조체를 통해 보상 금고 주소 관리
+>   * 보상 금고 주소(receiver)는 보상을 받기 위해서는 whitelist에 등록되어야함&#x20;
+>   * \_checkForDuplicateReceivers를 통해 중복 검증
+>   * ```solidity
+>     /// @dev Represents 100%. Chosen to be less granular.
+>     uint96 internal constant ONE_HUNDRED_PERCENT = 1e4;
+>     /// @notice The maximum weight a vault can assume in the reward allocation
+>     uint96 public maxWeightPerVault;
+>     // 현재 3000으로 설정되어있음!!
+>     ```
+>   * [maxWeightPerVault](https://berascan.com/address/0xdf960E8F3F19C481dDE769edEDD439ea1a63426a#readProxyContract#F18)
+> * **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
+>   * <pre class="language-solidity"><code class="lang-solidity"><strong>// function queueNewRewardAllocation
+>     </strong><strong>if (startBlock &#x3C;= block.number + rewardAllocationBlockDelay) {
+>     </strong>    InvalidStartBlock.selector.revertWith();
+>     }
+>     // function _validateWeights
+>     if (totalWeight != ONE_HUNDRED_PERCENT) {
+>             InvalidRewardAllocationWeights.selector.revertWith();
+>         }
+>     </code></pre>
+>   * 딜레이를 주고 한번에 모든 보상을 나눠 할당하도록 해서 특정 금고에 연속적인 트랜잭션을 통해 보상 집중 방지
+> * **하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지**
+>   * **queueNewRewardAllocation**: operator 전체 할당 한도 체크
+>   * **activateReadyQueuedRewardAllocation**: 실제 할당 반영 및 누적값 갱신
+>   * **lastActiveWeights**: validator별 마지막 활성화된 RewardAllocation 추적
+>   * **operatorVaultAllocations**: operator별 vault별 전체 할당 비율 추적
+>   * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-4) 참고
+> * **여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지**
+>   *   모든 운영자들이 특정 금고에 할당한 전체 합계가 일정 한도를 초과하면,
+>
+>       해당 금고에 대한 보상 할당을 일시적으로 중단(=RewardAllocation에서 해당 vault를 선택 불가)하는 기능 도입
+>   * vault별 전체 할당 합계를 추적
+>   * 한도 초과 시, 해당 vault는 RewardAllocation에 포함 불가(큐잉 자체가 revert)
+>   * 한도 미만이 되면 다시 할당 가능
+>   * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-5) 참고
 
 #### Best Practice&#x20;
 
 &#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L392-L394)
 
-```solidity
-function _validateWeights(Weight[] calldata weights) internal view {
-    // 보상 금고당 할당량 최대치 검증
+<pre class="language-solidity"><code class="lang-solidity">/// @notice Mapping of receiver address to whether they are white-listed or not.
+mapping(address receiver => bool) public isWhitelistedVault;
+
+/// @dev Represents 100%. Chosen to be less granular.
+uint96 internal constant ONE_HUNDRED_PERCENT = 1e4;
+/// @notice The maximum weight a vault can assume in the reward allocation
+uint96 public maxWeightPerVault;
+// 현재 3000으로 설정되어있음!!
+
+// RewardAllocation 구조체는 여러 개의 Weight로 구성
+struct Weight {
+    address receiver;           // 보상 금고(RewardVault) 주소
+    uint96 percentageNumerator; // 해당 금고가 받을 보상 비율
+}
+
+/// @inheritdoc IBeraChef
+function queueNewRewardAllocation(
+    bytes calldata valPubkey,
+    uint64 startBlock,
+    Weight[] calldata weights
+)
+    external
+    onlyOperator(valPubkey)
+{
+    // adds a delay before a new reward allocation can go into effect
+    if (startBlock &#x3C;= block.number + rewardAllocationBlockDelay) {
+        InvalidStartBlock.selector.revertWith();
+    }
+
+    RewardAllocation storage qra = queuedRewardAllocations[valPubkey];
+
+    // do not allow to queue a new reward allocation if there is already one queued
+    if (qra.startBlock > 0) {
+        RewardAllocationAlreadyQueued.selector.revertWith();
+    }
+
+    // validate if the weights are valid.
+    _validateWeights(valPubkey, weights);
+
+    // queue the new reward allocation
+    qra.startBlock = startBlock;
+    Weight[] storage storageWeights = qra.weights;
+    for (uint256 i; i &#x3C; weights.length;) {
+        storageWeights.push(weights[i]);
+        unchecked {
+            ++i;
+        }
+    }
+    emit QueueRewardAllocation(valPubkey, startBlock, weights);
+}
+
+function _validateWeights(bytes memory valPubkey, Weight[] calldata weights) internal {
     if (weights.length > maxNumWeightsPerRewardAllocation) {
         TooManyWeights.selector.revertWith();
     }
-    
-    // 중복 보상 금고 체크
     _checkForDuplicateReceivers(valPubkey, weights);
-    // ...
+
+    uint96 totalWeight;
+    for (uint256 i; i &#x3C; weights.length;) {
+        Weight calldata weight = weights[i];
+
+        if (weight.percentageNumerator == 0 || weight.percentageNumerator > maxWeightPerVault) {
+            InvalidWeight.selector.revertWith();
+        }
+
+        // **receiver가 whitelist에 등록된 vault인지 확인**
+        if (!isWhitelistedVault[weight.receiver]) {
+            NotWhitelistedVault.selector.revertWith();
+        }
+        totalWeight += weight.percentageNumerator;
+        unchecked { ++i; }
+    }
+    if (totalWeight != ONE_HUNDRED_PERCENT) {
+        InvalidRewardAllocationWeights.selector.revertWith();
+    }
 }
+
+function _checkForDuplicateReceivers(bytes memory valPubkey, Weight[] calldata weights) internal {
+    // use pubkey as identifier for the slot
+    bytes32 slotIdentifier = keccak256(valPubkey);
+
+    for (uint256 i; i &#x3C; weights.length;) {
+        address receiver = weights[i].receiver;
+        bool duplicate;
+
+        assembly ("memory-safe") {
+            // Get free memory pointer
+            let memPtr := mload(0x40)
+            // Store receiver address at the first 32 bytes position
+            mstore(memPtr, receiver)
+            // Store slot identifier at the next 32 bytes position
+            mstore(add(memPtr, 0x20), slotIdentifier)
+            // Calculate storage key
+            let storageKey := keccak256(memPtr, 0x40)
+            // Check if receiver is already seen
+            duplicate := tload(storageKey)
+            if iszero(duplicate) { tstore(storageKey, 1) }
+        }
+        if (duplicate) {
+            DuplicateReceiver.selector.revertWith(receiver);
+<strong>        }
+</strong>        unchecked {
+            ++i;
+        }
+    }
+}
+</code></pre>
+
+`커스텀 코드`
+
+<details>
+
+<summary>하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지</summary>
+
+<pre class="language-solidity"><code class="lang-solidity"><strong>// operator별, vault별 전체 할당 비율(누적)
+</strong>mapping(address operator => mapping(address vault => uint96 totalAllocated)) public operatorVaultAllocations;
+
+// validator(pubkey)별, 마지막으로 활성화된 RewardAllocation의 weights 저장
+mapping(bytes valPubkey => Weight[]) internal lastActiveWeights;
+
+function _validateOperatorTotalAllocation(
+    address operator,
+    Weight[] calldata newWeights,
+    Weight[] storage oldWeights,
+    uint96 maxTotalPerVault
+) internal view {
+    // 임시 mapping: vault별 누적 합계
+    mapping(address => uint96) memory tempTotal;
+
+    // 기존 operatorVaultAllocations 복사
+    // (oldWeights는 해당 validator의 이전 할당, newWeights는 새로 큐잉할 할당)
+    // 기존 할당에서 oldWeights만큼 빼고, newWeights만큼 더함
+
+    // 1. 기존 operatorVaultAllocations 복사
+    for (uint i = 0; i &#x3C; newWeights.length; i++) {
+        address vault = newWeights[i].receiver;
+        tempTotal[vault] = operatorVaultAllocations[operator][vault];
+    }
+    for (uint i = 0; i &#x3C; oldWeights.length; i++) {
+        address vault = oldWeights[i].receiver;
+        tempTotal[vault] = operatorVaultAllocations[operator][vault];
+    }
+
+    // 2. oldWeights만큼 빼기
+    for (uint i = 0; i &#x3C; oldWeights.length; i++) {
+        address vault = oldWeights[i].receiver;
+        tempTotal[vault] -= oldWeights[i].percentageNumerator;
+    }
+
+    // 3. newWeights만큼 더하기 및 한도 체크
+    for (uint i = 0; i &#x3C; newWeights.length; i++) {
+        address vault = newWeights[i].receiver;
+        tempTotal[vault] += newWeights[i].percentageNumerator;
+        require(
+            tempTotal[vault] &#x3C;= maxTotalPerVault,
+            "Too much allocation to one vault for this operator"
+        );
+    }
+}
+
+function _updateOperatorVaultAllocations(
+    address operator,
+    Weight[] storage oldWeights,
+    Weight[] calldata newWeights
+) internal {
+    // oldWeights만큼 빼기
+    for (uint i = 0; i &#x3C; oldWeights.length; i++) {
+        address vault = oldWeights[i].receiver;
+        operatorVaultAllocations[operator][vault] -= oldWeights[i].percentageNumerator;
+    }
+    // newWeights만큼 더하기
+    for (uint i = 0; i &#x3C; newWeights.length; i++) {
+        address vault = newWeights[i].receiver;
+        operatorVaultAllocations[operator][vault] += newWeights[i].percentageNumerator;
+    }
+}
+
+function queueNewRewardAllocation(
+    bytes calldata valPubkey,
+    uint64 startBlock,
+    Weight[] calldata weights
+) external onlyOperator(valPubkey) {
+    // ... 기존 유효성 검사 ...
+
+    // 1. operator 주소 추출
+    address operator = beaconDepositContract.getOperator(valPubkey);
+
+    // 2. 해당 validator의 이전 활성화된 RewardAllocation weights
+    Weight[] storage oldWeights = lastActiveWeights[valPubkey];
+
+    // 3. 전체 할당 한도 체크 (예: 70% = 7000)
+    _validateOperatorTotalAllocation(operator, weights, oldWeights, 7000);
+
+    // ... 기존 큐잉 로직 ...
+}
+
+function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external onlyDistributor {
+    if (!isQueuedRewardAllocationReady(valPubkey, block.number)) return;
+    RewardAllocation storage qra = queuedRewardAllocations[valPubkey];
+    uint64 startBlock = qra.startBlock;
+
+    // operator 주소 추출
+    address operator = beaconDepositContract.getOperator(valPubkey);
+
+    // 이전 weights
+    Weight[] storage oldWeights = lastActiveWeights[valPubkey];
+
+    // operatorVaultAllocations 갱신
+    _updateOperatorVaultAllocations(operator, oldWeights, qra.weights);
+
+    // lastActiveWeights 갱신
+    delete lastActiveWeights[valPubkey];
+    for (uint i = 0; i &#x3C; qra.weights.length; i++) {
+        lastActiveWeights[valPubkey].push(qra.weights[i]);
+    }
+
+    activeRewardAllocations[valPubkey] = qra;
+    emit ActivateRewardAllocation(valPubkey, startBlock, qra.weights);
+    delete queuedRewardAllocations[valPubkey];
+}
+
+</code></pre>
+
+
+
+</details>
+
+<details>
+
+<summary>여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지</summary>
+
+```solidity
+// vault별 전체 할당 합계(모든 operator의 합)
+mapping(address vault => uint96 totalAllocatedByAllOperators) public vaultTotalAllocations;
+
+// vault별 할당 한도(예: 8000 = 80%, 해당 수량은 거버넌스를 통해 수정)
+uint96 public constant VAULT_TOTAL_ALLOCATION_LIMIT = 8000;
+
+function _validateVaultTotalAllocation(
+    Weight[] calldata newWeights,
+    Weight[] storage oldWeights
+) internal view {
+    // 임시 mapping: vault별 누적 합계
+    mapping(address => uint96) memory tempTotal;
+
+    // 기존 vaultTotalAllocations 복사
+    for (uint i = 0; i < newWeights.length; i++) {
+        address vault = newWeights[i].receiver;
+        tempTotal[vault] = vaultTotalAllocations[vault];
+    }
+    for (uint i = 0; i < oldWeights.length; i++) {
+        address vault = oldWeights[i].receiver;
+        tempTotal[vault] = vaultTotalAllocations[vault];
+    }
+
+    // oldWeights만큼 빼기
+    for (uint i = 0; i < oldWeights.length; i++) {
+        address vault = oldWeights[i].receiver;
+        tempTotal[vault] -= oldWeights[i].percentageNumerator;
+    }
+
+    // newWeights만큼 더하기 및 한도 체크
+    for (uint i = 0; i < newWeights.length; i++) {
+        address vault = newWeights[i].receiver;
+        tempTotal[vault] += newWeights[i].percentageNumerator;
+        require(
+            tempTotal[vault] <= VAULT_TOTAL_ALLOCATION_LIMIT,
+            "Vault allocation limit exceeded"
+        );
+    }
+}
+
+function queueNewRewardAllocation(
+    bytes calldata valPubkey,
+    uint64 startBlock,
+    Weight[] calldata weights
+) external onlyOperator(valPubkey) {
+    // ... 기존 유효성 검사 ...
+
+    // 해당 validator의 이전 활성화된 RewardAllocation weights
+    Weight[] storage oldWeights = lastActiveWeights[valPubkey];
+
+    // vault별 전체 할당 한도 체크
+    _validateVaultTotalAllocation(weights, oldWeights);
+
+    // ... 기존 큐잉 로직 ...
+}
+
+function _updateVaultTotalAllocations(
+    Weight[] storage oldWeights,
+    Weight[] calldata newWeights
+) internal {
+    // oldWeights만큼 빼기
+    for (uint i = 0; i < oldWeights.length; i++) {
+        address vault = oldWeights[i].receiver;
+        vaultTotalAllocations[vault] -= oldWeights[i].percentageNumerator;
+    }
+    // newWeights만큼 더하기
+    for (uint i = 0; i < newWeights.length; i++) {
+        address vault = newWeights[i].receiver;
+        vaultTotalAllocations[vault] += newWeights[i].percentageNumerator;
+    }
+}
+
+function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external onlyDistributor {
+    if (!isQueuedRewardAllocationReady(valPubkey, block.number)) return;
+    RewardAllocation storage qra = queuedRewardAllocations[valPubkey];
+    uint64 startBlock = qra.startBlock;
+
+    // 이전 weights
+    Weight[] storage oldWeights = lastActiveWeights[valPubkey];
+
+    // vault별 전체 할당 합계 갱신
+    _updateVaultTotalAllocations(oldWeights, qra.weights);
+
+    // ... 기존 로직 ...
+}
+
 ```
+
+
+
+</details>
 
 ***
 
