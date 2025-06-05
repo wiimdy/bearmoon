@@ -440,15 +440,11 @@ contract StakingRewards is ... {
 
 `Low`&#x20;
 
-공격은 특정 조건(Lp 토큰 0)에서 발생하며, 보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생한다. 사용자에게 제공될 보상이 사라지나 발생 확률이 매우 적기 때문에 영향도를 Low로 평가한다.
+공격은 특정 조건(totalsupply == 0)에서 발생하며, 보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생한다. 사용자에게 제공될 보상이 사라지나 발생 확률이 매우 적기 때문에 영향도를 Low로 평가한다.
 
 #### 가이드라인
 
-> * **notifyRewardAmount 호출 시 LP 토큰 잔고가 0인 경우, 보상 누적 또는 이월을 제한하고 명확한 revert 사유를 제공해야 함.**
-> * **보상 총액 기록이 중복 누적되지 않도록 `notifyRewardAmount`와 LP 인출 간의 상호작용에 대한 상태 검증 로직을 추가.**
-> * **LP 토큰 전량 인출 시 보상 분배 및 이월 정책을 명확히 정의하고 사용자에게 사전 안내.**
-> * **APR 급등 및 revert 발생 가능성을 사전에 감지하여 스테이킹 재개 시 보상 분배를 일시적으로 제한하거나 관리자 승인 절차를 거치도록 설계.**
-> * **보상 분배 및 이월 관련 이벤트를 모두 기록하여 이상 징후 발생 시 신속하게 감사 및 롤백이 가능하도록 시스템화.**
+> * **리워드 볼트 생성시 최소 LP 토큰 예치로 totalsupply가 0이 되는 것을 방지**
 
 #### Best Practice&#x20;
 
@@ -460,7 +456,7 @@ contract RewardVaultFactory {
     // ... 기존 코드 ...
     
     // 최소 LP 토큰 예치량 설정
-    uint256 public constant MIN_INITIAL_LP_AMOUNT = 1e18; // 예: 1 LP 토큰
+    uint256 public constant MIN_INITIAL_LP_AMOUNT = 1e6; // 예: LP 토큰
     
     // 초기 LP 예치 여부 추적
     mapping(address => bool) public initialLPDeposited;
