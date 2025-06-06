@@ -151,6 +151,12 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 #### 가이드라인&#x20;
 
 > * **예치, 인출 로직 추가 및 검증, 거버넌스를 통해 조정 가능한 출금 제한 및 잠금 기간 설정**
+>   * **출금 대기 기간**
+>     *   거버넌스의 타임락 기간(2일) 과 동일하기 설정.&#x20;
+>
+>         ```solidity
+>         uint256 public constant WITHDRAWAL_LOCK_PERIOD = 2 days;
+>         ```
 >   *   **requestWithdrawal 시 검증:**
 >
 >       * 호출자가 유효한 검증자인지 (또는 권한을 위임받은 운영자인지).
@@ -194,7 +200,17 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 >     * **요청 (PENDING):** requestWithdrawal 호출 시 Withdrawal 구조체 생성, unlockTime 계산 후 저장.
 >     * **처리 대기:** block.timestamp < unlockTime 동안 PENDING 상태 유지.
 >     * **수령 준비 (READY\_FOR\_CLAIM):** block.timestamp >= unlockTime이 되고, processWithdrawal (또는 유사한 시스템 로직)을 통해 상태 변경.
->     * **완료 (COMPLETED):** 검증자가 claimWithdrawal을 호출하여 자금 수령 시 상태 변경.
+>     * **완료 (COMPLETED):** 검증자가 claimWithdrawal을 호출하여 자금 수령 시 상태 변경.\
+>
+>   * **페널티 설정 근거:**
+>     * **기회비용 및 시스템 안정성 기여도 보상:** 정상적인 출금 절차를 따르는 다른 검증자들은 그 기간 동안 네트워크 안정성에 기여하고 유동성을 제공합니다. 긴급 출금은 이러한 암묵적인 약속을 깨는 것이므로, 그에 대한 비용을 지불하는 것입니다.
+>     * **긴급 출금 남용 방지:** 페널티가 없다면 모든 사람이 긴급 출금을 사용하려 할 것이므로, 꼭 필요한 경우가 아니면 사용하지 않도록 유도하는 억제책입니다.
+>     * **페널티 수준:** 너무 낮으면 억제 효과가 없고, 너무 높으면 실제로 긴급한 상황에 처한 검증자에게 과도한 부담이 될 수 있습니다. 프로토콜의 장기적인 안정성과 검증자의 유연성 사이의 균형을 고려하여 설정됩니다 (예: 전체 예치금의 5\~15% 범위).\
+>
+>     * Base\_Penalty\_Rate: 기본적인 최소 페널티 비율 (예: 5%).
+>     * Time\_Remaining\_In\_Lock: 정상적인 잠금 기간 중 남은 시간.
+>     * Total\_Lock\_Period: 원래 설정된 총 잠금 기간.
+>     * Additional\_Penalty\_Factor: 잠금 기간을 일찍 어길수록 추가로 부과되는 페널티 계수 (예: 10%).
 
 {% hint style="danger" %}
 **긴급 인출 기능 구현 시 페널티 메커니즘 적용**
@@ -205,32 +221,26 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 * Penalty\_Rate = Base\_Penalty\_Rate + (Time\_Remaining\_In\_Lock / Total\_Lock\_Period) \* Additional\_Penalty\_Factor
 {% endhint %}
 
-* Base\_Penalty\_Rate: 기본적인 최소 페널티 비율 (예: 5%).
-* Time\_Remaining\_In\_Lock: 정상적인 잠금 기간 중 남은 시간.
-* Total\_Lock\_Period: 원래 설정된 총 잠금 기간.
-* Additional\_Penalty\_Factor: 잠금 기간을 일찍 어길수록 추가로 부과되는 페널티 계수 (예: 10%).
-* 간단하게는 고정 비율 페널티(예: 출금액의 10%)를 적용할 수도 있습니다.
-
-**페널티 비율 설정 근거:**
-
-* **기회비용 및 시스템 안정성 기여도 보상:** 정상적인 출금 절차를 따르는 다른 검증자들은 그 기간 동안 네트워크 안정성에 기여하고 유동성을 제공합니다. 긴급 출금은 이러한 암묵적인 약속을 깨는 것이므로, 그에 대한 비용을 지불하는 것입니다.
-* **긴급 출금 남용 방지:** 페널티가 없다면 모든 사람이 긴급 출금을 사용하려 할 것이므로, 꼭 필요한 경우가 아니면 사용하지 않도록 유도하는 억제책입니다.
-* **페널티 수준:** 너무 낮으면 억제 효과가 없고, 너무 높으면 실제로 긴급한 상황에 처한 검증자에게 과도한 부담이 될 수 있습니다. 프로토콜의 장기적인 안정성과 검증자의 유연성 사이의 균형을 고려하여 설정됩니다 (예: 전체 예치금의 5\~15% 범위).
-
-
-
 #### Best Practice&#x20;
 
 ```solidity
 // 출금 로직 추가 및 lock time, emergency 구현
 function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentrant {
+    
+    // 기본 페널티 계수 (BPS 단위, 예: 5%는 500)
+    uint256 public basePenaltyBps = 500;
+    // 추가 페널티 계수 (BPS 단위, 예: 10%는 1000)
+    uint256 public additionalPenaltyBps = 1000;
+    
+    uint256 public constant WITHDRAWAL_LOCK_PERIOD = 2 days;
+ 
     require(amount > 0, "Amount must be > 0");
     require(validatorStakes[msg.sender] >= amount, "Insufficient staked balance for withdrawal request");
 
     validatorStakes[msg.sender] -= amount; 
 
     uint256 currentId = nextWithdrawalId;
-    uint256 unlockTime = _isEmergency ? block.timestamp : block.timestamp + withdrawalLockupPeriod;
+    uint256 unlockTime = block.timestamp + WITHDRAWAL_LOCK_PERIOD;
 
     validatorWithdrawalRequests[msg.sender].push(Withdrawal({
         id: currentId,
