@@ -4,27 +4,27 @@ icon: user-check
 
 # PoL 보안 가이드라인: 검증자
 
-<table><thead><tr><th width="609.89453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="validator.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#id-3-cap">#id-3-cap</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="609.89453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#id-1">#id-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#id-3-cap">#id-3-cap</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
-### 위협 1: 블록 보상 분배 시 검증자의 중복 수령, 누락
+### 위협 1: 블록 생성 보상 분배 시 검증자의 보상 중복 수령, 누락
 
 검증자가 블록 생성 보상을 실행 레이어에서 수령하므로 합의 레이어의 정보를 가져와야 한다. \
 이 과정에서 정확하지 않는 정보 확인이 진행되면 블록 보상 제공 오류가 발생한다.
 
 #### 영향도
 
-`Medium`&#x20;
+`Low`&#x20;
 
-검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나, EIP-4788 기반 Merkle root 검증의 견고함이 공격 성공 가능성을 현저히 낮추므로 Medium으로 평가된다.
+검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나, Merkle root 검증 기법으로 공격 성공 가능성이 매우 낮아Low로 평가한다.
 
 #### 가이드 라인
 
 > * **동일 timestamp 중복 처리 방지 메커니즘 구현**
->   * timestamp를 eip-4788의 history\_buf\_length로 mod 연산을 하여 `_processedTimestampsBuffer`에 삽입.
+>   * timestamp를 eip-4788의 history\_buf\_length로 mod 연산을 하여 `_processedTimestampsBuffer`에 삽입
 >   * 최소 4.55 시간 (8191 \* 2초)이 지나면 가장 오래된 타임스탬프 처리 기록이 새로운 기록으로 덮어씌워지며 중복 검증 진행
 > *   **Beacon block root과 proposer index/pubkey 의 암호학적 검증**
 >
->     * SSZ.verifyProof 함수를 사용하여, 특정 타임스탬프의 비콘 루트(beacon root)를 기준으로 해당 제안자(proposer)의 보상 자격을 검증.
+>     * `SSZ.verifyProof` 함수를 사용하여, 특정 타임스탬프의 비콘 루트를 기준으로 해당 제안자의 보상 자격을 검증
 >     * 검증 실패시 revert 발생
 >
 >     ```solidity
@@ -91,18 +91,18 @@ function _verifyProposerIndexInBeaconBlock(
 
 `Low`&#x20;
 
-악의적 운영자로 인한 피해가 위임 자산의 직접적인 손실보다는, 평판 저하 및 미래의 BGT 위임으로 수익 감소에 국한되어 Low로 평가된다.
+악의적 운영자로 인한 피해가 위임 자산의 직접적인 손실보다는 평판 저하 및 미래의 BGT 위임으로 수익 감소에 국한되어 Low로 평가한다.
 
 #### 가이드라인
 
 > * **운영자 변경 시 queue 메커니즘과 시간 지연을 통한 급작스러운 변경 방지**
 >   * key = pubkey, value = new operator로 설정하여 운영자 변경 요청 queue 삽입
->   * queue에 1 day 있어야 operator 변경 진행
+>   * 운영자 변경시 delay 1일 (현재 컨트랙트에 구현 되어 있음) 지나야 가능
 > * **거버넌스 또는 신뢰할 수 있는 제3자를 통한 운영자 강제 변경/취소 메커니즘**
->   * `cancelOperatorChange` msg.sender를 현재 operator, governance 로 설정
->   * operator의 의도적인 commission 상승, 하락 같은 행위에 페널티로 운영자 변경
+>   * `cancelOperatorChange` msg.sender가 operator, governance 인지 검증 진행
+>   * 운영자의 의도적인 commission 급상승, 급하락 같은 행위에 페널티 부여
 > * **운영자 변경 시 기존 예치 잔액에 대한 잠금 기간 설정 및 점진적 권한 이전**
->   * 운영자에 대한 booster들의 판단이 진행 되도록 처음에는 보상 분배 권한만 진행 → unboost할 수 있는 시간을 주어진 후 commission 변경 권한 부여
+>   * 운영자에 대한 booster들의 판단이 진행 되도록 처음에는 보상 분배 권한만 부여 → unboost할 수 있는 시간(현재 unboost delay = 2000 block)을 주어진 후 commission 변경 권한 부여
 > * **운영자 주소가 zero address로 적용되지 않도록 방지**
 
 #### Best Practice&#x20;
@@ -146,7 +146,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 `Low`&#x20;
 
-자발적 출금 로직 부재로 자금이 일시적으로 동결되지만, 이는 자산의 직접적인 손실이나 탈취가 아니며 향후 검증자 자격(cap) 변동 시 회수 가능하므로 영향은 Low로 평가된다.
+자발적 출금 로직 부재로 자금이 일시적으로 동결되지만, 이는 자산의 직접적인 손실이나 탈취가 아니며 향후 검증자 자격(cap) 변동 시 회수 가능하므로 영향도를 Low로 평가한다.
 
 #### 가이드라인&#x20;
 
@@ -203,6 +203,8 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 * Penalty\_Amount = Withdrawal\_Amount \* Penalty\_Rate
 * Penalty\_Rate = Base\_Penalty\_Rate + (Time\_Remaining\_In\_Lock / Total\_Lock\_Period) \* Additional\_Penalty\_Factor
+{% endhint %}
+
 * Base\_Penalty\_Rate: 기본적인 최소 페널티 비율 (예: 5%).
 * Time\_Remaining\_In\_Lock: 정상적인 잠금 기간 중 남은 시간.
 * Total\_Lock\_Period: 원래 설정된 총 잠금 기간.
@@ -214,7 +216,8 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 * **기회비용 및 시스템 안정성 기여도 보상:** 정상적인 출금 절차를 따르는 다른 검증자들은 그 기간 동안 네트워크 안정성에 기여하고 유동성을 제공합니다. 긴급 출금은 이러한 암묵적인 약속을 깨는 것이므로, 그에 대한 비용을 지불하는 것입니다.
 * **긴급 출금 남용 방지:** 페널티가 없다면 모든 사람이 긴급 출금을 사용하려 할 것이므로, 꼭 필요한 경우가 아니면 사용하지 않도록 유도하는 억제책입니다.
 * **페널티 수준:** 너무 낮으면 억제 효과가 없고, 너무 높으면 실제로 긴급한 상황에 처한 검증자에게 과도한 부담이 될 수 있습니다. 프로토콜의 장기적인 안정성과 검증자의 유연성 사이의 균형을 고려하여 설정됩니다 (예: 전체 예치금의 5\~15% 범위).
-{% endhint %}
+
+
 
 #### Best Practice&#x20;
 
@@ -240,9 +243,32 @@ function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentr
     
     // 페널티 로직으로 출금에서 삭감
     ... 
-    if (request.isEmergency) {
-        penaltyAmount = (amountToWithdraw * emergencyWithdrawalPenaltyBps) / 10000;
-        if (penaltyAmount > amountToWithdraw) penaltyAmount = amountToWithdraw; 
-        amountToWithdraw -= penaltyAmount;
+if (request.isEmergency) {
+
+    uint256 currentTime = block.timestamp;
+
+    // 긴급 인출은 잠금 기간 내에서만 유효해야 합니다.
+    require(currentTime < request.unlockTimestamp, "Emergency withdrawal only valid during lock period");
+
+    // 잠금 기간 중 남은 시간을 계산합니다.
+    uint256 timeRemaining = request.unlockTimestamp - currentTime;
+
+    // 남은 시간에 비례하는 변동 페널티 비율을 계산합니다.
+    // Penalty_Rate의 변동 부분 = (Time_Remaining_In_Lock / Total_Lock_Period) * Additional_Penalty_Factor
+    // 정수 연산에서 정밀도 손실을 막기 위해 곱셈을 먼저 수행합니다.
+    // 가정: additionalPenaltyBps와 WITHDRAWAL_LOCK_PERIOD 변수가 컨트랙트에 정의되어 있습니다.
+    uint256 variablePenaltyBps = (timeRemaining * additionalPenaltyBps) / WITHDRAWAL_LOCK_PERIOD;
+
+    // 가정: basePenaltyBps 변수가 컨트랙트에 정의되어 있습니다.
+    uint256 totalPenaltyBps = basePenaltyBps + variablePenaltyBps;
+
+    penaltyAmount = (amountToWithdraw * totalPenaltyBps) / 10000;
+
+    if (penaltyAmount > amountToWithdraw) {
+        penaltyAmount = amountToWithdraw;
     }
+
+    amountToWithdraw -= penaltyAmount;
+
+}
 ```
