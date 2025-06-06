@@ -161,22 +161,22 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 
 #### 영향도&#x20;
 
-`Informational`.
+`Informational`
 
 특정 토큰에만 대량 입출금이 반복되어 풀 내 자산 비율이 심하게 무너질 경우, 가격 왜곡이나 일부 토큰 유동성 고갈이 발생할 수 있으나 시스템 전체의 보안이나 직접적 손실로 이어지지 않기 때문에 `Informational`로 평가한다.
 
 #### 가이드라인
 
-> * **자동 리밸런싱 메커니즘:**
->   *   **Uniswap, Curve 등의 AMM 서비스와 같이 유동성 풀 내 자산 가치 비율 유지를 위한 목표 비율 대비 편차 임계값 설정하여 초과 시 리밸런싱을 트리거 하도록 실시**
+> * **자동 리밸런싱 메커니즘**
+>   *   Uniswap, Curve 등의 AMM 서비스와 같이 유동성 풀 내 자산 가치 비율 유지를 위한 목표 비율 대비 편차 임계값 설정하여 초과 시 리밸런싱을 트리거 하도록 실시
 >
 >       $$\text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A + \text{Value}_B} \\ {\scriptsize (|\text{Ratio}_A - \text{Target Ratio}_A| > \text{Threshold} \implies \text{Rebalance Trigger})}$$
->   * **Uniswap의 x\*y=k 곡선과 같이 편차 발생 시 스마트 컨트랙트에서 시 자동 리밸런싱하는 트리거를 제공하여 가격 균형 회복 유도**
-> * **불균형 모니터링:**
->   * **기존 DEX 서비스와 유사하게 풀내 자산 비율, TVL 등의 주요 지표를 실시간 대시보드에서 추적 및 계산하는 기능 제공 필요**
->   * **운영하는 유동성 풀 비율이 목표치를 크게 벗어날 경우 편차 단계별 경고 시스템을 통해 관리자가 즉시 대응할 수 있는 경고 시스템 구축**
-> * **자동 스왑 처리:**
->   *   **Curve, Balancer 등과 같이 단일 토큰으로 유동성 공급 시 자동으로 풀의 비율에 맞게 스왑 후 유동성 공급하여 풀 불균형, 가격 왜곡, 유동성 고갈을 방지**
+>   * Uniswap의 x\*y=k 곡선과 같이 편차 발생 시 스마트 컨트랙트에서 시 자동 리밸런싱하는 트리거를 제공하여 가격 균형 회복 유도
+> * **불균형 모니터링**
+>   * 기존 DEX 서비스와 유사하게 풀내 자산 비율, TVL 등의 주요 지표를 실시간 대시보드에서 추적 및 계산하는 기능 제공 필요
+>   * 운영하는 유동성 풀 비율이 목표치를 크게 벗어날 경우 편차 단계별 경고 시스템을 통해 관리자가 즉시 대응할 수 있는 경고 시스템 구축
+> * **자동 스왑 처리**
+>   *   Curve, Balancer 등과 같이 단일 토큰으로 유동성 공급 시 자동으로 풀의 비율에 맞게 스왑 후 유동성 공급하여 풀 불균형, 가격 왜곡, 유동성 고갈을 방지
 >
 >       $$\text{Deposit Amount}_A \implies \text{Swap Portion} = \text{Amount}_A \times (1 - \text{Target Ratio}_A) \\ {\scriptsize \text{(Result: 각 토큰 비율이 목표치에 최대한 근접하도록 자동 스왑})}$$
 >
@@ -235,20 +235,20 @@ function addLiquiditySingle(
 #### 가이드라인
 
 > * **슬리피지 허용 한도 설정 및 검증:**
->   * **Uniswap, SushiSwap 등의 주요 DEX와 같이 사용자가 직접 슬리피지 한도를 입력하도록 유도하여 거래 전 최대 슬리피지 임계값 사전 정의하고 한도 초과 시 자동 취소**
+>   * Uniswap, SushiSwap 등의 주요 DEX와 같이 사용자가 직접 슬리피지 한도를 입력하도록 유도하여 거래 전 최대 슬리피지 임계값 사전 정의하고 한도 초과 시 자동 취소
 >   *   사용자가 입력한 최소 수량과 실제 계산된 최소 아웃풋이 일치하는지 검증하기 위해 수식을 활용하여 실제 지급량 확인 (프로토콜에 따라 수식 종류가 다를 수 있음)
 >
 >       $${\scriptsize (\text{Example: }\text{Minimum Output} = \text{Input Amount} \times (1 - \text{Slippage Tolerance}))}$$
->   * **주요 DEX와 동일하게 슬리피지 한도 초과 감지 시 거래 자동 취소 처리**
+>   * 주요 DEX와 동일하게 슬리피지 한도 초과 감지 시 거래 자동 취소 처리
 > * **대량 거래 시 분할 처리:**
->   * **1inch 네트워크 등의 DEX와 동일하게 여러 DEX / 유동성 풀에 대형 거래를 분할하여 슬리피지를 최소화하고 각  거래별 슬리피지 검증 실시**
->   *   **플래시론/MEV 공격 방지, 시장 안정성 확보를 위해 각 분할 거래를 서로 다른 블록에 실행하도록 제한하기 위해 분할 거래 간 최소 블록 간격 설정**
+>   * 1inch 네트워크 등의 DEX와 동일하게 여러 DEX / 유동성 풀에 대형 거래를 분할하여 슬리피지를 최소화하고 각  거래별 슬리피지 검증 실시
+>   *   플래시론/MEV 공격 방지, 시장 안정성 확보를 위해 각 분할 거래를 서로 다른 블록에 실행하도록 제한하기 위해 분할 거래 간 최소 블록 간격 설정
 >
 >       $$\scriptsize {(\text(Example: \text{Total Slippage} = 1 - \prod_{i=1}^{n} (1 - \text{Slippage}_i)) \space (n = \text{BlockNum})}$$
 > * **실시간 가격 모니터링 및 검증:**
->   * **DEX Screener, Aggregator 등과 같이 거래 실행 직전 오라클/풀 가격 재조회 및 가격 변동 임계값 초과 시 재계산 또는 예외처리 실시**
->   * **Chainlink, Band 등의 여러 오라클에서 가격을 받아 다중 가격 소스 활용 및 교차 검증하고 편차가 크면 거래 취소 또는 대체 소스 전환**
->   *   **아래 수식과 같은 방식으로 현재 유동성 기반 실시간 슬리피지 예측 공식 적용하여 모니터링 및 검증 실시**
+>   * DEX Screener, Aggregator 등과 같이 거래 실행 직전 오라클/풀 가격 재조회 및 가격 변동 임계값 초과 시 재계산 또는 예외처리 실시
+>   * Chainlink, Band 등의 여러 오라클에서 가격을 받아 다중 가격 소스 활용 및 교차 검증하고 편차가 크면 거래 취소 또는 대체 소스 전환
+>   *   아래 수식과 같은 방식으로 현재 유동성 기반 실시간 슬리피지 예측 공식 적용하여 모니터링 및 검증 실시
 >
 >       $$\text{Price Impact} = 1 - \frac{x}{x + \Delta x} \scriptsize {(x = PoolAmount, \Delta x =\text{TradeSize})}$$
 
@@ -322,18 +322,18 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 #### 가이드라인
 
 > * **자동화된 수수료 관리:**
->   *   **Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 자동 수집 트리거되도록 프로토콜 레벨에서 처리**
+>   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 자동 수집 트리거되도록 프로토콜 레벨에서 처리
 >
 >       $$\scriptsize (\text{Example: AccumulatedFees} \geq \text{Threshold})$$
->   *   **Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지**\
+>   *   Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지\
 >       $$\scriptsize (\text{Example: Current Time} - \text{Last Collection Time} \geq \text{Collection Interval})$$
 >
 >
 > * **권한 및 변경 관리:**
->   *   **대량 인출 또는 민감한 관리자 함수 실행 시  타임락 적용을 아래 수식과 같이 적용**
+>   *   대량 인출 또는 민감한 관리자 함수 실행 시  타임락 적용을 아래 수식과 같이 적용
 >
 >       $$\scriptsize \text{(Example: Execute Time} = \text{Request Time} + \text{Time} - \text{Lock Period})$$
->   * **Uniswap, Curve 등과 같이 수수료 변경 시 한 번에 적용하는 것이 아닌 단계적으로 수수료 적용 (예: 0.05%) \[출처:** [**Uniswap Docs**](https://docs.uniswap.org/concepts/protocol/fees)**]**
+>   * Uniswap, Curve 등과 같이 수수료 변경 시 한 번에 적용하는 것이 아닌 단계적으로 수수료 적용 (예: 0.05%) \[출처: [Uniswap Docs](https://docs.uniswap.org/concepts/protocol/fees)]
 
 #### Best Practice
 
@@ -374,16 +374,16 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
 #### 가이드라인
 
 > * **원자적 거래 보장:**
->   * **다른 AMM 및 DEX 스마트 컨트랙트와 같이 모든 풀 상태 변경을 단일 트랜잭션 내 처리하여 관련 변수를 한 번에 갱신**
->   * **require/assert 등의 키워드를 이용하여 중간 실행 단계에서 오류 발생 시 전체 거래가 롤백되는 메커니즘을 적용하여 중간 상태가 남지 않도록 설계**
+>   * 다른 AMM 및 DEX 스마트 컨트랙트와 같이 모든 풀 상태 변경을 단일 트랜잭션 내 처리하여 관련 변수를 한 번에 갱신
+>   * require/assert 등의 키워드를 이용하여 중간 실행 단계에서 오류 발생 시 전체 거래가 롤백되는 메커니즘을 적용하여 중간 상태가 남지 않도록 설계
 > * **중간 상태 검증:**
->   * **Uniswap 등의 AMM에서 사용하는 `X * Y = K` 수식을 이용하여 각 풀 업데이트 직후 불변량 검증을 통해 가격 오류, 아비트라지, 손실 발생 가능성 차단**
->   *   **여러 풀 또는 토큰 간의 연동으로 인해 발생하는 아비트라지를 줄이기 위해 정해진 수식을 이용하여 풀 간 가격 일관성 확인 및 총 토큰 공급량 보존 검증**
+>   * Uniswap 등의 AMM에서 사용하는 `X * Y = K` 수식을 이용하여 각 풀 업데이트 직후 불변량 검증을 통해 가격 오류, 아비트라지, 손실 발생 가능성 차단
+>   *   여러 풀 또는 토큰 간의 연동으로 인해 발생하는 아비트라지를 줄이기 위해 정해진 수식을 이용하여 풀 간 가격 일관성 확인 및 총 토큰 공급량 보존 검증
 >
 >       $$\scriptsize (\text{Example: }\sum_{i=1}^{n} \text{Token Supply}_i = \text{Total Supply}\space (n=\text{BlockNum}) )$$
 > * **풀 상태 동기화:**
->   * **여러 풀/체인 간 동기화가 필요한 경우 상태 불일치가 정해진 임계값을 넘으면 경고 및 자동 대응 설정**
->   * **상태 불일치가 감지되어 정해진 임계값 초과 시 자동 재동기화 함수 실행 및 동기화 동기화 실패 시 풀 일시 중단**
+>   * 여러 풀/체인 간 동기화가 필요한 경우 상태 불일치가 정해진 임계값을 넘으면 경고 및 자동 대응 설정
+>   * 상태 불일치가 감지되어 정해진 임계값 초과 시 자동 재동기화 함수 실행 및 동기화 동기화 실패 시 풀 일시 중단
 
 #### Best Practice
 
