@@ -16,7 +16,7 @@ icon: plane-arrival
 
 `Informational`
 
-공격자는 충분한 유동성을 가지고 거버넌스에 의해 승인될 만한 담보의 오라클을 조작해야 하는데 이는 매우 어렵고 비용이 많이 들기에 `Informational`로 평가했다.
+공격자는 충분한 유동성을 가지고 거버넌스에 의해 승인될 만한 담보의 오라클을 조작해야 하는데 이는 매우 어렵고 비용이 많이 들기에 `Informational`로 평가한다.
 
 #### 가이드라인
 
@@ -54,22 +54,22 @@ icon: plane-arrival
 
 4. **가격 편차 검증 및 대응:**
 
-* **편차 검증 대상:**
-  * **오라클 간 편차: 위 3번에서 사용되는 N개의 오라클 가격들 간의 상호 편차.**
-  * **오라클 가격과 TWAP 가격 간 편차: 실시간 오라클 가격과 특정 기간(예: 30분, 1시간)의 TWAP 간의 편차.**
-* **가격 편차 수식 (예시: 오라클 중앙값과 개별 오라클 간):**
-  * **PmedianPmedian​: N개 오라클 가격의 중간값**
-  * **PoracleiPoraclei​​: i번째 개별 오라클 가격**
-  * **Deviation\_i = |P\_median - P\_oracle\_i| / P\_median \* 100%**
-* **임계값 및 대응:**
-  * **임계값 설정: Deviation\_i > 5% (또는 오라클-TWAP 편차 > 10%)**
-  * **대응 조치:**
-    * **경고 및 로깅: 편차가 임계값을 초과하면 시스템에 즉시 경고를 발생시키고 관련 데이터를 로깅한다.**
-    * **일시적 운영 중단 (Circuit Breaker): 해당 담보를 사용한 신규 대출 및 청산 실행을 일시적으로 중단한다.**
-      * **BeraBorrow DenManager.sol의 setPaused(bool \_paused) 와 유사한 기능을 담보별로 두거나, BeraborrowCore.sol의 setNewCCR 호출과 연계하여 해당 담보의 CCR을 일시적으로 매우 높게 설정하여 사실상 중단시키는 방안 고려.**
-    * **보수적 가격 사용: 편차가 발생한 오라클을 제외하고 가격을 다시 계산한다.**
-    * **TWAP 의존도 증가: 실시간 가격 대신 TWAP 가격을 일시적으로 사용하거나, TWAP 반영 비중을 높인다.**
-    * **거버넌스 개입: 심각한 편차 발생 시, 거버넌스를 통해 해당 오라클을 교체하거나 문제를 해결할 때까지 담보 자격을 정지시킨다.**
+* **편차 검증 대상**
+  * 오라클 간 편차: 위 3번에서 사용되는 N개의 오라클 가격들 간의 상호 편차
+  * 오라클 가격과 TWAP 가격 간 편차: 실시간 오라클 가격과 특정 기간(예: 30분, 1시간)의 TWAP 간의 편차
+* **가격 편차 수식 (예시: 오라클 중앙값과 개별 오라클 간)**
+  * PmedianPmedian​: N개 오라클 가격의 중간값
+  * PoracleiPoraclei​​: i번째 개별 오라클 가격
+  * Deviation\_i = |P\_median - P\_oracle\_i| / P\_median \* 100%
+* **임계값 및 대응**
+  * 임계값 설정: Deviation\_i > 5% (또는 오라클-TWAP 편차 > 10%)
+  * 대응 조치
+    * 경고 및 로깅: 편차가 임계값을 초과하면 시스템에 즉시 경고를 발생시키고 관련 데이터를 로깅
+    * 일시적 운영 중단 (Circuit Breaker): 해당 담보를 사용한 신규 대출 및 청산 실행을 일시적으로 중단
+      * BeraBorrow DenManager.sol의 setPaused(bool \_paused) 와 유사한 기능을 담보별로 두거나, BeraborrowCore.sol의 setNewCCR 호출과 연계하여 해당 담보의 CCR을 일시적으로 매우 높게 설정하여 사실상 중단시키는 방안 고려
+    * 보수적 가격 사용: 편차가 발생한 오라클을 제외하고 가격을 다시 계산
+    * TWAP 의존도 증가: 실시간 가격 대신 TWAP 가격을 일시적으로 사용하거나, TWAP 반영 비중을 증가
+    * 거버넌스 개입: 심각한 편차 발생 시, 거버넌스를 통해 해당 오라클을 교체하거나 문제를 해결할 때까지 담보 자격을 정지
 
 
 
@@ -99,17 +99,17 @@ function setParameters(IFactory.DeploymentParams calldata params) public  {
 
 `Informational`
 
-발생한다면 큰 영향을 끼치지만 LSP에 공급량이 없는 경우와 공격자가 지분 가치를 부풀리고 이후 사용자가 토큰을 예치하는 경우는 가능성이 매우 낮으므로 `Informational` 로 평가했다.
+발생한다면 큰 영향을 끼치지만 LSP에 공급량이 없는 경우와 공격자가 지분 가치를 부풀리고 이후 사용자가 토큰을 예치하는 경우는 가능성이 매우 낮으므로 `Informational` 로 평가한다.
 
 #### 가이드라인
 
-> * **Virtual Shares 메커니즘 구현:**
->   * **초기 배포 시 가상 지분 및 자산 설정**
->   * [**OpenZeppelin의 decimal offset 9자리 적용**](https://github.com/OpenZeppelin/openzeppelin-contracts/pull/3979)
->   * **최소 예치금 임계값으로 $NECT 처럼 69개 이상 share 받도록 강제 설정(**[**오픈제플린 권장사항**](https://docs.openzeppelin.com/contracts/5.x/erc4626)**: 최소 100개 이상의 share)**&#x20;
-> * **부트스트랩 기간 보호 강화:**
->   * **`deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용**
->   * **`totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화**
+> * **Virtual Shares 메커니즘 구현**
+>   * 초기 배포 시 가상 지분 및 자산 설정
+>   * [OpenZeppelin의 decimal offset 9자리 적용](https://github.com/OpenZeppelin/openzeppelin-contracts/pull/3979)
+>   * 최소 예치금 임계값으로 $NECT 처럼 69개 이상 share 받도록 강제 설정([오픈제플린 권장사항](https://docs.openzeppelin.com/contracts/5.x/erc4626): 최소 100개 이상의 share)&#x20;
+> * **부트스트랩 기간 보호 강화**
+>   * `deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용
+>   * `totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화
 
 #### Best Practice
 
@@ -214,17 +214,17 @@ Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제
 
 `Informational`
 
-Recovery Mode에서는 담보 인출 금지 및 부채 증가 시 엄격한 담보비율 검증으로 인해 공격의 가능성이 낮으므로 `Informational`로 평가했다.
+Recovery Mode에서는 담보 인출 금지 및 부채 증가 시 엄격한 담보비율 검증으로 인해 공격의 가능성이 낮으므로 `Informational`로 평가한다.
 
 #### 가이드라인
 
 > * **모든 포지션 변경 시 개별 ICR(개별 담보 비율)과 시스템 TCR(총 담보율) 동시 검증**
-> * **Recovery Mode 개선:**
->   * **Recovery Mode 진입 시 자동 MCR 상향 조정**&#x20;
->   * **Recovery Mode 진입 시 담보 인출 차단**
-> * **Mode Transition 안정성:**
->   * **TCR 계산 시 최신 가격 및 이자 반영 보장**
->   * **Mode 전환 시 모든 포지션 상태 일괄 업데이트**
+> * **Recovery Mode 개선**
+>   * Recovery Mode 진입 시 자동 MCR 상향 조정&#x20;
+>   * Recovery Mode 진입 시 담보 인출 차단
+> * **Mode Transition 안정성**
+>   * TCR 계산 시 최신 가격 및 이자 반영 보장
+>   * Mode 전환 시 모든 포지션 상태 일괄 업데이트
 
 #### Best Practice
 
@@ -278,18 +278,18 @@ Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적
 
 `Informational`
 
-Owner의 악의적인 행동은 가능성이 낮기 때문에`Informational`로 평가했다.
+Owner의 악의적인 행동은 가능성이 낮기 때문에`Informational`로 평가한다.
 
 #### 가이드라인
 
-> * **거버넌스 권한 분산:**
->   * **모든 중요 파라미터 변경에 멀티시그 + 타임락 적용**
->   * **긴급 상황 외 paused 상태 변경 금지**
->   * **가격 피드 변경 시 공지**
-> * **파라미터 변경 제한:**
->   * **MCR, CCR 변경 시 증감 최대치 제한**
->   * **수수료 변경 시 월 변경 횟수 제한**
->   * **시스템 주소 변경 시 커뮤니티 투표 필수**&#x20;
+> * **거버넌스 권한 분산**
+>   * 모든 중요 파라미터 변경에 멀티시그 + 타임락 적용
+>   * 긴급 상황 외 paused 상태 변경 금지
+>   * 가격 피드 변경 시 공지
+> * **파라미터 변경 제한**
+>   * MCR, CCR 변경 시 증감 최대치 제한
+>   * 수수료 변경 시 월 변경 횟수 제한
+>   * 시스템 주소 변경 시 커뮤니티 투표 필수&#x20;
 
 #### Best Practice
 
@@ -309,18 +309,18 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 `Informational`
 
-이자율을 수정하는 것은 owner만 호출 가능하기 때문에`Informational`로 평가했다.
+이자율을 수정하는 것은 owner만 호출 가능하기 때문에`Informational`로 평가한다.
 
 #### 가이드라인
 
-> * **이자율 거버넌스 보호:**
->   * **이자율 변경 시 7일 타임락 적용**
->   * **이자율 변경폭 제한**
->   * **이자율 변경 시 커뮤니티 투표 필수**
-> * **이자 계산 투명성:**
->   * **모든 이자 계산을 체인상에서 검증 가능하도록 공개**
->   * **이자 누적 로직의 오버플로우 방지**
->   * **이자율 변경 이력 추적 및 감사 가능성 확보**
+> * **이자율 거버넌스 보호**
+>   * 이자율 변경 시 7일 타임락 적용
+>   * 이자율 변경폭 제한
+>   * 이자율 변경 시 커뮤니티 투표 필수
+> * **이자 계산 투명성**
+>   * 모든 이자 계산을 체인상에서 검증 가능하도록 공개
+>   * 이자 누적 로직의 오버플로우 방지
+>   * 이자율 변경 이력 추적 및 감사 가능성 확보
 
 #### Best Practice
 
@@ -346,21 +346,21 @@ if (newInterestRate != interestRate) {
 
 `Informational`
 
-개별 담보비율 기준 순차 청산 및 위험 담보 점진적 감소 메커니즘으로 대량 청산 완화 로직이 구현되어 있으며, 이는 정상적인 시스템의 동작이기 때문에`Informational`로 평가했다.
+개별 담보비율 기준 순차 청산 및 위험 담보 점진적 감소 메커니즘으로 대량 청산 완화 로직이 구현되어 있으며, 이는 정상적인 시스템의 동작이기 때문에`Informational`로 평가한다.
 
 #### 가이드라인
 
-> * **연쇄반응 방지 메커니즘:**
->   * **시간대별 청산 한도 설정**
->   * **Recovery Mode에서 추가 청산 제한 강화**
-> * **Dynamic Risk Parameters:**
->   * **변동성 증가 시 MCR 자동 상향 조정 메커니즘**
->   * **시장 스트레스 지수 기반 청산 지연 시스템**
->   * **대량 청산 감지 시 새로운 차용 일시 중단**
+> * **연쇄반응 방지 메커니즘**
+>   * 시간대별 청산 한도 설정
+>   * Recovery Mode에서 추가 청산 제한 강화
+> * **Dynamic Risk Parameters**
+>   * 변동성 증가 시 MCR 자동 상향 조정 메커니즘
+>   * 시장 스트레스 지수 기반 청산 지연 시스템
+>   * 대량 청산 감지 시 새로운 차용 일시 중단
 
-#### Best practice
+#### **Best practice**
 
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[**`DenManager.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
 
 ```solidity
 function startSunset() external onlyOwner {
