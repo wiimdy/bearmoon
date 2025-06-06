@@ -6,9 +6,39 @@ icon: plane-arrival
 
 
 
-<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-4-recovery-mode">#id-4-recovery-mode</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-5-owner">#id-5-owner</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-4-recovery-mode">#id-4-recovery-mode</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-5-owner">#id-5-owner</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
-### 위협 1: ERC-4626 인플레이션 공격
+### 위협 1: 플래시론 재진입 공격
+
+플래시론 재진입 공격은 공격자가 대출금 상환 전에 콜백 함수를 통해 프로토콜에 다시 접근하여 담보물을 부당하게 인출하거나 추가 대출을 실행한다. 이는 결국 프로토콜에 상환되지 않는 부실 채권을 남기거나 담보 자산을 탈취당하게 만들어 직접적인 자금 손실을 야기한다.
+
+#### 영향도&#x20;
+
+`Medium`
+
+ㅇ
+
+#### 가이드라인
+
+> * **CEI 패턴 엄격 적용**
+> * **플래시론 실행 중 모든 상태 변경 함수 접근 차단**
+> * **플래시론 한도 설정**
+> * **플래시론 수수료 설정**
+
+#### Best Practice
+
+[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol#L179-L182)
+
+```solidity
+function flashFee(address token, uint256 amount) public view returns (uint256) {
+        require(token == address(this), "ERC20FlashMint: wrong token");
+        return _flashFee(amount);
+}
+```
+
+***
+
+### 위협 2: ERC-4626 인플레이션 공격
 
 공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다.
 
@@ -16,7 +46,7 @@ icon: plane-arrival
 
 `Informational`
 
-발생한다면 큰 영향을 끼치지만 LSP에 공급량이 없는 경우와 공격자가 지분 가치를 부풀리고 이후 사용자가 토큰을 예치하는 경우는 가능성이 매우 낮으므로 `Informational` 로 평가한다.
+발생한다면 큰 영향을 끼치지만 LSP에 공급량이 없는 경우와 공격자가 지분 가치를 부풀리고 이후 사용자가 토큰을 예치하는 경우는 가능성이 낮으므로 `Low` 로 평가한다.
 
 #### 가이드라인
 
@@ -86,36 +116,6 @@ if (block.timestamp < bootstrapEndTime) {
 } else {
     // 일반 기간: 일반 최소 예치금 적용
     require(assets >= MIN_DEPOSIT_NORMAL, "Deposit amount below normal minimum");
-}
-```
-
-***
-
-### 위협 2: 플래시론 재진입 공격
-
-플래시론 재진입 공격은 공격자가 대출금 상환 전에 콜백 함수를 통해 프로토콜에 다시 접근하여 담보물을 부당하게 인출하거나 추가 대출을 실행한다. 이는 결국 프로토콜에 상환되지 않는 부실 채권을 남기거나 담보 자산을 탈취당하게 만들어 직접적인 자금 손실을 야기한다.
-
-#### 영향도&#x20;
-
-`Informational`
-
-ㅇ
-
-#### 가이드라인
-
-> * **CEI 패턴 엄격 적용**
-> * **플래시론 실행 중 모든 상태 변경 함수 접근 차단**
-> * **플래시론 한도 설정**
-> * **플래시론 수수료 설정**
-
-#### Best Practice
-
-[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol#L179-L182)
-
-```solidity
-function flashFee(address token, uint256 amount) public view returns (uint256) {
-        require(token == address(this), "ERC20FlashMint: wrong token");
-        return _flashFee(amount);
 }
 ```
 
@@ -207,29 +207,6 @@ Owner의 악의적인 행동은 가능성이 낮기 때문에`Informational`로 
 >   * MCR, CCR 변경 시 증감 최대치 제한
 >   * 수수료 변경 시 월 변경 횟수 제한
 >   * 시스템 주소 변경 시 커뮤니티 투표 필수&#x20;
-
-#### Best Practice
-
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L254-L257)
-
-```solidity
-require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unauthorized");
-```
-
-***
-
-### 위협 5: 이자율 조작을 통한 부당한 이자 부과
-
-공격자 또는 악의적인 거버넌스가 이자율을 부당하게 조작하면, 차용자는 과도한 이자를 지불하게 되어 직접적인 경제적 손실을 입거나, 예치자는 기대했던 수익을 얻지 못하게 된다.
-
-#### 영향도&#x20;
-
-`Informational`
-
-이자율을 수정하는 것은 owner만 호출 가능하기 때문에`Informational`로 평가한다.
-
-#### 가이드라인
-
 > * **이자율 거버넌스 보호**
 >   * 이자율 변경 시 7일 타임락 적용
 >   * 이자율 변경폭 제한
@@ -240,6 +217,12 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 >   * 이자율 변경 이력 추적 및 감사 가능성 확보
 
 #### Best Practice
+
+[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L254-L257)
+
+```solidity
+require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unauthorized");
+```
 
 [`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L326-L336)
 
@@ -255,7 +238,7 @@ if (newInterestRate != interestRate) {
 
 ***
 
-### 위협 6: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
+### 위협 5: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
 대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들에게 과도한 슬리피지로 인한 자산 손실을 강요한다.&#x20;
 
