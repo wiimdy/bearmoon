@@ -51,7 +51,7 @@ totalsupply가 0이 된 후 유동성 공급자의 자금을 탈취할 수 있�
 >   * LSP deposit/mint 함수에 최소 예치금 요구사항 추가&#x20;
 >   * 초기 예치 시 더 높은 최소 금액 설정으로 공격 비용 증가
 > * **totalSupply=0 상태 보호 강화**
->   * 모든 예치 함수에 ZeroTotalSupply 체크 확장 적용linearVestingExtraAssets 함수에만 존재하는 보호를 전체 시스템으로 확산
+>   * 모든 예치 함수에 ZeroTotalSupply 체크 확장 적용 linearVestingExtraAssets 함수에만 존재하는 보호를 전체 시스템으로 확산
 > * **부트스트랩 기간 보호 메커니즘**
 >   * 초기 24-48시간 동안 예치 제한 및 추가 검증 절차 적용
 >   * 부트스트랩 기간 중 관리자 승인 없이는 대량 예치 차단
