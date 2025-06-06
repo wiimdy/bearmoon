@@ -13,7 +13,7 @@ icon: user-check
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나 Merkle root 검증 기법으로 공격 성공 가능성이 매우 낮기 때문에`Low`로 평가한다.&#x20;
 
@@ -151,26 +151,21 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 #### 가이드라인&#x20;
 
 > * **예치, 인출 로직 추가 및 검증, 거버넌스를 통해 조정 가능한 출금 제한 및 잠금 기간 설정**
->   * **출금 대기 기간**
->     *   거버넌스의 타임락 기간(2일) 과 동일하게 설정
+>   *   **출금 대기 기간**
 >
->         ```solidity
->         uint256 public constant WITHDRAWAL_LOCK_PERIOD = 2 days;
->         ```
->   *   **requestWithdrawal 시 검증:**
+>       * 거버넌스의 타임락 기간(2일) 과 동일하게 설정
 >
->       * 호출자가 유효한 검증자인지
->       * 요청 금액이 검증자의 인출 가능한 예치금(또는 최소 예치금 요구사항을 제외한 초과분)을 초과하지 않는지
->       * 활성화된 출금 요청 한도(횟수, 총액)를 초과하지 않는지
->
->
->   *   **claimWithdrawal 시 검증:**
->
->       * 호출자가 해당 출금 요청의 정당한 수령인인지
->       * 출금 요청 상태가 READY\_FOR\_CLAIM인지
->       * unlockTime이 실제로 지났는지
->
->
+>       ```solidity
+>       uint256 public constant WITHDRAWAL_LOCK_PERIOD = 2 days;
+>       ```
+>   * **requestWithdrawal 시 검증:**
+>     * 호출자가 유효한 검증자인지
+>     * 요청 금액이 검증자의 인출 가능한 예치금(또는 최소 예치금 요구사항을 제외한 초과분)을 초과하지 않는지
+>     * 활성화된 출금 요청 한도(횟수, 총액)를 초과하지 않는지
+>   * **claimWithdrawal 시 검증:**
+>     * 호출자가 해당 출금 요청의 정당한 수령인인지
+>     * 출금 요청 상태가 READY\_FOR\_CLAIM인지
+>     * unlockTime이 실제로 지났는지
 >   *   **출금 제한 및 출금 잠금 기간 고려 사항**
 >
 >       * 네트워크 안정성: 검증자가 갑자기 대량으로 이탈하여 네트워크 보안이 약화되는 것을 방지
@@ -180,35 +175,28 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 >
 >
 > * **queue 시스템을 통한 단계별 출금 프로세스 구현**
->   *   **requestWithdrawal (검증자/사용자 호출)**
->
->       * 검증자가 출금 요청 시, 해당 출금 요청액만큼 검증자의 예치금에서 즉시 차감하거나, 출금 대기 상태로 전환하여 추가적인 스테이킹 보상 계산에서 제외
->
->
+>   * **requestWithdrawal (검증자/사용자 호출):**
+>     * 검증자가 출금 요청 시, 해당 출금 요청액만큼 검증자의 예치금에서 즉시 차감하거나, 출금 대기 상태로 전환하여 추가적인 스테이킹 보상 계산에서 제외
 >   * **processWithdrawal (시스템/운영자 호출):**
->     * unlockTime이 도래한 출금 요청들을 식별하고, 해당 자금을 실제로 인출 가능한 상태로 처리\
->
+>     * unlockTime이 도래한 출금 요청들을 식별하고, 해당 자금을 실제로 인출 가능한 상태로 처리
 >   * **claimWithdrawal (검증자/사용자 호출):**
->     * `processWithdrawal`을 통해 출금 가능 상태가 된 자금을 검증자(또는 지정된 수령인)가 자신의 지갑으로 최종적으로 인출\
->
->   * **라이프 사이클**
+>     * `processWithdrawal`을 통해 출금 가능 상태가 된 자금을 검증자(또는 지정된 수령인)가 자신의 지갑으로 최종적으로 인출
+>   * **라이프 사이클:**
 >     * **요청 (PENDING):** requestWithdrawal 호출 시 Withdrawal 구조체 생성, unlockTime 계산 후 저장
 >     * **처리 대기:** block.timestamp < unlockTime 동안 PENDING 상태 유지
 >     * **수령 준비 (READY\_FOR\_CLAIM):** block.timestamp >= unlockTime이 되고, processWithdrawal (또는 유사한 시스템 로직)을 통해 상태 변경
->     * **완료 (COMPLETED):** 검증자가 claimWithdrawal을 호출하여 자금 수령 시 상태 변경\
->
+>     * **완료 (COMPLETED):** 검증자가 claimWithdrawal을 호출하여 자금 수령 시 상태 변경
 >   * **페널티 설정 근거:**
->     * **기회비용 및 시스템 안정성 기여도 보상**
+>     * **기회비용 및 시스템 안정성 기여도 보상:**
 >       * 정상적인 출금 절차를 따르는 다른 검증자들은 그 기간 동안 네트워크 안정성에 기여하고 유동성을 제공한다. 긴급 출금은 이러한 암묵적인 약속을 깨므로, 그에 대한 비용을 지불
->     * **긴급 출금 남용 방지**
+>     * **긴급 출금 남용 방지:**
 >       * 페널티가 없다면 모든 사람이 긴급 출금을 사용하므로 꼭 필요한 경우가 아니면 사용하지 않도록 유도
->     * **페널티 수준**
->       * 현재 남아있는 잠금 기간에 비례하여 기본 페널티 + 추가 페널티 부여\
->
->     * Base\_Penalty\_Rate: 기본적인 최소 페널티 비율 (예: 5%)
->     * Time\_Remaining\_In\_Lock: 정상적인 잠금 기간 중 남은 시간
->     * Total\_Lock\_Period: 원래 설정된 총 잠금 기간
->     * Additional\_Penalty\_Factor: 잠금 기간을 일찍 어길수록 추가로 부과되는 페널티 계수 (예: 10%)
+>     * **페널티 수준:**
+>       * 현재 남아있는 잠금 기간에 비례하여 기본 페널티 + 추가 페널티 부여
+>         * Base\_Penalty\_Rate: 기본적인 최소 페널티 비율 (예: 5%)
+>         * Time\_Remaining\_In\_Lock: 정상적인 잠금 기간 중 남은 시간
+>         * Total\_Lock\_Period: 원래 설정된 총 잠금 기간
+>         * Additional\_Penalty\_Factor: 잠금 기간을 일찍 어길수록 추가로 부과되는 페널티 계수 (예: 10%)
 
 {% hint style="danger" %}
 **긴급 인출 기능 구현 시 페널티 메커니즘 적용**
