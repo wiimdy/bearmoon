@@ -4,17 +4,69 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc-20">#id-3-erc-20</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc-20">#id-3-erc-20</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
-### 위협 1: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
+### 위협 1: 재진입 공격을 통해 보상 중복 청구
 
-권한이 없는 사용자가 인센티브 토큰을 임의로 추가하거나 중복 등록하여, 시스템에서 과도한 보상을 받는 상황이 발생할 수 있다. 화이트리스트와 토큰 개수 제한, 중복 방지 로직이 없다면 악의적 사용자가 인센티브 구조를 교란시킬 수 있다.
+컨트랙트 함수 중 토큰의 흐름을 제어하는 함수에 대한 재진입을 허용할 경우 재진입 공격에 의한 토큰 무단 인출 문제로 시스템 전체의 손해로 이어질 수 있다.
 
 #### 영향도
 
 `Medium`&#x20;
 
-공격자가 악의적인 토큰을 인센티브 토큰에 추가하면 검증자 및 사용자의 보상을 가로챌 수 있다. 또한 인센티브율을 증가시켜 프로토콜의 인센티브 토큰을 빠르게 감소 시킬 수 있어 `Medium`으로 평가
+재진입 공격 성공 시 특정 사용자가 정당한 보상 이상을 중복으로 인출하여 프로토콜 또는 다른 사용자들에게 직접적인 재정적 손실을 야기할 수 있기 때문에`Medium`으로 평가했다.
+
+#### 가이드라인
+
+> * **체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수**
+> * **nonReentrant 가드 사용**
+
+#### Best Practice&#x20;
+
+&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L336)
+
+```solidity
+function getReward(
+    address account,
+    address recipient
+)
+    external
+    // nonReentrant 가드 사용
+    nonReentrant
+    onlyOperatorOrUser(Account)
+    returns (uint256)
+{
+    // ...
+}
+```
+
+&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L139)
+
+```solidity
+function _getReward(address account, address recipient)
+    internal
+    virtual
+    updateReward(account) 
+    returns (uint256)
+{
+    // ...
+    // 미수령된 보상을 초기화 하고 전송 진행
+    uint256 reward = info.unclaimedReward;
+    // ...
+}
+```
+
+***
+
+### 위협 2: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
+
+권한이 없는 사용자가 인센티브 토큰을 임의로 추가하거나 중복 등록하여, 시스템에서 과도한 보상을 받는 상황이 발생할 수 있다. 화이트리스트와 토큰 개수 제한, 중복 방지 로직이 없다면 악의적 사용자가 인센티브 구조를 교란시킬 수 있다.
+
+#### 영향도
+
+`Low`
+
+공격자가 악의적인 토큰을 인센티브 토큰에 추가하면 검증자 및 사용자의 보상을 가로채거나 인센티브율을 증가시켜 프로토콜의 인센티브 토큰을 빠르게 감소 시킬 수 있다. 그러나 토큰 등록은 거버넌스를 통한 과정이기 때문에`Low`로 평가했다.
 
 #### 가이드라인
 
@@ -87,67 +139,15 @@ function whitelistIncentiveToken(
 
 ***
 
-### 위협 2: 재진입 공격을 통해 보상 중복 청구
-
-컨트랙트 함수 중 토큰의 흐름을 제어하는 함수에 대한 재진입을 허용할 경우 재진입 공격에 의한 토큰 무단 인출 문제로 시스템 전체의 손해로 이어질 수 있다.
-
-#### 영향도
-
-`Medium`&#x20;
-
-재진입 공격 성공 시 특정 사용자가 정당한 보상 이상을 중복으로 인출하여 프로토콜 또는 다른 사용자들에게 직접적인 재정적 손실을 야기할 수 있다. 따라서 영향도를 `Medium`으로 평가
-
-#### 가이드라인
-
-> * **체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수**
-> * **nonReentrant 가드 사용**
-
-#### Best Practice&#x20;
-
-&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L336)
-
-```solidity
-function getReward(
-    address account,
-    address recipient
-)
-    external
-    // nonReentrant 가드 사용
-    nonReentrant
-    onlyOperatorOrUser(Account)
-    returns (uint256)
-{
-    // ...
-}
-```
-
-&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L139)
-
-```solidity
-function _getReward(address account, address recipient)
-    internal
-    virtual
-    updateReward(account) 
-    returns (uint256)
-{
-    // ...
-    // 미수령된 보상을 초기화 하고 전송 진행
-    uint256 reward = info.unclaimedReward;
-    // ...
-}
-```
-
-***
-
 ### 위협 3: 인센티브 토큰 ERC-20 표준 미검증으로 인한 위협
 
 인센티브 토큰에 대한 ERC20 표준 준수 여부 등의 검증 절차 누락 시 네트워크 보상 처리 과정에서 승인량 불일치나 전송 실패로 인해 자산 손실이 발생할 수 있다.
 
 #### 영향도
 
-`Medium`&#x20;
+`Low`&#x20;
 
-ERC-20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션에서 의도치 않은 토큰 전송 실패, 수량 불일치 등을 유발하여 부분적인 자산 손실이나 기능 장애를 초래할 수 있다. 따라서 영향도를 `Medium`으로 평가
+ERC-20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션에서 의도치 않은 토큰 전송 실패, 수량 불일치 등을 유발하여 부분적인 자산 손실이나 기능 장애를 초래할 수 있기 때문에 `Low`로 평가했다.
 
 **가이드라인**
 
@@ -202,7 +202,7 @@ function addIncentive(
 
 `Low`&#x20;
 
-잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다 일시적인 기능이 정지되어 피해를 볼 수 있어 `Low`로 평가
+잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다는 일시적인 기능의 정지 가능성 때문에 `Low`로 평가했다.
 
 #### 가이드라인
 
@@ -268,7 +268,7 @@ bytes32 public genesisDepositsRoot;
 
 `Low`&#x20;
 
-공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 modifire 로 인해 발생가능성은 낮기에 영향도를 `Low`로 평가
+공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 modifire 로 인해 발생가능성은 낮기 때문에 `Low`로 평가했다.
 
 #### 가이드라인
 
@@ -329,9 +329,7 @@ function getReward(
 
 `Low`&#x20;
 
-사용자의 보상이 예상보다 적게 들어 올 수 있다. 즉 컨트랙트의 로직 문제로 제공하기로 한 보상을 주지 않아 영향도를 `Low`로 평가
-
-컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 미세하게 적게 지급될 수 있으나, 그 차이가 작고 의도적인 탈취가 아니므로 영향도를 Low로 평가한다
+컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 적게 지급될 수 있으나, 그 차이가 미세하고 의도적인 탈취가 아니기 때문에`Low`로 평가했다.
 
 #### 가이드라인
 
@@ -442,7 +440,7 @@ contract StakingRewards is ... {
 
 `Low`&#x20;
 
-공격은 특정 조건(totalsupply == 0)에서 발생하며 보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생한다. 사용자에게 제공될 보상이 사라지나 발생 확률이 매우 적기 때문에 영향도를 `Low`로 평가
+보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생할 수 있으나 발생 가능성이 매우 낮기 때문에`Low`로 평가했다.
 
 #### 가이드라인
 
@@ -562,7 +560,7 @@ contract RewardVault is RewardVault {
 
 `Low`&#x20;
 
-보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 잃게 된다. 하지만 관리자는 거버넌스에 의해 관리하므로 발생가능성이 적어 영향도를 `Low`로 평가한다.
+보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 잃게 된다. 하지만 관리자는 거버넌스에 의해 정해지기에 발생 가능성이 낮기 때문에 `Low`로 평가했다.
 
 #### 가이드라인
 
