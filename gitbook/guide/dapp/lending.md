@@ -16,7 +16,7 @@ icon: plane-arrival
 
 `Informational`
 
-DenManager.sol의 fetchPrice()는 IPriceFeed 인터페이스를 통해 가격을 가져온다. 특정 담보에 대한 오라클 가격을 조작하는 것은 가능하지만, BeraBorrow는 Factory.sol의 deployNewInstance를 통해 신규 담보를 추가할 때 각 담보 유형별로 MCR, 수수료 등의 파라미터를 설정하여 새로운 담보에 대한 심사를 진행한다. 공격자는 충분한 유동성을 가지고 거버넌스에 의해 승인될 만한 담보의 오라클을 조작해야 하는데, 이는 매우 어렵고 비용이 많이 들기에 Informational로 선정했다.
+공격자는 충분한 유동성을 가지고 거버넌스에 의해 승인될 만한 담보의 오라클을 조작해야 하는데 이는 매우 어렵고 비용이 많이 들기에 `Informational`로 평가했다.
 
 #### 가이드라인
 
@@ -99,7 +99,7 @@ function setParameters(IFactory.DeploymentParams calldata params) public  {
 
 `Informational`
 
-ERC-4626 볼트인 LSP는 이미 배포되고 운영 중이기에 총 공급량이 거의 없는 경우를 만들기 힘들다. 또한 공격자가 자신의 지분 가치를 부풀리고 후에 사용자가 토큰을 예치했을 경우에만 탈취가 가능하다. 공격 성공을 위한 전제 조건 두 가지를 만족해야하고 당장 프로토콜 자산의 직접적인 피해를 일으키기 어려워 Informational로 선정하였다.
+발생한다면 큰 영향을 끼치지만 LSP에 공급량이 없는 경우와 공격자가 지분 가치를 부풀리고 이후 사용자가 토큰을 예치하는 경우는 가능성이 매우 낮으므로 `Informational` 로 평가했다.
 
 #### 가이드라인
 
@@ -214,11 +214,7 @@ Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제
 
 `Informational`
 
-BorrowerOperations.sol에서 checkRecoveryMode(uint256 TCR) 함수는 TCR이 BERABORROW\_CORE.CCR() 미만일 때 Recovery Mode로 판단한다. \_requireValidAdjustmentInCurrentMode 함수 내에서, if (\_isRecoveryMode) 블록은 다음과 같이 동작을 제한한다.
-
-* require(\_collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode");: 담보 인출이 명시적으로 금지.
-* 부채 증가 시 if (\_isDebtIncrease), 새로운 ICR은 반드시 CCR 이상이어야 하고\_requireICRisAboveCCR(newICR), 기존 ICR보다 높거나 같아야 함. \_requireNewICRisAboveOldICR(newICR, oldICR). 이는 부채를 늘리려면 반드시 포지션의 건전성을 개선해야 함을 의미하며, 사실상 추가 담보 없이는 불가능에 가까움.
-* 이러한 강력한 제약 조건 때문에 공격자가 Recovery Mode의 허점을 이용해 과도한 NECT를 빌리는 것은 현실적으로 불가능하기에 Informational로 선정했다.
+Recovery Mode에서는 담보 인출 금지 및 부채 증가 시 엄격한 담보비율 검증으로 인해 공격의 가능성이 낮으므로 `Informational`로 평가했다.
 
 #### 가이드라인
 
@@ -282,7 +278,7 @@ Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적
 
 `Informational`
 
-Owner가 악의적인 행동을 하는 것은 발생 가능성이 낮기에 Informational로 선정했다.
+Owner의 악의적인 행동은 가능성이 낮기 때문에`Informational`로 평가했다.
 
 #### 가이드라인
 
@@ -313,7 +309,7 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 `Informational`
 
-이자율을 수정하는 것은 owner만이 호출 가능하고, owner가 악의적인 행동을 하는 것은 발생 가능성이 낮기에 Informational로 선정했다.
+이자율을 수정하는 것은 owner만 호출 가능하기 때문에`Informational`로 평가했다.
 
 #### 가이드라인
 
@@ -350,7 +346,7 @@ if (newInterestRate != interestRate) {
 
 `Informational`
 
-Beraborrow는 Liquity 기반 시스템이고, 이는 개별 덴의 ICR을 기준으로 청산한다. DenManager.sol은 SortedDens를 사용하여 가장 위험한 덴부터 순차적으로 처리한다. 이는 시장에 한 번에 대량의 담보가 풀리는 것을 완화한다. 또한 DenManager.sol의 startSunset() 기능이 특정 담보 유형의 위험이 커질 때 interestRate 인상, redemptionFeeFloor 제거 등을 통해 해당 담보의 사용을 점진적으로 줄여나간다. 이처럼 대량 청산을 완화하는 로직이 구현되어 있고, 실제 대량 청산이 발생할 가능성이 낮으며 또한 이는 정상적인 동작 중 일부이므로 Informational로 선정했다.
+개별 담보비율 기준 순차 청산 및 위험 담보 점진적 감소 메커니즘으로 대량 청산 완화 로직이 구현되어 있으며, 이는 정상적인 시스템의 동작이기 때문에`Informational`로 평가했다.
 
 #### 가이드라인
 
