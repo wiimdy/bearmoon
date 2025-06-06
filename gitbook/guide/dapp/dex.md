@@ -74,26 +74,26 @@ _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
 `Low`&#x20;
 
-LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자가 실제 풀 자산 가치와 불일치하는 LP 토큰을 받을 경우 일부 사용자가 제한적으로 손실이나 이득을 볼 수 있기 때문에 `Low`로 평가했다.
+LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자가 실제 풀 자산 가치와 불일치하는 LP 토큰을 받을 경우 일부 사용자가 제한적으로 손실이나 이득을 볼 수 있기 때문에 `Low`로 평가한다.
 
 #### 가이드라인
 
 > * **정확한 가치 계산:**
->   * **Chainlink, Uniswap Twap 등 신뢰할 수 있는 오라클에서 각 토큰의 현재 시장 가격 실시간 반영하여 최소 1분 \~ 최대 3분 이내로 갱신된 데이터만 사용하며, 참고하는 오라클 간 가격 편차가 1.5% 이상이면 추가 검증**
->   *   **토큰별 유동성 비율을 곱해 가가중 평균 가격 계산 시 유동성 비중 적용**
+>   * Chainlink, Uniswap Twap 등 신뢰할 수 있는 오라클에서 각 토큰의 현재 시장 가격 실시간 반영하여 최소 1분 \~ 최대 3분 이내로 갱신된 데이터만 사용하며, 참고하는 오라클 간 가격 편차가 1.5% 이상이면 추가 검증
+>   *   토큰별 유동성 비율을 곱해 가가중 평균 가격 계산 시 유동성 비중 적용
 >
 >       $$\text{Pool Value} = (\text{tokenA}_amount \times \text{priceA}) + (\text{tokenB}_amount \times \text{priceB})$$
->   * **새로운 유동성의 풀 전체 대비 정확한 비중 계산**
+>   * 새로운 유동성의 풀 전체 대비 정확한 비중 계산
 > * **수치 정밀도 보장:**
->   * **SafeMath, FixedPointMathLib 등과 같은 고정소수점 연산 라이브러리 필수 사용하여 최소 18자리의 소수점 연산 정밀도 사용**
->   * **연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 계산 결과의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지**
->   * **덧셈/곱셈 순서를 바꿔 작은 값이 먼저 반올림 되는것을 방지하기 위해 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산 순서 최적화**
+>   * SafeMath, FixedPointMathLib 등과 같은 고정소수점 연산 라이브러리 필수 사용하여 최소 18자리의 소수점 연산 정밀도 사용
+>   * 연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 계산 결과의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지
+>   * 덧셈/곱셈 순서를 바꿔 작은 값이 먼저 반올림 되는것을 방지하기 위해 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산 순서 최적화
 > * **실시간 검증:**
->   *   **아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교**
+>   *   아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교
 >
 >       $$\text{LP Total Supply} \times \text{Current LP Token Vaule}  \approx \text{LP Pool TVL}$$
->   * **유동성 추가 트랜잭션 실행 직후 계산된 발행 예정량과 실제 발행 LP 토큰 수량이 일치하는지 확인**
->   * **Uniswap 등의 기존 DeFi 서비스와 동일하게 LP 토큰 가치와 풀 자산 가치의 편차가 0.1% 이상으로 편차 임계값 초과 시 계산 로직 재검증**
+>   * 유동성 추가 트랜잭션 실행 직후 계산된 발행 예정량과 실제 발행 LP 토큰 수량이 일치하는지 확인
+>   * Uniswap 등의 기존 DeFi 서비스와 동일하게 LP 토큰 가치와 풀 자산 가치의 편차가 0.1% 이상으로 편차 임계값 초과 시 계산 로직 재검증
 
 #### Best Practice
 
@@ -125,20 +125,20 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 #### 가이드라인
 
 > * **최소 유동성 검증:**
->   *   **유동성 제거 전 풀별 절대적 최소 유동성 임계값을 아래와 같이 스마트 컨트랙트에 적용하여 검증**
+>   *   유동성 제거 전 풀별 절대적 최소 유동성 임계값을 아래와 같이 스마트 컨트랙트에 적용하여 검증
 >
 >       $$\text{MinLiquidity} = \max(\text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha) \\ {\scriptsize (\text{Pool Vaule}_\text {after removal} \geq \text{MinLiquidity})}$$
->   *   **풀 내 각 토큰의 잔고 x 시장 가격의 합이 일정 수준 이하로 떨어지면 가격 조작/MEV 공격에 취약해지므로 유동성 제거 시점의 오라클 가격 기준으로 토큰 가치 기준 합산 후 임계값 이상인지 실시간 검증**
+>   *   풀 내 각 토큰의 잔고 x 시장 가격의 합이 일정 수준 이하로 떨어지면 가격 조작/MEV 공격에 취약해지므로 유동성 제거 시점의 오라클 가격 기준으로 토큰 가치 기준 합산 후 임계값 이상인지 실시간 검증
 >
 >       $$\text{Pool Value} = \sum_{i=1}^{n} (\text{Token}_i\, \text{Balance} \times \text{Token}_i\, \text{Price}) \\ {\scriptsize (\text{Pool Vaule}_\text {after removal} \geq \text{MinLiquidity})}$$
 > * **타이밍 공격 방지:**
->   *   **Uniswap V3 등의 사례와 같이 유동성 제거 요청 시점의 오라클/TWAP 가격을 고정을 고정하여 실제 제거가 처리될 때까지 최초 요청 가격을 기준으로 정산 검증**
+>   *   Uniswap V3 등의 사례와 같이 유동성 제거 요청 시점의 오라클/TWAP 가격을 고정을 고정하여 실제 제거가 처리될 때까지 최초 요청 가격을 기준으로 정산 검증
 >
 >       $$\text{Remove Value} = \text{Liquidity Amount} \times \text{Price}_{\text{request}}$$
->   *   **유동성 제거 시, 최근 N 블록의 평균 가격(TWAP)을 정산 기준으로 활용하여 일시적 가격 조작 방지**
+>   *   유동성 제거 시, 최근 N 블록의 평균 가격(TWAP)을 정산 기준으로 활용하여 일시적 가격 조작 방지
 >
 >       $$\text{TWAP} = \frac{1}{N} \sum_{j=1}^{N} \text{Price}_{\text{block }j} \space {\scriptsize (N= \text{Block Number})}$$
->   *   **Curve, Balancer 등과 같이 프로토콜 레벨에서 유동성 제공 후 LP 토큰 수령 시 최소 보유 기간이 지나야만 유동성 제거가 가능하도록 조건 추가**
+>   *   Curve, Balancer 등과 같이 프로토콜 레벨에서 유동성 제공 후 LP 토큰 수령 시 최소 보유 기간이 지나야만 유동성 제거가 가능하도록 조건 추가
 >
 >       $$(\text{Example: } \text{Current Time} - \text{LP Mint Time} \geq \text{Min Hold Period})$$
 
