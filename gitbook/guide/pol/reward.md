@@ -340,7 +340,7 @@ function getReward(
 >   * 오차 범위 0.01%로 설정 (대부분 금융에서 사용하는 오차 범위)
 > *   **사용자 유리한 반올림 정책**
 >
->     * 보상 받을 금액이 존재하지만 나눗셈 절삭되어 0이 된다면 최소값(1 wei)를 보장해준다.
+>     * 보상 받을 금액이 존재하지만 나눗셈 절삭되어 0이 된다면 최소값(1 wei) 으로 보장
 >
 >     ```solidity
 >     if (balance > 0 && earnedAmount == 0 && rewardPerTokenDelta > 0) {
@@ -562,30 +562,27 @@ contract RewardVault is RewardVault {
 
 `Low`&#x20;
 
-보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 읽게 된다. 하지만 관리자는 거버넌스에 의해 관리하므로 발생가능성이 적어 영향도를 `Low`로 평가
+보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 잃게 된다. 하지만 관리자는 거버넌스에 의해 관리하므로 발생가능성이 적어 영향도를 `Low`로 평가한다.
 
 #### 가이드라인
 
-> * **인센티브 토큰 제거 또는 교체는 큐를 이용하여 딜레이 이후 반영.**
->   *   딜레이는 3시간으로 설정
->
->       * BGTIncentiveDistributor에서 보상 청구 대기시간의 최대치인 MAX\_REWARD\_CLAIM\_DELAY를 3시간으로 설정하여 통일하기 위함
+> * **인센티브 토큰 제거 또는 교체는 큐를 이용하여 딜레이(3 hours) 이후 반영**
+>   *   BGTIncentiveDistributor에서 인센티브 보상 청구 대기시간의 최대치인 MAX\_REWARD\_CLAIM\_DELAY를 3시간으로 통일하기 위함
 >
 >       ```solidity
 >       // BGTIncentiveDistributor.sol
 >       uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
 >       ```
->   * 큐에 넣기 위해서는 제한 로직 통과해야함
+>   * 큐에 넣기 위해서는 검증 로직 통과해야 함
 >     * 인센티브 토큰 제거
->       * 현재 해당 인센티브 토큰의 잔액이 없어야함
->       * FactoryVaultManager 여야함
->       * 제거할 토큰이 화이트리스트에 등록되어있는 토큰이어야함
->         * 그래야 제거 가능
+>       * 현재 해당 인센티브 토큰의 잔액이 없어야 함
+>       * FactoryVaultManager 여야 함
+>       * 제거할 토큰이 화이트리스트에 등록되어있는 토큰이어야 함
 >     * 인센티브 토큰 추가
 >       * FactoryOwner만 추가가능
 >   * 제거 큐에 들어가있는 토큰에는 addIncentive 불가
 > * **보상 금고의 보상 구조 변경(토큰 추가/제거)은 사용자에게 사전 고지 및 명확한 UI 표시**
->   * IncentiveTokenWhitelisted와 IncentiveTokenRemoved 이벤트를 읽어오는 봇을 만들어서 변화가 생기면 BEX에 팝업
+>   * IncentiveTokenWhitelisted와 IncentiveTokenRemoved 이벤트를 읽어오는 봇을 만들어 변화가 생기면 프로토콜 사이트에 팝업 표시
 
 #### Best Practice&#x20;
 
