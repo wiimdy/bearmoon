@@ -71,12 +71,12 @@ function _getReward(address account, address recipient)
 #### 가이드라인
 
 > * **인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**
->   * **인센티브 토큰 추가 권한: Factory Owner**
->   * **인센티브 토큰 제거 권한: Factory Vault Manager**
->   * **현재 인센티브 토큰 최대 3개 등록 가능**
+>   * **인센티브 토큰 추가 권한:** Factory Owner
+>   * **인센티브 토큰 제거 권한:** Factory Vault Manager
+>   * 현재 인센티브 토큰 최대 3개 등록 가능
 > *   **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
 >
->     * **인센티브 토큰 추가 시** `minIncentive > 0`  검증 진행
+>     * 인센티브 토큰 추가 시 `minIncentive > 0`  검증 진행
 >
 >     ```solidity
 >     // validate `minIncentiveRate` value
@@ -84,7 +84,7 @@ function _getReward(address account, address recipient)
 >     if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
 >     ```
 >
->     * **인센티브 비율 변경시 최소 비율보다 높게 설정**
+>     * 인센티브 비율 변경시 최소 비율보다 높게 설정
 >
 >     ```solidity
 >     // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
@@ -94,8 +94,8 @@ function _getReward(address account, address recipient)
 >     if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
 >     ```
 >
->     * **현재 incentive manager 권한**
->       * **`addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능**
+>     * 현재 incentive manager 권한
+>       * `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
 > * **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
 
 #### Best Practice&#x20;
@@ -152,14 +152,14 @@ ERC-20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션
 **가이드라인**
 
 > * **안전한 토큰 승인 및 전송**
->   * **거래별 정확한 승인량 계산 및 설정**
->   * **승인량과 실제 사용량 일치 검증**
->   * **모든 토큰 전송 후 반환값 검증 및 전송 실패 시 전체 롤백**
+>   * 거래별 정확한 승인량 계산 및 설정
+>   * 승인량과 실제 사용량 일치 검증
+>   * 모든 토큰 전송 후 반환값 검증 및 전송 실패 시 전체 롤백
 > * **토큰 표준 호환성 검증**
->   * **ERC-20 표준 준수 여부 사전 검증**
+>   * ERC-20 표준 준수 여부 사전 검증
 > * **토큰 화이트리스트 관리**
->   * **지원 토큰 사전 심사 및 승인 절차**
->   * **악성 토큰 블랙리스트 운영 및 실시간 업데이트**
+>   * 지원 토큰 사전 심사 및 승인 절차
+>   * 악성 토큰 블랙리스트 운영 및 실시간 업데이트
 
 #### Best Practice&#x20;
 
@@ -444,7 +444,7 @@ contract StakingRewards is ... {
 
 #### 가이드라인
 
-> * **리워드 볼트 생성시 최소 LP 토큰 예치로 totalsupply가 0이 되는 것을 방지한다**
+> * **리워드 볼트 생성시 최소 LP 토큰 예치로 totalsupply가 0이 되는 것을 방지**
 
 #### Best Practice&#x20;
 
