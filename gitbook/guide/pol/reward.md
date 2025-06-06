@@ -4,7 +4,7 @@ icon: sack-dollar
 
 # PoL 보안 가이드라인: 보상 분배
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc-20">#id-3-erc-20</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc-20">#id-3-erc-20</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: 재진입 공격을 통해 보상 중복 청구
 
@@ -14,7 +14,7 @@ icon: sack-dollar
 
 `Medium`&#x20;
 
-재진입 공격 성공 시 특정 사용자가 정당한 보상 이상을 중복으로 인출하여 프로토콜 또는 다른 사용자들에게 직접적인 재정적 손실을 야기할 수 있기 때문에`Medium`으로 평가했다.
+재진입 공격 성공 시 특정 사용자가 정당한 보상 이상을 중복으로 인출하여 프로토콜 또는 다른 사용자들에게 직접적인 재정적 손실을 야기할 수 있기 때문에`Medium`으로 평가한다.
 
 #### 가이드라인
 
@@ -66,7 +66,7 @@ function _getReward(address account, address recipient)
 
 `Low`
 
-공격자가 악의적인 토큰을 인센티브 토큰에 추가하면 검증자 및 사용자의 보상을 가로채거나 인센티브율을 증가시켜 프로토콜의 인센티브 토큰을 빠르게 감소 시킬 수 있다. 그러나 토큰 등록은 거버넌스를 통한 과정이기 때문에`Low`로 평가했다.
+공격자가 악의적인 토큰을 인센티브 토큰에 추가하면 검증자 및 사용자의 보상을 가로채거나 인센티브율을 증가시켜 프로토콜의 인센티브 토큰을 빠르게 감소 시킬 수 있다. 그러나 토큰 등록은 거버넌스를 통한 과정이기 때문에`Low`로 평가한다.
 
 #### 가이드라인
 
@@ -147,7 +147,7 @@ function whitelistIncentiveToken(
 
 `Low`&#x20;
 
-ERC-20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션에서 의도치 않은 토큰 전송 실패, 수량 불일치 등을 유발하여 부분적인 자산 손실이나 기능 장애를 초래할 수 있기 때문에 `Low`로 평가했다.
+ERC-20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션에서 의도치 않은 토큰 전송 실패, 수량 불일치 등을 유발하여 부분적인 자산 손실이나 기능 장애를 초래할 수 있기 때문에 `Low`로 평가한다.
 
 **가이드라인**
 
@@ -202,7 +202,7 @@ function addIncentive(
 
 `Low`&#x20;
 
-잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다는 일시적인 기능의 정지 가능성 때문에 `Low`로 평가했다.
+잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다는 일시적인 기능의 정지 가능성 때문에 `Low`로 평가한다.
 
 #### 가이드라인
 
@@ -268,7 +268,7 @@ bytes32 public genesisDepositsRoot;
 
 `Low`&#x20;
 
-공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 modifire 로 인해 발생가능성은 낮기 때문에 `Low`로 평가했다.
+공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 modifire 로 인해 발생가능성은 낮기 때문에 `Low`로 평가한다.
 
 #### 가이드라인
 
@@ -329,7 +329,7 @@ function getReward(
 
 `Low`&#x20;
 
-컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 적게 지급될 수 있으나, 그 차이가 미세하고 의도적인 탈취가 아니기 때문에`Low`로 평가했다.
+컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 적게 지급될 수 있으나, 그 차이가 미세하고 의도적인 탈취가 아니기 때문에`Low`로 평가한다.
 
 #### 가이드라인
 
@@ -440,7 +440,7 @@ contract StakingRewards is ... {
 
 `Low`&#x20;
 
-보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생할 수 있으나 발생 가능성이 매우 낮기 때문에`Low`로 평가했다.
+보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생할 수 있으나 발생 가능성이 매우 낮기 때문에`Low`로 평가한다.
 
 #### 가이드라인
 
@@ -560,7 +560,7 @@ contract RewardVault is RewardVault {
 
 `Low`&#x20;
 
-보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 잃게 된다. 하지만 관리자는 거버넌스에 의해 정해지기에 발생 가능성이 낮기 때문에 `Low`로 평가했다.
+보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 잃게 된다. 하지만 관리자는 거버넌스에 의해 정해지기에 발생 가능성이 낮기 때문에 `Low`로 평가한다.
 
 #### 가이드라인
 
