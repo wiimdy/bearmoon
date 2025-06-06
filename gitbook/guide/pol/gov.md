@@ -4,9 +4,77 @@ icon: square-poll-vertical
 
 # PoL 보안 가이드라인: 거버넌스
 
-<table><thead><tr><th width="591.765625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91">#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c">#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="591.765625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2">#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91">#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="gov.md#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c">#ec-9c-84-ed-98-917-ec-82-ac-ec-9a-a9-ec-9e-90-ea-b3-a0-ec-a7-80-eb-b6-80-ec-a1-b1-ec-9c-bc-eb-a1-9c</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
-### 위협 1: 거버넌스 제안 검증 미흡 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
+### 위협 1: BGT 독점에 의한 거버넌스 조작 <a href="#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91" id="ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91"></a>
+
+대규모 프로토콜이 사용자를 독점할 경우 전체 BGT 중 20% 이상을 얻을 수 있고 하나의 프로토콜이 BGT를 대량 보유할 경우 투표를 조작하여 프로토콜에 유리한 정책을 강제할 수 있다.
+
+#### 영향도
+
+`High`
+
+하나의 프로토콜이 조작을 일으킬 수 있어 거버넌스가 무의미해지며 실현가능성 및 영향도가 크기에 `High` 로 평가한다.
+
+#### 가이드라인
+
+> * **단일 엔티티나 프로토콜이 전체 BGT의 일정 비율(15%) 이상을 보유할 때 경고 메커니즘 도입**
+>   * 15% 기준은 제안이 올라가는 기준인 20%의 3/4로 설정
+> * **특정 비율을 넘어간 BGT에 대해서 선형적인 투표권 대신 영향력이 감소하는 방식으로 대량 보유자의 영향력을 축소**
+>   * 제곱근 기반 Quadratic Voting 방식 적용하여 대량 보유자의 영향력 축소
+
+#### Best Practice
+
+[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
+
+```solidity
+function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
+    (uint256 againstVotes, uint256 forVotes,) = proposalVotes(proposalId);
+    uint256 threshold = (forVotes + againstVotes) * 51 / 100;
+    return forVotes >= threshold;
+}
+```
+
+`커스텀 코드`&#x20;
+
+<pre class="language-solidity"><code class="lang-solidity">// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
+contract ConcentrationWarning {
+    event ConcentrationWarning(address indexed user, uint256 concentration);
+    
+    function calculateQuadraticWeight(uint256 bgtAmount) public pure returns (uint256) {
+        return sqrt(bgtAmount);
+    }
+    
+    function castQuadraticVote(uint256 proposalId, bool support) external {
+        uint256 weight = calculateQuadraticWeight(getBGTBalance(msg.sender));
+        uint256 concentration = getConcentration(msg.sender);
+        
+        // 15% 이상: 경고 발생
+        if (concentration > 15e16) {
+            emit ConcentrationWarning(msg.sender, concentration);
+        }
+        
+        emit VoteCast(proposalId, msg.sender, support, weight);
+    }
+    
+    function getConcentration(address user) public view returns (uint256) {
+        uint256 totalBGT = getTotalBGTSupply();
+        uint256 userBGT = getBGTBalance(user) + getDelegatedBGT(user);
+        return userBGT * 1e18 / totalBGT;
+    }
+    
+    function isHighConcentration(address user) external view returns (bool) {
+        return getConcentration(user) > 15e16;
+    }
+}
+<strong>
+</strong>
+
+</code></pre>
+
+***
+
+### 위협 2: 거버넌스 제안 검증 미흡 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
 
 거버넌스를 통해 악의적인 보상 금고나 인센티브 토큰이 승인될 위험이 존재 한다. 이를 통해 공격자가 자금을 탈취하거나 시스템 안정성을 해칠 수 있다.
 
@@ -64,7 +132,7 @@ contract ComponentValidator {
 
 ***
 
-### 위협 2: 사익 충돌로 인한 거절 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
+### 위협 3: 사익 충돌로 인한 거절 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
 
 재단이나 가디언즈가 자신에게 불리한 제안을 거부하여 거버넌스가 공정하게 작동하지 않고 중앙화될 우려가 있다. \
 이는 커뮤니티의 정당한 의사결정을 방해하고 시스템의 탈중앙화를 훼손할 수 있다.
@@ -123,7 +191,7 @@ contract TransparentGovernance {
 
 ***
 
-### 위협 3: 온체인 거버넌스 로직 미구현 제한 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
+### 위협 4: 온체인 거버넌스 로직 미구현 제한 <a href="#ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8" id="ec-9c-84-ed-98-911-ec-95-85-ec-84-b1-ec-bb-b4-ed-8f-ac-eb-84-8c-ed-8a-b8-ec-8a-b9-ec-9d-b8"></a>
 
 거버넌스가 아직 온체인에 구현되지 않아 포럼 기반 투표로 운영되며, 이로 인해 투표율(20%) 충족이 어렵고 의사결정 과정이 비효율적이거나 조작 가능할 수 있다.
 
@@ -205,74 +273,6 @@ contract ForumVoteTracker {
     }
 }
 ```
-
-***
-
-### 위협 4: BGT 독점에 의한 거버넌스 조작 <a href="#ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91" id="ec-9c-84-ed-98-915-bgt-eb-8f-85-ec-a0-90-ec-97-90-ec-9d-98-ed-95-9c-governance-ec-a1-b0-ec-9e-91"></a>
-
-대규모 프로토콜이 사용자를 독점할 경우 전체 BGT 중 20% 이상을 얻을 수 있고 하나의 프로토콜이 BGT를 대량 보유할 경우 투표를 조작하여 프로토콜에 유리한 정책을 강제할 수 있다.
-
-#### 영향도
-
-`High`
-
-하나의 프로토콜이 조작을 일으킬 수 있어 거버넌스가 무의미해지며 실현가능성 및 영향도가 크기에 `High` 로 평가
-
-#### 가이드라인
-
-> * **단일 엔티티나 프로토콜이 전체 BGT의 일정 비율(15%) 이상을 보유할 때 경고 메커니즘 도입**
->   * 15% 기준은 제안이 올라가는 기준인 20%의 3/4로 설정
-> * **특정 비율을 넘어간 BGT에 대해서 선형적인 투표권 대신 영향력이 감소하는 방식으로 대량 보유자의 영향력을 축소**
->   * 제곱근 기반 Quadratic Voting 방식 적용하여 대량 보유자의 영향력 축소
-
-#### Best Practice
-
-[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
-
-```solidity
-function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
-    (uint256 againstVotes, uint256 forVotes,) = proposalVotes(proposalId);
-    uint256 threshold = (forVotes + againstVotes) * 51 / 100;
-    return forVotes >= threshold;
-}
-```
-
-`커스텀 코드`&#x20;
-
-<pre class="language-solidity"><code class="lang-solidity">// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
-contract ConcentrationWarning {
-    event ConcentrationWarning(address indexed user, uint256 concentration);
-    
-    function calculateQuadraticWeight(uint256 bgtAmount) public pure returns (uint256) {
-        return sqrt(bgtAmount);
-    }
-    
-    function castQuadraticVote(uint256 proposalId, bool support) external {
-        uint256 weight = calculateQuadraticWeight(getBGTBalance(msg.sender));
-        uint256 concentration = getConcentration(msg.sender);
-        
-        // 15% 이상: 경고 발생
-        if (concentration > 15e16) {
-            emit ConcentrationWarning(msg.sender, concentration);
-        }
-        
-        emit VoteCast(proposalId, msg.sender, support, weight);
-    }
-    
-    function getConcentration(address user) public view returns (uint256) {
-        uint256 totalBGT = getTotalBGTSupply();
-        uint256 userBGT = getBGTBalance(user) + getDelegatedBGT(user);
-        return userBGT * 1e18 / totalBGT;
-    }
-    
-    function isHighConcentration(address user) external view returns (bool) {
-        return getConcentration(user) > 15e16;
-    }
-}
-<strong>
-</strong>
-
-</code></pre>
 
 ***
 
