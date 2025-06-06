@@ -8,90 +8,7 @@ icon: plane-arrival
 
 <table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-4-recovery-mode">#id-4-recovery-mode</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-5-owner">#id-5-owner</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
-### 위협 1: 담보 평가 및 가격 결정 메커니즘의 취약점
-
-유동성이 낮은 토큰이 담보로 등록될 경우 공격자가 유동성이 작은 풀의 토큰 가격을 플래시론으로 조작하여 PriceFeed를 속이고 고평가된 담보로 과도한 NECT를 차용한다. 다시 가격이 복구되어 청산 되어도 담보에 비해 많은 금액을 대출하여 프로토콜에 손해를 입힌다.
-
-#### 영향도&#x20;
-
-`Informational`
-
-공격자는 충분한 유동성을 가지고 거버넌스에 의해 승인될 만한 담보의 오라클을 조작해야 하는데 이는 매우 어렵고 비용이 많이 들기에 `Informational`로 평가한다.
-
-#### 가이드라인
-
-> * **각 담보 자산(iBGT, iBERA, 특정 Kodiak/BEX LP 토큰 등)의 위험 프로파일을 개별적으로 평가하고, 이에 따라 LTV(담보인정비율), MCR(최소담보비율), 청산 패널티 등을 차등 설정한다. 위험 프로파일 평가는 다음 지표들을 포함한다.**
-
-1. **유동성 평가:**
-
-* **판정 지표:**
-  * **온체인 DEX 유동성 깊이: 해당 토큰과 주요 페어(HONEY, USDC, WETH)의 DEX 풀에 예치된 총 가치 (TVL) 및 슬리피지.**&#x20;
-    * **BeraBorrow의 DenManager.sol 자체에는 직접적인 유동성 측정 로직이 없으나, 새로운 담보 추가 시 Factory.sol의 deployNewInstance를 통해 설정되는 파라미터들이 이 평가를 기반으로 해야 한다.**
-  * **24시간 거래량: 해당 토큰의 온체인 DEX 거래량**
-* **기준: 각 지표에 대해 최소 임계값을 설정하고, 미달 시 '저유동성 토큰'으로 분류하여 LTV 하향 조정 및 MCR 상향 조정.**\
-
-
-2. **변동성 산정:**
-
-* **산정 방식:**
-  * **기간: 최소 지난 30일 이상의 가격 데이터 사용.**
-  * **지표: 해당 기간 동안 일별 종가 기준 로그 수익률의 표준편차(Historical Volatility)를 계산.**
-  * **Volatility = σ = sqrt( (1/N) \* Σ( (R\_i - R\_avg)^2 ) )**
-    * **N: 기간 내 관찰 횟수**
-    * **R\_i​: i 시점의 로그 수익률 (ln(Pi/Pi−1)ln(Pi​/Pi−1​))**
-    * **R\_avg​: 평균 로그 수익률**
-* **활용: 계산된 변동성을 기준으로 등급을 나누고(낮음, 중간, 높음, 매우 높음), 등급에 따라 LTV 및 청산 관련 파라미터를 차등 적용.**\
-
-
-3. **N개 오라클 가격 피드 사용 및 통합:**
-
-* **최소 요건: 각 담보에 대해 최소 2개, 권장 3개 이상의 독립적인 가격 소스를 사용한다.**&#x20;
-* **통합 방식:**
-  * **중간값 방식: N개의 오라클로부터 가격을 받아 정렬 후 중간값을 최종 가격으로 사용. 이는 극단적인 가격을 제시하는 단일 오라클의 영향을 제거한다.**
-  * **가중 평균 방식: 각 오라클의 신뢰도, 업데이트 빈도 등을 고려하여 가중치를 부여하고 가중 평균을 사용할 수 있으나, 가중치 설정의 객관성 확보가 중요하다.**
-
-
-
-4. **가격 편차 검증 및 대응:**
-
-* **편차 검증 대상**
-  * 오라클 간 편차: 위 3번에서 사용되는 N개의 오라클 가격들 간의 상호 편차
-  * 오라클 가격과 TWAP 가격 간 편차: 실시간 오라클 가격과 특정 기간(예: 30분, 1시간)의 TWAP 간의 편차
-* **가격 편차 수식 (예시: 오라클 중앙값과 개별 오라클 간)**
-  * PmedianPmedian​: N개 오라클 가격의 중간값
-  * PoracleiPoraclei​​: i번째 개별 오라클 가격
-  * Deviation\_i = |P\_median - P\_oracle\_i| / P\_median \* 100%
-* **임계값 및 대응**
-  * 임계값 설정: Deviation\_i > 5% (또는 오라클-TWAP 편차 > 10%)
-  * 대응 조치
-    * 경고 및 로깅: 편차가 임계값을 초과하면 시스템에 즉시 경고를 발생시키고 관련 데이터를 로깅
-    * 일시적 운영 중단 (Circuit Breaker): 해당 담보를 사용한 신규 대출 및 청산 실행을 일시적으로 중단
-      * BeraBorrow DenManager.sol의 setPaused(bool \_paused) 와 유사한 기능을 담보별로 두거나, BeraborrowCore.sol의 setNewCCR 호출과 연계하여 해당 담보의 CCR을 일시적으로 매우 높게 설정하여 사실상 중단시키는 방안 고려
-    * 보수적 가격 사용: 편차가 발생한 오라클을 제외하고 가격을 다시 계산
-    * TWAP 의존도 증가: 실시간 가격 대신 TWAP 가격을 일시적으로 사용하거나, TWAP 반영 비중을 증가
-    * 거버넌스 개입: 심각한 편차 발생 시, 거버넌스를 통해 해당 오라클을 교체하거나 문제를 해결할 때까지 담보 자격을 정지
-
-
-
-#### Best Practice
-
-[`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L302-L336)
-
-```solidity
-// MCR 설정등 각 담보에 따라 차등 설정
-
-function setParameters(IFactory.DeploymentParams calldata params) public  {
-    require(!sunsetting, "Cannot change after sunset");
-    require(params.MCR <= BERABORROW_CORE.CCR() && params.MCR >= 1.1e18, 
-            "MCR cannot be > CCR or < 110%");
- //...
-    MCR = params.MCR;
-}
-```
-
-***
-
-### 위협 2: ERC-4626 인플레이션 공격
+### 위협 1: ERC-4626 인플레이션 공격
 
 공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다.
 
@@ -174,7 +91,7 @@ if (block.timestamp < bootstrapEndTime) {
 
 ***
 
-### 위협 3: 플래시론 재진입 공격
+### 위협 2: 플래시론 재진입 공격
 
 플래시론 재진입 공격은 공격자가 대출금 상환 전에 콜백 함수를 통해 프로토콜에 다시 접근하여 담보물을 부당하게 인출하거나 추가 대출을 실행한다. 이는 결국 프로토콜에 상환되지 않는 부실 채권을 남기거나 담보 자산을 탈취당하게 만들어 직접적인 자금 손실을 야기한다.
 
@@ -204,7 +121,7 @@ function flashFee(address token, uint256 amount) public view returns (uint256) {
 
 ***
 
-### 위협 4: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
+### 위협 3: Recovery Mode 상태 판단 및 전환 메커니즘의 불완전성
 
 Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제로는 위험한 상태임에도 정상 작동하는 것처럼 보이게 만들어, 추가적인 부실 대출을 허용하고 손실을 확대시킨다.
 
@@ -270,7 +187,7 @@ if (_isRecoveryMode) {
 
 ***
 
-### 위협 5: Owner 권한 남용으로 인한 시스템 무결성 침해
+### 위협 4: Owner 권한 남용으로 인한 시스템 무결성 침해
 
 Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적으로 변경하면, 사용자들은 예기치 않은 과도한 수수료 지불 및 자산 청산 위험 증가 등 직접적인 경제적 손실을 입게 된다.
 
@@ -301,7 +218,7 @@ require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unautho
 
 ***
 
-### 위협 6: 이자율 조작을 통한 부당한 이자 부과
+### 위협 5: 이자율 조작을 통한 부당한 이자 부과
 
 공격자 또는 악의적인 거버넌스가 이자율을 부당하게 조작하면, 차용자는 과도한 이자를 지불하게 되어 직접적인 경제적 손실을 입거나, 예치자는 기대했던 수익을 얻지 못하게 된다.
 
@@ -338,7 +255,7 @@ if (newInterestRate != interestRate) {
 
 ***
 
-### 위협 7: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
+### 위협 6: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
 대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들에게 과도한 슬리피지로 인한 자산 손실을 강요한다.&#x20;
 
