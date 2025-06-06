@@ -18,7 +18,7 @@ layout:
 
 # dApp 보안 가이드라인: 체이닝
 
-<table><thead><tr><th width="595">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1-dex-lsp-erc-4626">#id-1-dex-lsp-erc-4626</a></td><td align="center"><strong><code>Medium</code></strong></td></tr><tr><td><a data-mention href="chaining.md#id-2-honey-permissionlesspsm.sol">#id-2-honey-permissionlesspsm.sol</a></td><td align="center"><strong><code>Low</code></strong></td></tr><tr><td><a data-mention href="chaining.md#id-3">#id-3</a></td><td align="center"><strong><code>Informational</code></strong></td></tr></tbody></table>
+<table><thead><tr><th width="595">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chaining.md#id-1-dex-lsp-erc-4626">#id-1-dex-lsp-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chaining.md#id-2-honey-permissionlesspsm.sol">#id-2-honey-permissionlesspsm.sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chaining.md#id-3">#id-3</a></td><td align="center"><strong><code>Informational</code></strong></td></tr></tbody></table>
 
 ### 위협 1: DEX 풀 불균형 연쇄청산으로 인한 LSP ERC-4626 인플레이션 공격
 
@@ -38,9 +38,9 @@ BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있�
 
 #### 영향도
 
-**`Medium`**&#x20;
+`Medium`&#x20;
 
-totalsupply가 0이 된 후 유동성 공급자의 자금을 탈취할 수 있으나 볼트 생성 초기 혹은 totalsupply가 0에 도달 할 경우에만 공격이 가능하므로 영향도를 **`Medium`**&#xC73C;로 평가한다.
+totalsupply가 0이 된 후 유동성 공급자의 자금을 탈취할 수 있으나 볼트 생성 초기 혹은 totalsupply가 0에 도달 할 경우에만 공격이 가능하므로 영향도를 `Medium`으로 평가한다.
 
 #### 가이드라인
 
@@ -119,9 +119,9 @@ NECT의 가격 결정 메커니즘: \_whitelistStable 함수 내에서 `wadOffse
 
 #### 영향도
 
-**`Low`**
+`Low`
 
-디페깅난 자산으로 NECT를 발행해 담보를 바꾸면 공격자는 이득을 볼 수 있다. 이런 차익 거래를 통해 디페깅이 회복이 되지만 대출 프로토콜의 입장에서는 불안정한 자산(HONEY)을 받아 스테이블 코인(NECT)을 발행하므로 손해를 볼 수 있다. 따라서 영향도를 **`Low`**&#xB85C; 평가한다.
+디페깅난 자산으로 NECT를 발행해 담보를 바꾸면 공격자는 이득을 볼 수 있다. 이런 차익 거래를 통해 디페깅이 회복이 되지만 대출 프로토콜의 입장에서는 불안정한 자산(HONEY)을 받아 스테이블 코인(NECT)을 발행하므로 손해를 볼 수 있다. 따라서 영향도를 `Low`로 평가한다.
 
 
 
@@ -182,9 +182,9 @@ Infrared 프로토콜은 베라체인의 PoL 경제에서 사실상 보상 엔�
 
 #### 영향도
 
-**`Informational`**
+`Informational`
 
-대형 외부 프로토콜의 붕괴와 같은 이벤트는 체인 전반의 시스템 리스크로 작용할 수 있으며, 이는 본 프로토콜에도 간접적인 영향을 미칠 수 있다. 하지만 이는 본 프로토콜 자체의 직접적인 보안 취약점이라기보다는 외부 변화에 대응하기 위한 정책 및 방어 체계의 문제에 가까워 영향도를 **`Informational`** 로 평가한다.
+대형 외부 프로토콜의 붕괴와 같은 이벤트는 체인 전반의 시스템 리스크로 작용할 수 있으며, 이는 본 프로토콜에도 간접적인 영향을 미칠 수 있다. 하지만 이는 본 프로토콜 자체의 직접적인 보안 취약점이라기보다는 외부 변화에 대응하기 위한 정책 및 방어 체계의 문제에 가까워 영향도를 `Informational` 로 평가한다.
 
 #### 가이드라인
 
