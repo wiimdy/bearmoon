@@ -155,7 +155,7 @@ HONEY의 시장 가격이 폭락했음에도  Beraborrow의`PermissionlessPSM.so
 
 **핵심 취약점**
 
-NECT의 가격 결정 메커니즘: \_whitelistStable 함수 내에서 wadOffset = uint64(10 \*\* (nect.decimals() - stable.decimals()))로 HONEY와 NECT 간의 교환 비율 오프셋을 설정한다. 이는 단순히 두 토큰의 소수점 자릿수 차이를 보정하는 역할만 하며, HONEY의 실제 시장 가격을 반영하는 오라클과 연동되어 있지 않는다. 따라서 HONEY의 외부 시장 가격이 폭락하더라도 Beraborrow의 PermissionlessPSM.sol은 여전히 고정된 오프셋인 1:1로 NECT를 민팅해준다.
+NECT의 가격 결정 메커니즘: \_whitelistStable 함수 내에서 `wadOffset = (10 ** (nect.decimals() - stable.decimals())`로 HONEY와 NECT 간의 교환 비율 오프셋을 설정한다. 이는 단순히 두 토큰의 소수점 자릿수 차이를 보정하는 역할만 하며, HONEY의 실제 시장 가격을 반영하는 오라클과 연동되어 있지 않는다. 따라서 HONEY의 외부 시장 가격이 폭락하더라도 Beraborrow의 PermissionlessPSM.sol은 여전히 고정된 오프셋인 1:1로 NECT를 민팅해준다.
 
 공격 시나리오
 
@@ -166,12 +166,16 @@ NECT의 가격 결정 메커니즘: \_whitelistStable 함수 내에서 wadOffset
 
 #### 영향도
 
-`Medium`
+`Medium`&#x20;
+
+ㄱ곰곰히 생각해보니 이게 공격인가? 보안의 취약점이 있는건가라는 생각이 드네요 ㅋㅋㅋㅋㅋㅋㅋ 그냥 정상 거래! 차익거래 잖아!!!
+
+
 
 #### 가이드라인
 
-> * **NECT 발행 로직에 HONEY 가격 오라클을 연동하여 실시간 가치를 반영하고, 가격 급락 시 발행 수수료를 동적으로 인상하거나 해당 스테이블코인을 통한 발행을 일시 중단한다.**&#x20;
-> * **스테이블코인별 발행 총량을 관리하여 급격한 민팅을 방지한다.**
+> * **NECT 발행 로직에 HONEY 가격 오라클을 연동하여 실시간 가치를 반영하고, 가격 급락 시 발행 수수료를 동적으로 인상하거나 해당 스테이블 코인을 통한 발행을 일시 중단한다.**&#x20;
+> * **스테이블 코인별 발행 총량을 관리하여 급격한 민팅을 방지한다.**
 
 #### Best Practice
 
