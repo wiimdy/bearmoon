@@ -56,11 +56,24 @@ description: 📚 레퍼런스 각주 목록
 
 #### calculateLoss 수식 레퍼런스 디페깅 비율 × 자산 가치로 손실 계산, 사용자 위험 고지와 acknowledgeRisk 확인 필수
 
+```solidity
+// 기본 손실 계산:
+Loss = AssetValueAtPeg × DepegRatio
+// 사용자 받을 자산량:
+UserAssetAmount = HoneyAmount × AssetWeight
+// 디페깅 비율:
+DepegRatio = (PegPrice - CurrentPrice) / PegPrice
+// 페그 기준 자산 가치:
+AssetValueAtPeg = UserAssetAmount × PegPrice
+// 최종 손실:
+Loss = AssetValueAtPeg × DepegRatio
+```
+
 #### Quadratic Voting BGT 보유량 제곱근 기반 투표권 계산으로 대량 보유자 영향력 축소, 15% 집중도 경고 시스템
 
 #### Berachain 타임락(2일), Guardian 개입(5-of-9 multisig) 거버넌스 제안 악용 방지를 위한 2일 지연과 가디언 개입, 악의적 제안 차단 안전장치
 
-#### DeFi 평균 피드백 소요 시간 (2\~3주) 거버넌스 제안 검증을 위한 기술→경제→보안 다층 검토와 커뮤니티 의견 수렴 최소 기간
+#### Defi 평균 피드백 소요 시간(2\~3주) Uniswap RFC 최소 7일, 전체 프로세스 14일 기준. Compound 제안 간격 평균 6.95일, 커뮤니티 논의→투표→실행 단계별 충분한 검토 시간 확보 필요. 복잡한 프로토콜 변경사항의 경우 기술적 검토, 경제적 영향 분석, 보안 감사를 포함한 다층적 검증을 위해 최소 2\~3주 소요
 
 #### 독립적 중재 위원회 프로토콜 사례 거버넌스 거부 투명성 확보와 이의제기 메커니즘, 이해관계 공개로 재단 물량 30% 제한
 

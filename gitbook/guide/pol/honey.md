@@ -185,35 +185,38 @@ contract EnhancedMultiOracleSystem {
 contract StabilityRecovery {
     struct RecoveryState {
         uint256 recoveryStartTime;
-        uint256 stableCount;          // 연속 안정 카운트
+        uint256 lastCheckTime;    
+        uint256 stableCount;
         bool isRecovering;
     }
     
-    uint256 public constant RECOVERY_CONFIRMATION_PERIOD = 30 minutes;  // 30분 연속 안정
-    uint256 public constant STABILITY_CHECK_INTERVAL = 1 minutes;       // 1분마다 체크
+    uint256 public constant RECOVERY_CONFIRMATION_PERIOD = 3 hours;
+    uint256 public constant STABILITY_CHECK_INTERVAL = 30 seconds;
     
-    // 🔄 자동 회복 로직
     function checkAutoRecovery(address asset) external returns (bool) {
+        require(
+            block.timestamp >= recoveryStates[asset].lastCheckTime + STABILITY_CHECK_INTERVAL,
+            "Too frequent checks"
+        );
+        
         if (isPriceStable(asset)) {
             if (!recoveryStates[asset].isRecovering) {
-                // 회복 시작
                 recoveryStates[asset].recoveryStartTime = block.timestamp;
                 recoveryStates[asset].isRecovering = true;
                 recoveryStates[asset].stableCount = 1;
             } else {
-                // 연속 안정성 증가
                 recoveryStates[asset].stableCount++;
                 
-                // 30분 연속 안정 시 자동 해제
                 if (block.timestamp >= recoveryStates[asset].recoveryStartTime + RECOVERY_CONFIRMATION_PERIOD) {
                     _resetToNormalMode(asset);
                     return true;
                 }
             }
         } else {
-            // 불안정 감지 시 회복 상태 리셋
             _resetRecoveryState(asset);
         }
+        
+        recoveryStates[asset].lastCheckTime = block.timestamp; 
         return false;
     }
 }
@@ -233,7 +236,7 @@ contract StabilityRecovery {
 
 #### 가이드라인
 
-> * **Basket 모드가 활성화 된 상태에서 상환 시 디페깅된 자산은** [**3개 이상의 오라클**](../../undefined.md#chainlink-3)**을 참조하여 자산의 가치를 평가**
+> * **Basket 모드가 활성화 된 상태에서 상환 시 디페깅된 자산은** [**3개 이상의 오라클**](../../undefined.md#chainlink-3)**을 참조하여 자산의 가치를 평가(현재 베라체인은 신뢰가능한 chainlink 오라클 및 HONEY 오라클로 pyth, spot 오라클 참조)**
 >   * 이 과정에서 활성화된 오라클만을 참조(비활성화, 긴급중단 오라클 참조 금지)
 > * **사용자에게 상환 과정에서 디페깅 자산이 포함될 수 있다는 점, 디페깅 자산의 평가 기준, 그리고 이로 인한 잠재적 손실 가능성에 대해 명확하고 쉽게 고지하는 절차 필요**
 >   * 디페깅된 자산으로 인한 예상 손실을 어떻게 계산하는지에 대한 [수식 기반 설명](../../undefined.md#calculateloss-acknowledgerisk)
@@ -297,42 +300,35 @@ contract RedeemWarningSystem {
     }
 } 
 
-// calculateLoss() 참조
+// calculateLoss() - Reference [26]: 디페깅 비율 × 자산 가치로 손실 계산
 function calculateLoss(address asset, uint256 honeyAmount) internal view returns (uint256) {
-    // 1. 현재 시장 가격 조회 (다중 오라클)
-    uint256 currentPrice = getAggregatedPrice(asset); // 예: 0.85e18 (15% 디페깅)
+    // 1. 현재 시장 가격 조회 (Reference [25]: 다중 오라클)
+    uint256 currentPrice = getAggregatedPrice(asset);
     uint256 pegPrice = 1e18; // $1.00
     
     // 2. 디페깅 상황에서만 손실 계산
     if (currentPrice >= pegPrice) return 0;
     
     // 3. 사용자가 받을 해당 자산의 양 계산
+    // UserAssetAmount = HoneyAmount × AssetWeight
     uint256[] memory weights = getWeights();
     uint256 assetIndex = getAssetIndex(asset);
     uint256 userAssetAmount = honeyAmount * weights[assetIndex] / 1e18;
     
-    // 4. 디페깅으로 인한 손실 계산
+    // 4. Reference [26] 수식 적용: Loss = AssetValueAtPeg × DepegRatio
+    
+    // DepegRatio = (PegPrice - CurrentPrice) / PegPrice
     uint256 depegRatio = (pegPrice - currentPrice) * 1e18 / pegPrice;
+    
+    // AssetValueAtPeg = UserAssetAmount × PegPrice  
     uint256 assetValueAtPeg = userAssetAmount * pegPrice / 1e18;
+    
+    // Loss = AssetValueAtPeg × DepegRatio
     uint256 loss = assetValueAtPeg * depegRatio / 1e18;
     
     return loss;
 }
-    // calculateLoss() 계산 예시:
-    
-    // 입력값:
-    // honeyAmount: 1000 HONEY
-    // USDC 가격: $0.85 (15% 디페깅)
-    // USDC 가중치: 30%
-    
-    // 계산 과정:
-    // userAssetAmount = 1000 × 0.3 = 300 USDC
-    // depegRatio = (1.00 - 0.85) / 1.00 = 0.15 (15%)
-    // assetValueAtPeg = 300 × $1.00 = $300
-    // loss = $300 × 0.15 = $45 
-    
-    // 결과: 
-    // 사용자는 USDC 디페깅으로 $45 손실 예상
+
 </code></pre>
 
 \
