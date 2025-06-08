@@ -202,14 +202,14 @@ function addIncentive(
 
 `Low`&#x20;
 
-잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다는 일시적인 기능의 정지 가능성 때문에 `Low`로 평가한다.
+잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다는 일시적인 기능의 정지 가능성 때문에 `Low`로 평가되지만, 업그레이드 가능한 컨트랙트의 경우 재초기화 방지가 중요하며, Parity Wallet과 같은 사례에서 보았듯이 심각한 결과를 초래할 수 있다.
 
 #### 가이드라인
 
 > * **모든 컨트랙트 초기화 시 zero address 검증 및 필수 매개변수 검증**
 > * **초기 설정 매개변수들의 합리적 범위 검증**
 > * **초기 예치 루트 설정 등 초기 상태의 무결성 보장**
-> * **초기화 함수의 불변성 보장 및 재초기화 방지 메커니즘**
+> * **초기화 함수의 불변성 보장 및 재초기화 방지 메커니즘(예: \_\_disableInitializers() 사용)**
 > * **주요 파라미터 변경을 위한 롤백 메커니즘**&#x20;
 
 #### Best Practice&#x20;
@@ -268,7 +268,7 @@ bytes32 public genesisDepositsRoot;
 
 `Low`&#x20;
 
-공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 modifire 로 인해 발생가능성은 낮기 때문에 `Low`로 평가한다.
+공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 `onlyOperatorOrUser` modifier로 예치자 혹은 대리인만 수령 가능해 발생 가능성이 낮아 `Low`로 평가한다.
 
 #### 가이드라인
 
@@ -329,7 +329,7 @@ function getReward(
 
 `Low`&#x20;
 
-컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 적게 지급될 수 있으나, 그 차이가 미세하고 의도적인 탈취가 아니기 때문에`Low`로 평가한다.
+컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 적게 지급될 수 있으나, 대부분의 금융 시스템에서의 허용(0.01%) 되는 미세한 차이고 의도적인 탈취가 아니기 때문에`Low`로 평가한다.
 
 #### 가이드라인
 
@@ -440,7 +440,7 @@ contract StakingRewards is ... {
 
 `Low`&#x20;
 
-보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생할 수 있으나 발생 가능성이 매우 낮기 때문에`Low`로 평가한다.
+보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생할 수 있으나 totalsupply가 0이 될 발생 가능성이 낮아 `Low`로 평가한다.
 
 #### 가이드라인
 
@@ -606,8 +606,8 @@ struct RemoveIncentiveTokenRequest {
 mapping(address => AddIncentiveTokenRequest) public addIncentiveTokenQueue;
 mapping(address => RemoveIncentiveTokenRequest) public removeIncentiveTokenQueue;
 
-// 딜레이 기간(예: 2일)
-uint256 public constant INCENTIVE_TOKEN_REQUEST_DELAY = 2 days;
+// 딜레이 기간(3시간)
+uint256 public constant INCENTIVE_TOKEN_REQUEST_DELAY = 3 hours;
 
 // 큐에 넣는 함수들
 // 인센티브 토큰 추가 요청
