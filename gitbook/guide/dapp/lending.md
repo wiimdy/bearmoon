@@ -20,7 +20,7 @@ icon: plane-arrival
 
 #### 가이드라인
 
-> *   **연쇄반응 방지 메커니즘**
+> *   [**연쇄반응**](../../undefined.md#recovery-mode-mcr) **방지 메커니즘**
 >
 >     *   Recovery Mode에서 담보 상환 제한
 >
@@ -196,7 +196,7 @@ Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토
 #### 가이드라인
 
 > * **모든 포지션 변경 시 개별 ICR(개별 담보 비율)과 시스템 TCR(총 담보율) 동시 검증**
-> * **Mode Transition 안정성**
+> * [**Mode Transition 안정성**](../../undefined.md#recovery-mode-checkrecoverymode-tcr-icr-tcr-mode)
 >   * TCR 계산 시 최신 가격 및 이자 반영 보장
 >   * Mode 전환 시 모든 포지션 상태 일괄 업데이트
 
