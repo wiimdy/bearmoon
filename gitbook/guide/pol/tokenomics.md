@@ -166,46 +166,49 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 
 #### 가이드라인
 
-* **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
-  * Weight 구조체를 통해 보상 금고 주소 관리
-  * 보상 금고 주소(receiver)는 보상을 받기 위해서는 whitelist에 등록되어야함&#x20;
-  * \_checkForDuplicateReceivers를 통해 중복 검증
-  * ```solidity
-    /// @dev Represents 100%. Chosen to be less granular.
-    uint96 internal constant ONE_HUNDRED_PERCENT = 1e4;
-    /// @notice The maximum weight a vault can assume in the reward allocation
-    uint96 public maxWeightPerVault;
-    // 현재 3000으로 설정되어있음!!
-    ```
-  * [maxWeightPerVault](https://berascan.com/address/0xdf960E8F3F19C481dDE769edEDD439ea1a63426a#readProxyContract#F18)
-*   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
-
-    ```solidity
-    // function queueNewRewardAllocation
-    if (startBlock <= block.number + rewardAllocationBlockDelay) {
-        InvalidStartBlock.selector.revertWith();
-    }
-    // function _validateWeights
-    if (totalWeight != ONE_HUNDRED_PERCENT) {
-            InvalidRewardAllocationWeights.selector.revertWith();
-        }
-    ```
-
-    * 딜레이를 주고 한번에 모든 보상을 나눠 할당하도록 해서 특정 금고에 연속적인 트랜잭션을 통해 보상 집중 방지
-* **하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지**
-  * **queueNewRewardAllocation**: operator 전체 할당 한도 체크
-  * **activateReadyQueuedRewardAllocation**: 실제 할당 반영 및 누적값 갱신
-  * **lastActiveWeights**: validator별 마지막 활성화된 RewardAllocation 추적
-  * **operatorVaultAllocations**: operator별 vault별 전체 할당 비율 추적
-  * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-4) 참고
-* **여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지**
-  *   모든 운영자들이 특정 금고에 할당한 전체 합계가 일정 한도를 초과하면,
-
-      해당 금고에 대한 보상 할당을 일시적으로 중단(=RewardAllocation에서 해당 vault를 선택 불가)하는 기능 도입
-  * vault별 전체 할당 합계를 추적
-  * 한도 초과 시, 해당 vault는 RewardAllocation에 포함 불가(큐잉 자체가 revert)
-  * 한도 미만이 되면 다시 할당 가능
-  * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-5) 참고
+> * **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
+>   * Weight 구조체를 통해 보상 금고 주소 관리
+>   * 보상 금고 주소(receiver)는 보상을 받기 위해서는 whitelist에 등록되어야함&#x20;
+>   * \_checkForDuplicateReceivers를 통해 중복 검증
+>   * ```solidity
+>     /// @dev Represents 100%. Chosen to be less granular.
+>     uint96 internal constant ONE_HUNDRED_PERCENT = 1e4;
+>     /// @notice The maximum weight a vault can assume in the reward allocation
+>     uint96 public maxWeightPerVault;
+>     // 현재 3000으로 설정되어있음!!
+>     ```
+>   * [maxWeightPerVault](https://berascan.com/address/0xdf960E8F3F19C481dDE769edEDD439ea1a63426a#readProxyContract#F18)\
+>
+> *   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
+>
+>     ```solidity
+>     // function queueNewRewardAllocation
+>     if (startBlock <= block.number + rewardAllocationBlockDelay) {
+>         InvalidStartBlock.selector.revertWith();
+>     }
+>     // function _validateWeights
+>     if (totalWeight != ONE_HUNDRED_PERCENT) {
+>             InvalidRewardAllocationWeights.selector.revertWith();
+>         }
+>     ```
+>
+>     * 딜레이를 주고 한번에 모든 보상을 나눠 할당하도록 해서 특정 금고에 연속적인 트랜잭션을 통해 보상 집중 방지\
+>
+> * **하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지**
+>   * **queueNewRewardAllocation**: operator 전체 할당 한도 체크
+>   * **activateReadyQueuedRewardAllocation**: 실제 할당 반영 및 누적값 갱신
+>   * **lastActiveWeights**: validator별 마지막 활성화된 RewardAllocation 추적
+>   * **operatorVaultAllocations**: operator별 vault별 전체 할당 비율 추적
+>   * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-4) 참고\
+>
+> * **여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지**
+>   *   모든 운영자들이 특정 금고에 할당한 전체 합계가 일정 한도를 초과하면,
+>
+>       해당 금고에 대한 보상 할당을 일시적으로 중단(=RewardAllocation에서 해당 vault를 선택 불가)하는 기능 도입
+>   * vault별 전체 할당 합계를 추적
+>   * 한도 초과 시, 해당 vault는 RewardAllocation에 포함 불가(큐잉 자체가 revert)
+>   * 한도 미만이 되면 다시 할당 가능
+>   * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-5) 참고
 
 #### Best Practice&#x20;
 
