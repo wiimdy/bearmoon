@@ -168,7 +168,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 
 > * **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
 >   * Weight 구조체를 통해 생성되어 있는 모든 보상 금고 주소(receiver) 관리
->   * 보상 금고 주소(receiver)로 보상을 받기 위해서는 [거버넌스를 통해 whitelist에 등록](../../undefined.md#id-19-iswhitelistedvault-_checkforduplicatereceivers-100)되어야함
+>   * 보상 금고 주소(receiver)로 보상을 받기 위해서는 [거버넌스를 통해 whitelist에 등록](../../undefined.md#iswhitelistedvault-_checkforduplicatereceivers-100)되어야함
 >     * 단순 Weight 구조체로 생성되었다고 보상을 할당 받을 수 있는것이 아님\
 >
 > *   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
@@ -188,7 +188,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >         }
 >     ```
 >
->     * [보상 할당에 딜레이(약 2000블록)](../../undefined.md#id-17-30-rewardallocationblockdelay)을 두어 보상 할당이 바로 반영되지 않도록 하고 각 할당마다 전체 보상의 100%를 모두 분배하도록 하여서 여러 트랜잭션을 이용해 보상을 나눠 분배하는 것을 방지\
+>     * 보상 할당에 딜레이(약 2000블록)을 두어 보상 할당이 바로 반영되지 않도록 하고 각 할당마다 전체 보상의 100%를 모두 분배하도록 하여서 여러 트랜잭션을 이용해 보상을 나눠 분배하는 것을 방지\
 >
 > * **하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지**
 >   * **queueNewRewardAllocation**: operator 전체 할당 한도 체크
@@ -563,7 +563,7 @@ BGT 인플레이션과 보상 집중이 일부 소수에게 유리하게 작용�
 > * **보상 집중 시 자동 감지 및 제한**
 >   *   한 검증자/금고/주소에 보상이 과도하게 집중될 경우
 >
->       * 보상 분배 공식에서 convexity, boostMultiplier 등[ 파라미터를 조정](../../undefined.md#id-20-bgt)해 집중될수록 추가 보상 효율이 급격히 감소하도록 설계
+>       * 보상 분배 공식에서 convexity, boostMultiplier 등[ 파라미터를 조정](../../undefined.md#bgt)해 집중될수록 추가 보상 효율이 급격히 감소하도록 설계
 >       *   computeReward()의 공식 설계
 >
 >           ![](../../.gitbook/assets/image.png)
@@ -711,13 +711,12 @@ function computeReward(
 
 </details>
 
-```solidity
-// BGT 위임 시 순환 부스팅 방지
+<pre class="language-solidity"><code class="lang-solidity">// BGT 위임 시 순환 부스팅 방지
 mapping(address => mapping(address => uint256)) public vaultOriginBGT;
 mapping(address => uint256) public lastVaultRewardTime;
 
 function delegateBGT(address validator, uint256 amount) external {
-    // 30일 쿨다운 체크
+    <a data-footnote-ref href="#user-content-fn-1">// 30일 쿨다운 체크</a>
     require(block.timestamp > lastVaultRewardTime[msg.sender] + 30 days, "Cooldown period");
     
     // 셀프 부스팅 금지
@@ -726,7 +725,7 @@ function delegateBGT(address validator, uint256 amount) external {
     
     // 분산 위임 강제 (최대 20%)
     uint256 totalBGT = bgtToken.balanceOf(msg.sender);
-    require(delegatedAmount[msg.sender][validator] + amount <= totalBGT * 20 / 100, "Max 20% per validator");
+    require(delegatedAmount[msg.sender][validator] + amount &#x3C;= totalBGT * 20 / 100, "Max 20% per validator");
     
     _delegate(validator, amount);
 }
@@ -736,9 +735,9 @@ function checkInflationLimit() external view returns (bool) {
     uint256 weeklyInflation = calculateWeeklyInflation();
     uint256 targetWeekly = TARGET_ANNUAL_INFLATION / 52; // 10% / 52주
     
-    return weeklyInflation <= targetWeekly * 130 / 100; // 30% 여유분
+    return weeklyInflation &#x3C;= targetWeekly * 130 / 100; // 30% 여유분
 }
-```
+</code></pre>
 
 ***
 
@@ -756,7 +755,7 @@ function checkInflationLimit() external view returns (bool) {
 #### 가이드라인
 
 > * **보상 금고 내의 인센티브 토큰 최소 보유량을 제한**
->   * &#x20;[`minIncentiveBalance`](../../undefined.md#id-21-minimumincentivethreshold) 상태 변수 추가
+>   * &#x20;[`minIncentiveBalance`](../../undefined.md#minimumincentivethreshold) 상태 변수 추가
 >   * setter로 변경 가능
 >   * 이벤트 로그 추가
 >   * 현재 보상금고의 인센티브 토큰 잔액을 알 수 있는 getCurrentIncentiveBalance() 함수 추가
@@ -1004,3 +1003,6 @@ function claimFees(
     if (queuedPayoutAmount != 0) _setPayoutAmount();
 }
 ```
+
+[^1]: 30일 쿨다운 기준\
+    rewardAllocationBlockDelay를 통한 보상 할당 지연 정책, 연속적 트랜잭션으로 특정 금고 집중 방지
