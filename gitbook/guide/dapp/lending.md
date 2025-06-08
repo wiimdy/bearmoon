@@ -6,53 +6,97 @@ icon: plane-arrival
 
 
 
-<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3-recovery-mode">#id-3-recovery-mode</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-4-owner">#id-4-owner</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-5">#id-5</a></td><td align="center"><code>Medium</code></td></tr></tbody></table>
+<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3-recovery-mode">#id-3-recovery-mode</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-4-owner">#id-4-owner</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
-### 위협 1: 플래시론 재진입 공격
+### 위협 1: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
-플래시론 재진입 공격은 공격자가 대출금 상환 전에 콜백 함수를 통해 프로토콜에 다시 접근하여 담보물을 부당하게 인출하거나 추가 대출을 실행한다. 이는 결국 프로토콜에 상환되지 않는 부실 채권을 남기거나 담보 자산을 탈취당하게 만들어 직접적인 자금 손실을 야기한다.
+대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들의 담보 자산 손실 및 프로토콜의 부실 채권을 생성한다.&#x20;
 
 #### 영향도&#x20;
 
 `Medium`
 
-랜딩 프로토콜에서 반복적인 플래쉬론을 통해 가용자산보다 몇배 큰 규모의 공격이 가능하고 [재진입 취약점](../../undefined.md#id-33-re-entrancy-cei-flashfee)이 존재할 경우 대규모 프로토콜 자산이 탈취당할 위험이 있다. 그렇지만 재진입 자체의 취약점은 발생 가능성이 미미하기 때문에 `Meduim`으로 평가한다.
+사용자에게 과도한 담보 손실을 강요하고, 심각할 경우 프로토콜에 회수 불가능한 부실 채권을 남겨 시스템의 지급 불능을 초래할 수 있다. 발생 확률이 시장 상황에 따라 존재하며 과거 사례를 통해 피해가 치명적일 수 있어(레퍼런스 추가) `Medium`로 평가한다.
 
 #### 가이드라인
 
-> * **CEI 패턴 엄격 적용**
->   * [**https://docs.soliditylang.org/en/v0.8.26/security-considerations.html#reentrancy**](https://docs.soliditylang.org/en/v0.8.26/security-considerations.html#reentrancy)
-> * **플래시론 실행 중 모든 상태 변경 함수 접근 차단**
-> * **플래시론 한도 설정**
-> * **플래시론 수수료 설정**
+> *   **연쇄반응 방지 메커니즘**
+>
+>     *   Recovery Mode에서 담보 상환 제한
+>
+>
+>
+>         ```solidity
+>         function _requireValidAdjustmentInCurrentMode(...) {...
+>              // recoveryMode에서 담보 상환 불가
+>              if (_isRecoveryMode) {
+>                 require(_collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode");
+>                 if (_isDebtIncrease) {
+>                     _requireICRisAboveCCR(newICR);
+>                     _requireNewICRisAboveOldICR(newICR, oldICR);
+>                 }
+>                 ...
+>         }
+>                     
+>         // recoveryMode에서 대출 포지션 닫기 불가            
+>         function closeDen(...) {
+>         ...
+>         require(!isRecoveryMode, "BorrowerOps: Operation not permitted during Recovery Mode");
+>         }
+>         ```
+>
+>
+> * **Dynamic Risk Parameters**
+>   *   recoveryMode 시 청산 기준 하향 조정 메커니즘
+>
+>
+>
+>       ```solidity
+>       function liquidateDens(..) {
+>
+>       // 일반 모드일 경우
+>       if (ICR <= _LSP_CR_LIMIT) {
+>           singleLiquidation = _liquidateWithoutSP(denManager, account);
+>           _applyLiquidationValuesToTotals(totals, singleLiquidation);
+>       } else if (ICR < applicableMCR) {
+>           singleLiquidation = _liquidateNormalMode(
+>               denManager,
+>               account,
+>               debtInStabPool,
+>               denManagerValues.sunsetting
+>           );
+>           debtInStabPool -= singleLiquidation.debtToOffset;
+>           _applyLiquidationValuesToTotals(totals, singleLiquidation);
+>       } else break; // break if the loop reaches a Den with ICR >= MCR
+>
+>       // recoverMode일 경우 
+>       // recoverMode 체크 (CCR > TCR) && 청산 대상인지 체크 (ICR < TCR)
+>
+>       {
+>           uint256 TCR = BeraborrowMath._computeCR(entireSystemColl, entireSystemDebt);
+>           if (TCR >= borrowerOperations.BERABORROW_CORE().CCR() || ICR >= TCR)
+>               break;
+>       }
+>
+>       // 현재 recoverMode가 켜져 있고 해당 Den의 ICR이 TCR 보다 작으면 청산 진행
+>       singleLiquidation = _tryLiquidateWithCap(
+>           denManager,
+>           account,
+>           debtInStabPool,
+>           _getApplicableMCR(account, denManagerValues),
+>           denManagerValues.price
+>       );
+>       ```
 
-#### Best Practice
+#### **Best practice**
 
-[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol#L197-L232)
+[**`LiquidationManager.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/LiquidationManager.sol#L331-L368)
 
-```solidity
-function flashLoan(
-    IERC3156FlashBorrower receiver,
-    address token,
-    uint256 amount,
-    bytes calldata data
-) external returns (bool) {
-    uint256 fee = flashFee(token, amount);
-    require(amount <= maxFlashLoan(token), "ERC20FlashMint: amount exceeds maxFlashLoan");
-
-    _mint(address(receiver), amount);
-    require(
-        receiver.onFlashLoan(msg.sender, token, amount, fee, data) == _RETURN_VALUE,
-        "ERC20FlashMint: invalid return value"
-    );
-    _spendAllowance(address(receiver), address(this), amount + fee);
-    _burn(address(receiver), amount);
-    _transfer(address(receiver), _metaBeraborrowCore.feeReceiver(), fee);
-    return true;
-}
-```
+[**`BorrowOperations.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L413-L423)
 
 ***
+
+
 
 ### 위협 2: [ERC-4626 인플레이션](../../undefined.md#id-34-erc-4626-virtual-shares-9-decimal-offset-69-share) 공격
 
@@ -253,89 +297,3 @@ if (newInterestRate != interestRate) {
 ```
 
 ***
-
-### 위협 5: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
-
-대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들의 담보 자산 손실 및 프로토콜의 부실 채권을 생성한다.&#x20;
-
-#### 영향도&#x20;
-
-`Medium`
-
-사용자에게 과도한 담보 손실을 강요하고, 심각할 경우 프로토콜에 회수 불가능한 부실 채권을 남겨 시스템의 지급 불능을 초래할 수 있다. 발생 확률이 시장 상황에 따라 존재하며 과거 사례를 통해 피해가 치명적일 수 있어(레퍼런스 추가) `Medium`로 평가한다.
-
-#### 가이드라인
-
-> *   **연쇄반응 방지 메커니즘**
->
->     *   Recovery Mode에서 담보 상환 제한
->
->
->
->         ```solidity
->         function _requireValidAdjustmentInCurrentMode(...) {...
->              // recoveryMode에서 담보 상환 불가
->              if (_isRecoveryMode) {
->                 require(_collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode");
->                 if (_isDebtIncrease) {
->                     _requireICRisAboveCCR(newICR);
->                     _requireNewICRisAboveOldICR(newICR, oldICR);
->                 }
->                 ...
->         }
->                     
->         // recoveryMode에서 대출 포지션 닫기 불가            
->         function closeDen(...) {
->         ...
->         require(!isRecoveryMode, "BorrowerOps: Operation not permitted during Recovery Mode");
->         }
->         ```
->
->
-> * **Dynamic Risk Parameters**
->   *   recoveryMode 시 청산 기준 하향 조정 메커니즘
->
->
->
->       ```solidity
->       function liquidateDens(..) {
->
->       // 일반 모드일 경우
->       if (ICR <= _LSP_CR_LIMIT) {
->           singleLiquidation = _liquidateWithoutSP(denManager, account);
->           _applyLiquidationValuesToTotals(totals, singleLiquidation);
->       } else if (ICR < applicableMCR) {
->           singleLiquidation = _liquidateNormalMode(
->               denManager,
->               account,
->               debtInStabPool,
->               denManagerValues.sunsetting
->           );
->           debtInStabPool -= singleLiquidation.debtToOffset;
->           _applyLiquidationValuesToTotals(totals, singleLiquidation);
->       } else break; // break if the loop reaches a Den with ICR >= MCR
->
->       // recoverMode일 경우 
->       // recoverMode 체크 (CCR > TCR) && 청산 대상인지 체크 (ICR < TCR)
->
->       {
->           uint256 TCR = BeraborrowMath._computeCR(entireSystemColl, entireSystemDebt);
->           if (TCR >= borrowerOperations.BERABORROW_CORE().CCR() || ICR >= TCR)
->               break;
->       }
->
->       // 현재 recoverMode가 켜져 있고 해당 Den의 ICR이 TCR 보다 작으면 청산 진행
->       singleLiquidation = _tryLiquidateWithCap(
->           denManager,
->           account,
->           debtInStabPool,
->           _getApplicableMCR(account, denManagerValues),
->           denManagerValues.price
->       );
->       ```
-
-#### **Best practice**
-
-[**`LiquidationManager.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/LiquidationManager.sol#L331-L368)
-
-[**`BorrowOperations.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L413-L423)
