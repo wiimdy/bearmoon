@@ -76,9 +76,9 @@ description: 📚 레퍼런스 각주 목록
 
 #### ERC-4626 인플레이션 공격 방지 Virtual Shares와 9자리 decimal offset 적용, 최소 69개 이상 share 강제 설정으로 부트스트랩 보호
 
-#### Recovery Mode 상태 판단 및 전환 메커니즘 TCR < CCR 시 자동 진입, 담보 인출 차단과 ICR/TCR 동시 검증으로 부실 대출 방지
+#### Recovery Mode 전환 안정성 보장 checkRecoveryMode() TCR 실시간 검증과 ICR/TCR 동시 확인, Mode 전환 시 모든 포지션 일괄 업데이트로 상태 불일치 방지
 
-#### Berachain PoL 합의 메커니즘 연계 구현
+#### Recovery Mode 상태 판단 및 전환 메커니즘 TCR < CCR 시 자동 진입, 담보 인출 차단과 ICR/TCR 동시 검증으로 부실 대출 방지
 
 #### Wonderland DAO 거버넌스 취약점 사례 DeFi 프로토콜 창립자의 과거 러그풀 이력 미공개로 거버넌스 신뢰성 훼손, Owner 배경 검증과 투명성 확보 필요성 입증
 

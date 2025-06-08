@@ -16,7 +16,7 @@ icon: plane-arrival
 
 `Medium`
 
-사용자에게 과도한 담보 손실을 강요하고, 심각할 경우 프로토콜에 회수 불가능한 부실 채권을 남겨 시스템의 지급 불능을 초래할 수 있다. 발생 확률이 시장 상황에 따라 존재하며 과거 사례를 통해 피해가 치명적일 수 있어(레퍼런스 추가) `Medium`로 평가한다.
+사용자에게 과도한 담보 손실을 강요하고, 심각할 경우 프로토콜에 회수 불가능한 부실 채권을 남겨 시스템의 지급 불능을 초래할 수 있다. 발생 확률이 시장 상황에 따라 존재하며 [과거 사례](../../undefined.md#liquity-2021.5.19)를 통해 피해가 치명적일 수 있어(레퍼런스 추가) `Medium`로 평가한다.
 
 #### 가이드라인
 
@@ -98,9 +98,9 @@ icon: plane-arrival
 
 
 
-### 위협 2: [ERC-4626 인플레이션](../../undefined.md#id-34-erc-4626-virtual-shares-9-decimal-offset-69-share) 공격
+### 위협 2: [ERC-4626 인플레이션](../../undefined.md#erc-4626-virtual-shares-9-decimal-offset-69-share) 공격
 
-공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다.
+공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다. 유사한 [과거 사례](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)도 존재한다.
 
 #### 영향도&#x20;
 
@@ -114,12 +114,9 @@ icon: plane-arrival
 >   * 초기 배포 시 가상 지분 및 자산 설정
 >   * [OpenZeppelin의 decimal offset 9자리 적용](https://github.com/OpenZeppelin/openzeppelin-contracts/pull/3979)
 >   * 최소 예치금 임계값으로 $NECT 처럼 69개 이상 share 받도록 강제 설정([오픈제플린 권장사항](https://docs.openzeppelin.com/contracts/5.x/erc4626): 최소 100개 이상의 share)&#x20;
-> *   **부트스트랩 기간 보호 강화**
->
->     * `deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용
->     * `totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화
->
->     레퍼런스 - [https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)
+> * **부트스트랩 기간 보호 강화**
+>   * `deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용
+>   * `totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화
 
 #### Best Practice
 
@@ -194,7 +191,7 @@ Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제
 
 `Low`
 
-Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토콜에 잠재적 손실을 끼칠 수 있다. 하지만 담보 인출 금지 및 다중 담보 비율(ICR/TCR) 검증과 같은 강력한 보호 장치들이 이미 중첩되어 있으므로 실제 공격이 성공할 확률이 낮아`Low`로 평가한다.
+Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토콜에 잠재적 손실을 끼칠 수 있다. 실제 MakerDAO의 MCD 시스템에서도 Recovery Mode 진입 시 [오류 발생 사례](https://medium.com/linum-labs/black-thursday-makerdaos-multi-collateral-dai-exploitation-and-the-plan-to-recover-c083c0b81875)가 존재한다. 하지만 담보 인출 금지 및 다중 담보 비율(ICR/TCR) 검증과 같은 강력한 보호 장치들이 이미 중첩되어 있으므로 실제 공격이 성공할 확률이 낮아`Low`로 평가한다.&#x20;
 
 #### 가이드라인
 
