@@ -4,7 +4,7 @@ icon: honey-pot
 
 # PoL 보안 가이드라인: 오라클 및 HONEY
 
-<table><thead><tr><th width="591.7421875">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-3-basket">#id-3-basket</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="honey.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="591.7421875">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="honey.md#id-1">#id-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="honey.md#id-2-basket">#id-2-basket</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="honey.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: 외부 오라클 가격 조작 및 신뢰할 수 없는 오라클 로직
 
@@ -140,84 +140,7 @@ contract EnhancedMultiOracleSystem {
 
 ***
 
-### 위협 2: Basket 모드 내 가중치 결정 로직의 외부 영향 취약성 또는 예측 가능성
-
-Basket 모드에서 여러 스테이블 코인을 특정 비율에 따라 반환하거나 요구할 때 구성 비율 결정 로직이 외부 가격 피드의 일시적 오류, 특정 풀의 유동성 급변 등 외부 요인에 의해 공격자에게 유리하게 예측되거나 형성될 수 있다면, 공격자는 Basket 모드 활성화 시점 또는 특정 시장 상황을 노려 자신에게 유리한 조건으로 자산을 교환하려 시도할 수 있다
-
-#### 영향도
-
-`Low`
-
-소수의 오라클에서 단순로직으로 가격을 가져와서 가격을 결정하는 로직은 오라클 조작 가능성이나 디페깅 예측 가능성을 줄 수 있어 `Low` 로 평가
-
-#### 가이드라인
-
-> * **오라클 가격을 참조할 때 3개 이상의 평균값을 사용하며 스무딩 메커니즘을 도입하여 급격한 변동 방지**
->   * **스무딩 메커니즘:** 시간 가중 평균(TWAP), 거래량 가중 평균 가격(VWAP) 등을 통 급격한 가격\
->     변동을 방지하는 메커니즘
-> * **각 오라클 별 가중치를 실시간으로 공개하고 가중치 변경 등에 관해서는 문서화 시켜 관리**
-
-#### Best Practice
-
-[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L664-L693)&#x20;
-
-```solidity
-// _getWeights 는 지분 개수 기반 상대적 비율 계산 되므로 외부 오라클 가격에 직접 의존하지 않음
-
-function _getWeights(bool filterBadCollaterals, bool filterPausedCollateral) internal view returns (uint256[] memory weights) {
-    weights = new uint256[](registeredAssets.length);
-    uint256 sum = 0;
-    
-    for (uint256 i = 0; i < registeredAssets.length; i++) {
-        if (filterBadCollaterals && isBadCollateralAsset[registeredAssets[i]]) continue;
-        if (filterPausedCollateral && vaults[registeredAssets[i]].paused()) continue;
-        
-        // 순담보지분 계산 : vault지분 - 수수료지분 (오라클조작 저항성)
-        weights[i] = _getSharesWithoutFees(registeredAssets[i]);
-        sum += weights[i];
-    }
-    
-    if (sum == 0) return weights;
-    for (uint256 i = 0; i < registeredAssets.length; i++) {
-        weights[i] = weights[i] * 1e18 / sum;
-    }
-}
-```
-
-`커스텀 코드`&#x20;
-
-<pre class="language-solidity"><code class="lang-solidity">// 1시간 동안의 시간 가중 평균 가격을 계산하여 단기적인 가격 조작을 방지하고 안정적인 가중치 결정을 위한 스무딩 시스템
-contract TWAPBasedWeights {
-    struct TWAPData {
-        uint256 cumulativePrice;
-        uint256 lastUpdateTime;
-        uint256 twapPrice;
-    }
-    
-    mapping(address => TWAPData) public twapData;
-    uint256 public constant TWAP_PERIOD = 1 hours;
-    
-    function updateTWAP(address asset, uint256 currentPrice) external {
-        TWAPData storage data = twapData[asset];
-        uint256 timeElapsed = block.timestamp - data.lastUpdateTime;
-        
-        if (timeElapsed > 0) {
-            data.cumulativePrice += currentPrice * timeElapsed;
-            if (timeElapsed >= TWAP_PERIOD) {
-                data.twapPrice = data.cumulativePrice / TWAP_PERIOD;
-                data.cumulativePrice = 0;
-            }
-            data.lastUpdateTime = block.timestamp;
-        }
-    }
-}
-
-<strong>
-</strong></code></pre>
-
-***
-
-### 위협 3: 지나치게 민감한 디페깅 기준 및 Basket 모드 활성화 조건 악용
+### 위협 2: 지나치게 민감한 디페깅 기준 및 Basket 모드 활성화 조건 악용
 
 매우 낮은 수준의 가격 변동에도 디페깅으로 간주하는 기준은 사소한 시장 변동성에도 Basket 모드를 빈번하게 활성화시켜 사용자 경험을 저해할 수 있다.&#x20;
 
@@ -298,7 +221,7 @@ contract StabilityRecovery {
 
 ***
 
-### 위협 4: 디페깅된 자산의 상환시 가치 평가 및 사용자 고지 불확실성
+### 위협 3: 디페깅된 자산의 상환시 가치 평가 및 사용자 고지 불확실성
 
 '디페깅된 자산이 어떤 가격으로 평가되어 사용자에게 반환되는지', '이 과정에서 사용자가 어느 정도의 잠재적 손실을 감수해야 하는지'에 대한 기준과 고지가 명확하지 않다면 사용자는 basket 모드 상태에서 받을 토큰의 가치를 정확하게 평가할 수 없다.
 
