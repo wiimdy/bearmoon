@@ -233,33 +233,33 @@ contract TWAPBasedWeights {
 
 #### 가이드라인
 
-> * **민감도 조정 기준:** 민팅과 리딤시에 각각 따로 basket 모드가 따로 동작하는 것이 아니라 가격 변동률 차이별로 basket 모드의 단계를 나누어 적용
+> * **민감도 조정 기준:** 민팅과 리딤시에 각각 따로 basket 모드가 따로 동작하는 것이 아니라 [가격 변동률](../../undefined.md#id-22-0.1-0.2-0.5-basket-3-1) 차이별로 basket 모드의 단계를 나누어 적용
 >   * 경고 단계 (0.1%): 1분 지속 시 사용자 알림
 >   * (일시적 디페깅) 제한 단계 (0.2%): 1분 지속 시 해당 자산 민팅 제한 및 교환비 조정
 >   * (디페깅) Basket 단계 (0.5%): 1분 지속 시 즉시 Basket 모드 활성화
 > * **Basket 모드 활성화는 최후의 안정성 유지 수단으로 고려하며 페깅 자산의 안정성 회복 시 자동 해제**
->   * **안정성 회복:** 1시간 연속 안정(0.2% 미만) 시 자동으로 정상 모드 복귀
+>   * **안정성 회복:** [1시간 연속 안정(0.2% 미만)](../../undefined.md#id-23-basket-1-0.2) 시 자동으로 정상 모드 복귀
 
 #### Best Practice
 
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
 
-```solidity
-function isBasketModeEnabled(bool isMint) public view returns (bool) {
+<pre class="language-solidity"><code class="lang-solidity">function isBasketModeEnabled(bool isMint) public view returns (bool) {
     if (forcedBasketMode) return true;
     
-    for (uint256 i = 0; i < registeredAssets.length; i++) {
+    for (uint256 i = 0; i &#x3C; registeredAssets.length; i++) {
         address asset = registeredAssets[i];
         if (isBadCollateralAsset[asset] || vaults[asset].paused()) continue;
-        if (isMint && !isPegged(asset)) return true;
+        if (isMint &#x26;&#x26; !<a data-footnote-ref href="#user-content-fn-1">isPegged</a>(asset)) return true;
     }
     return false;
 }
-```
+</code></pre>
 
 `커스텀 코드`&#x20;
 
-<pre class="language-solidity"><code class="lang-solidity">contract StabilityRecovery {
+```solidity
+contract StabilityRecovery {
     struct RecoveryState {
         uint256 recoveryStartTime;
         uint256 stableCount;          // 연속 안정 카운트
@@ -282,8 +282,8 @@ function isBasketModeEnabled(bool isMint) public view returns (bool) {
                 recoveryStates[asset].stableCount++;
                 
                 // 30분 연속 안정 시 자동 해제
-<strong>                if (block.timestamp >= recoveryStates[asset].recoveryStartTime + RECOVERY_CONFIRMATION_PERIOD) {
-</strong>                    _resetToNormalMode(asset);
+                if (block.timestamp >= recoveryStates[asset].recoveryStartTime + RECOVERY_CONFIRMATION_PERIOD) {
+                    _resetToNormalMode(asset);
                     return true;
                 }
             }
@@ -294,7 +294,7 @@ function isBasketModeEnabled(bool isMint) public view returns (bool) {
         return false;
     }
 }
-</code></pre>
+```
 
 ***
 
@@ -310,10 +310,10 @@ function isBasketModeEnabled(bool isMint) public view returns (bool) {
 
 #### 가이드라인
 
-> * **Basket 모드가 활성화 된 상태에서 상환 시 디페깅된 자산은 3개 이상의 오라클을 참조하여 자산의 가치를 평가**
+> * **Basket 모드가 활성화 된 상태에서 상환 시 디페깅된 자산은** [**3개 이상의 오라클**](../../undefined.md#id-25-chainlink-3)**을 참조하여 자산의 가치를 평가**
 >   * 이 과정에서 활성화된 오라클만을 참조(비활성화, 긴급중단 오라클 참조 금지)
 > * **사용자에게 상환 과정에서 디페깅 자산이 포함될 수 있다는 점, 디페깅 자산의 평가 기준, 그리고 이로 인한 잠재적 손실 가능성에 대해 명확하고 쉽게 고지하는 절차 필요**
->   * 디페깅된 자산으로 인한 예상 손실을 어떻게 계산하는지에 대한 수식 기반 설명
+>   * 디페깅된 자산으로 인한 예상 손실을 어떻게 계산하는지에 대한 [수식 기반 설명](../../undefined.md#id-26-calculateloss-acknowledgerisk)
 > * **필요시 프로토콜 차원에서 디페깅된 자산으로 인한 급격한 손실 위험을 일부 완화할 수 있는 내부 준비금 운영 고려**
 >   * 준비금 구성은 상환과정에서 발생한 수수료의 일부를 활용해서 내부 준비금으로 운영
 >   * 준비금은 basket 모드 활성화 시에 한정하여 활성화하며 사용자 손실을 최소화하는데 사용
@@ -344,8 +344,7 @@ function redeem(address asset, uint256 honeyAmount, address receiver, bool expec
 
 `커스텀 코드`&#x20;
 
-```solidity
-// 상환 전 디페깅된 자산 포함 여부와 예상 손실을 미리 계산하여 사용자에게 경고하고 위험 인지 확인을 받는 사전 고지 시스템
+<pre class="language-solidity"><code class="lang-solidity">// 상환 전 디페깅된 자산 포함 여부와 예상 손실을 미리 계산하여 사용자에게 경고하고 위험 인지 확인을 받는 사전 고지 시스템
 
 contract RedeemWarningSystem {
     struct RedeemWarning {
@@ -359,10 +358,10 @@ contract RedeemWarningSystem {
         uint256 depeggedCount = 0;
         uint256 totalLoss = 0;
         
-        for (uint256 i = 0; i < assets.length; i++) {
+        for (uint256 i = 0; i &#x3C; assets.length; i++) {
             if (!isPegged(assets[i])) {
                 depeggedCount++;
-                totalLoss += calculateLoss(assets[i], honeyAmount);
+                totalLoss += <a data-footnote-ref href="#user-content-fn-2">calculateLoss</a>(assets[i], honeyAmount);
             }
         }
         
@@ -411,6 +410,12 @@ function calculateLoss(address asset, uint256 honeyAmount) internal view returns
     
     // 결과: 
     // 사용자는 USDC 디페깅으로 $45 손실 예상
-```
+</code></pre>
 
 \
+
+
+[^1]: 레퍼런스 \[24] 다중 오라클 집계와 활성화된 오라클만 참조하는 페깅 상태 검증 로직, 신뢰성 있는 가격 판단
+
+[^2]: 레퍼런스 \[26] calculateLoss 수식 레퍼런스\
+    디페깅 비율 × 자산 가치로 손실 계산, 사용자 위험 고지와 acknowledgeRisk 확인 필수
