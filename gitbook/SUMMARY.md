@@ -22,7 +22,7 @@
   * [dApp 보안 가이드라인: Lending](guide/dapp/lending.md)
   * [dApp 보안 가이드라인: DEX](guide/dapp/dex.md)
   * [dApp 보안 가이드라인: LSD](guide/dapp/lsd.md)
-  * [dApp 보안 가이드라인: 체이닝](guide/dapp/chaining.md)
+  * [dApp 보안 가이드라인: 체이닝](guide/dapp/chain.md)
 
 ## 부록 <a href="#appendix" id="appendix"></a>
 

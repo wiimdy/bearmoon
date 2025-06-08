@@ -17,6 +17,6 @@
 [lsd.md](lsd.md)
 {% endcontent-ref %}
 
-{% content-ref url="chaining.md" %}
-[chaining.md](chaining.md)
+{% content-ref url="chain.md" %}
+[chain.md](chain.md)
 {% endcontent-ref %}

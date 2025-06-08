@@ -21,18 +21,34 @@ icon: plane-arrival
 #### 가이드라인
 
 > * **CEI 패턴 엄격 적용**
+>   * [**https://docs.soliditylang.org/en/v0.8.26/security-considerations.html#reentrancy**](https://docs.soliditylang.org/en/v0.8.26/security-considerations.html#reentrancy)
 > * **플래시론 실행 중 모든 상태 변경 함수 접근 차단**
 > * **플래시론 한도 설정**
 > * **플래시론 수수료 설정**
 
 #### Best Practice
 
-[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol#L179-L182)
+[`DebtToken.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DebtToken.sol#L197-L232)
 
 ```solidity
-function flashFee(address token, uint256 amount) public view returns (uint256) {
-        require(token == address(this), "ERC20FlashMint: wrong token");
-        return _flashFee(amount);
+function flashLoan(
+    IERC3156FlashBorrower receiver,
+    address token,
+    uint256 amount,
+    bytes calldata data
+) external returns (bool) {
+    uint256 fee = flashFee(token, amount);
+    require(amount <= maxFlashLoan(token), "ERC20FlashMint: amount exceeds maxFlashLoan");
+
+    _mint(address(receiver), amount);
+    require(
+        receiver.onFlashLoan(msg.sender, token, amount, fee, data) == _RETURN_VALUE,
+        "ERC20FlashMint: invalid return value"
+    );
+    _spendAllowance(address(receiver), address(this), amount + fee);
+    _burn(address(receiver), amount);
+    _transfer(address(receiver), _metaBeraborrowCore.feeReceiver(), fee);
+    return true;
 }
 ```
 
@@ -125,20 +141,17 @@ if (block.timestamp < bootstrapEndTime) {
 
 Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제로는 위험한 상태임에도 정상 작동하는 것처럼 보이게 만들어, 추가적인 부실 대출을 허용하고 손실을 확대시킨다.
 
-공격자가 담보 비율(ICR/TCR) 검증 로직을 우회하여 시스템이 Recovery Mode임에도 과도하게 NECT를 차용하면, 해당 대출은 부실화될 위험이 매우 커진다.
+공격자가 담보 비율(ICR/TCR) 검증 로직을 우회하여 시스템이 Recovery Mode임에도 과도하게 대출을 하면, 해당 대출은 부실화될 위험이 매우 커진다.
 
 #### 영향도&#x20;
 
 `Low`
 
-Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토콜에 잠재적 손실을 끼칠 수 있다. 하지만 담보 인출 금지 및 다중 담보 비율(ICR/TCR) 검증과 같은 강력한 보호 장치들이 이미 중첩되어 있어, 실제 공격이 성공하여 발생하는 피해 규모는 매우 제한적이므로 `Low`로 평가한다.
+Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토콜에 잠재적 손실을 끼칠 수 있다. 하지만 담보 인출 금지 및 다중 담보 비율(ICR/TCR) 검증과 같은 강력한 보호 장치들이 이미 중첩되어 있으므로 실제 공격이 성공할 확률이 낮아`Low`로 평가한다.
 
 #### 가이드라인
 
 > * **모든 포지션 변경 시 개별 ICR(개별 담보 비율)과 시스템 TCR(총 담보율) 동시 검증**
-> * **Recovery Mode 개선**
->   * Recovery Mode 진입 시 자동 MCR 상향 조정&#x20;
->   * Recovery Mode 진입 시 담보 인출 차단
 > * **Mode Transition 안정성**
 >   * TCR 계산 시 최신 가격 및 이자 반영 보장
 >   * Mode 전환 시 모든 포지션 상태 일괄 업데이트
