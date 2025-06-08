@@ -146,7 +146,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 `Low`&#x20;
 
-[자발적 출금 로직 부재](../../undefined.md#id-7-queue-2)로 자금 동결되지만, 베라체인의 [ValidatorSetCap](../../undefined.md#id-7-queue-2)에 따라 강제 퇴출 시 회수 가능하며, 이는 자산 손실보다는 네트워크 안정성에 잠재적 영향을 미쳐 `Low`로 평가한다.
+[자발적 출금 로직 부재](../../undefined.md#id-7-queue-2)로 자금 동결되지만, 베라체인의 [ValidatorSetCap](../../undefined.md#id-6-validatorsetcap)에 따라 강제 퇴출 시 회수 가능하며, 이는 자산 손실보다는 네트워크 안정성에 잠재적 영향을 미쳐 `Low`로 평가한다.
 
 #### 가이드라인&#x20;
 

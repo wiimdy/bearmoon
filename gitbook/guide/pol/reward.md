@@ -19,14 +19,13 @@ icon: sack-dollar
 #### 가이드라인
 
 > * **체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수**
-> * **nonReentrant 가드 사용**
+> * [**ReentrantGuard**](../../undefined.md#id-9-oz-reentrancyguard-spec-openzeppelin-nonreentrant) **사용**
 
 #### Best Practice&#x20;
 
 &#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L336)
 
-```solidity
-function getReward(
+<pre class="language-solidity"><code class="lang-solidity">function <a data-footnote-ref href="#user-content-fn-1">getReward</a>(
     address account,
     address recipient
 )
@@ -38,7 +37,7 @@ function getReward(
 {
     // ...
 }
-```
+</code></pre>
 
 &#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L139)
 
@@ -70,7 +69,7 @@ function _getReward(address account, address recipient)
 
 #### 가이드라인
 
-> * **인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**
+> * [**인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**](../../undefined.md#id-10-oz-access-control-openzeppelin-factory-owner-vault-manager)
 >   * **인센티브 토큰 추가 권한:** Factory Owner
 >   * **인센티브 토큰 제거 권한:** Factory Vault Manager
 >   * 현재 인센티브 토큰 최대 3개 등록 가능
@@ -687,3 +686,5 @@ function addIncentive(
 
 
 ```
+
+[^1]: 레퍼런스 \[8] 보상 청구 핵심 함수로 onlyOperatorOrUser 접근 제어와 updateReward 수정자로 상태 동기화 보장
