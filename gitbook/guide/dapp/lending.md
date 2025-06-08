@@ -60,7 +60,7 @@ function flashLoan(
 
 #### 영향도&#x20;
 
-`Informational`
+`Low`
 
 발생한다면 큰 영향을 끼치지만 LSP에 공급량이 없는 경우와 공격자가 지분 가치를 부풀리고 이후 사용자가 토큰을 예치하는 경우는 가능성이 낮으므로 `Low` 로 평가한다.
 
@@ -70,9 +70,12 @@ function flashLoan(
 >   * 초기 배포 시 가상 지분 및 자산 설정
 >   * [OpenZeppelin의 decimal offset 9자리 적용](https://github.com/OpenZeppelin/openzeppelin-contracts/pull/3979)
 >   * 최소 예치금 임계값으로 $NECT 처럼 69개 이상 share 받도록 강제 설정([오픈제플린 권장사항](https://docs.openzeppelin.com/contracts/5.x/erc4626): 최소 100개 이상의 share)&#x20;
-> * **부트스트랩 기간 보호 강화**
->   * `deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용
->   * `totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화
+> *   **부트스트랩 기간 보호 강화**
+>
+>     * `deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용
+>     * `totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화
+>
+>     레퍼런스 - [https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)
 
 #### Best Practice
 
