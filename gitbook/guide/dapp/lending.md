@@ -6,7 +6,7 @@ icon: plane-arrival
 
 
 
-<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3-recovery-mode">#id-3-recovery-mode</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-4-owner">#id-4-owner</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="495.3115234375">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3-recovery-mode">#id-3-recovery-mode</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-4-owner">#id-4-owner</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
@@ -188,7 +188,7 @@ if (block.timestamp < bootstrapEndTime) {
 
 Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제로는 위험한 상태임에도 정상 작동하는 것처럼 보이게 만들어, 추가적인 부실 대출을 허용하고 손실을 확대시킨다.
 
-공격자가 담보 비율(ICR/TCR) 검증 로직을 우회하여 시스템이 [Recovery Mode](../../undefined.md#id-35-recovery-mode-tcr-less-than-ccr-icr-tcr)임에도 과도하게 대출을 하면, 해당 대출은 부실화될 위험이 매우 커진다.
+공격자가 담보 비율(ICR/TCR) 검증 로직을 우회하여 시스템이 [Recovery Mode](../../undefined.md#recovery-mode-tcr-less-than-ccr-icr-tcr)임에도 과도하게 대출을 하면, 해당 대출은 부실화될 위험이 매우 커진다.
 
 #### 영향도&#x20;
 
@@ -255,12 +255,12 @@ Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적
 
 `Low`
 
-Owner의 악의적인 파라미터 변경은 사용자에게 직접적인 자금 손실을 입힐 수 있는 심각한 위협이다. 과거 DeFi 사례에서 보듯, 이는 기술적 취약점뿐만 아니라 신뢰를 받던 핵심 그룹이 돌아서는 '거버넌스 리스크'를 포함한다. 그러나 이러한 권한은 다중 서명과 Timelock로 통제되므로, 실제 성공 가능성은 낮아 `Low`로 평가한다.
+Owner의 악의적인 파라미터 변경은 사용자에게 직접적인 자금 손실을 입힐 수 있는 심각한 위협이다. [과거 DeFi 사례](https://medium.com/@alymarguerite/wonderland-dao-too-good-to-be-true-8832313aff81)에서 보듯, 이는 기술적 취약점뿐만 아니라 신뢰를 받던 핵심 그룹이 돌아서는 '[거버넌스 리스크](../../undefined.md#wonderland-dao-defi-owner)'를 포함한다. 그러나 이러한 권한은 다중 서명과 Timelock로 통제되므로, 실제 성공 가능성은 낮아 `Low`로 평가한다.
 
 #### 가이드라인
 
 > * **거버넌스 권한 분산**
->   * 모든 중요 파라미터 변경에 [멀티시그 + 타임락 적용](../../undefined.md#id-37-owner--mcr-ccr-7)
+>   * 모든 중요 파라미터 변경에 [멀티시그 + 타임락 적용](../../undefined.md#owner--mcr-ccr-7)
 >   * 긴급 상황 외 paused 상태 변경 금지
 >   * 가격 피드 변경 시 공지
 > * **파라미터 변경 제한**
