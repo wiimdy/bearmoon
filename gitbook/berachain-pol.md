@@ -69,7 +69,7 @@ _\*BYUSD: 페이팔 USD(PYUSD)를 베라체인으로 브릿지해서 전송한 �
 
 
 
-<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 

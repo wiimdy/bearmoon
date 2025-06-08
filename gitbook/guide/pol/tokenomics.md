@@ -167,21 +167,17 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 #### 가이드라인
 
 > * **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
->   * Weight 구조체를 통해 보상 금고 주소 관리
->   * 보상 금고 주소(receiver)는 보상을 받기 위해서는 whitelist에 등록되어야함&#x20;
->   * \_checkForDuplicateReceivers를 통해 중복 검증
->   * ```solidity
->     /// @dev Represents 100%. Chosen to be less granular.
->     uint96 internal constant ONE_HUNDRED_PERCENT = 1e4;
->     /// @notice The maximum weight a vault can assume in the reward allocation
->     uint96 public maxWeightPerVault;
->     // 현재 3000으로 설정되어있음!!
->     ```
->   * [maxWeightPerVault](https://berascan.com/address/0xdf960E8F3F19C481dDE769edEDD439ea1a63426a#readProxyContract#F18)\
+>   * Weight 구조체를 통해 생성되어 있는 모든 보상 금고 주소(receiver) 관리
+>   * 보상 금고 주소(receiver)로 보상을 받기 위해서는 거버넌스를 통해 whitelist에 등록되어야함
+>     * 단순 Weight 구조체로 생성되었다고 보상을 할당 받을 수 있는것이 아님\
 >
 > *   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
 >
 >     ```solidity
+>     /// @notice The delay in blocks before a new reward allocation can go into effect.
+>     uint64 public rewardAllocationBlockDelay;
+>     // 현재 2000 블록으로 설정 (약 4000초)
+>
 >     // function queueNewRewardAllocation
 >     if (startBlock <= block.number + rewardAllocationBlockDelay) {
 >         InvalidStartBlock.selector.revertWith();
@@ -192,7 +188,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >         }
 >     ```
 >
->     * 딜레이를 주고 한번에 모든 보상을 나눠 할당하도록 해서 특정 금고에 연속적인 트랜잭션을 통해 보상 집중 방지\
+>     * 딜레이를 주고 한번에 모든 보상을 나눠 할당하도록 해서 특정 금고에 연속적인 트랜잭션을 통해 보상 집중 방지 → 보상 할당에 딜레이(약 2000블록)을 두어 보상 할당이 바로 반영되지 않도록 하고 각 할당마다 전체 보상의 100%를 모두 분배하도록 하여서 여러 트랜잭션을 이용해 보상을 나눠 분배하는 것을 방지\
 >
 > * **하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지**
 >   * **queueNewRewardAllocation**: operator 전체 할당 한도 체크
@@ -551,19 +547,169 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 
 `Low`
 
+상위 LSP와 벨리데이터 소수가 담합해 BGT 부스팅을 독점하면, BGT 인플레이션이 급격히 증가하고 BGT의 소유와 보상이 극소수에게 집중되는 구조가 현실화될 수 있다.
 
+BGT 인플레이션과 보상 집중이 일부 소수에게 유리하게 작용할 수 있지만, 시스템 전체의 운영이나 즉각적인 안정성에는 직접적인 치명적 영향을 주지 않아 `Low`로 평가한다.
 
 #### 가이드라인
 
-> * **인플레이션에 대한 모니터링 필요**
-> * **동적인 보상 계산 파라미터를 통해 인플레이션에 대해서 유동적 대응**
-> * **BGT 흐름도 분석을 통한 인플레이션 비율 조정**
-> * **실시간 보상 배출량 모니터링 시스템 구축 및 이상 징후 감지 메커니즘 설정**
-> * **보상 계산식에 대한 명확한 문서화와 커뮤니티 이해를 위한 시각화 자료 제공**
+> * **BlockRewardController의 보상 파라미터 거버넌스 관리**
+>   * baseRate, rewardRate, minBoostedRewardRate, boostMultiplier, rewardConvexity 등 → 모두 onlyOwner(거버넌스/운영자)만 변경 가능 → 인플레이션이 과도하게 증가할 경우 즉시 파라미터 조정 가능
+>   * [**코드 근거**](tokenomics.md#undefined-8)
+> * **보상 분배 공식의 투명성 및 조정 가능성**
+>   * 보상 공식:
+>     * BGT 보상은 `computeReward()` 함수에서`boostPower`, `rewardRate`, `boostMultiplier`, `rewardConvexity` 등 파라미터로 계산
+>     * [공식 예시](tokenomics.md#undefined-8)
+> * **보상 집중 시 자동 감지 및 제한**
+>   *   한 검증자/금고/주소에 보상이 과도하게 집중될 경우
+>
+>       * 보상 분배 공식에서 convexity, boostMultiplier 등 파라미터를 조정해 집중될수록 추가 보상 효율이 급격히 감소하도록 설계
+>       *   computeReward()의 공식 설계
+>
+>           ![](../../.gitbook/assets/image.png)
+>
+>       출처 - [https://docs.berachain.com/learn/pol/blockrewards](https://docs.berachain.com/learn/pol/blockrewards)
+> * RewardAllocation 분산 강제
+>   * Weight 구조체를 통한 분산
+>     * 보상 분배 시 여러 금고(receiver)에 Weight로 비율을 명확히 할당
+>     * 한 금고에 할당 가능한 최대 Weight(`maxWeightPerVault`) 제한
+>     * RewardAllocation의 전체 합이 100%가 아니면 revert
+>     *   코드 근거: 위협 2의 코드 \_validateWeights 확인
+>
+>         {% code overflow="wrap" %}
+>         ```solidity
+>         if (weight.percentageNumerator == 0 || weight.percentageNumerator > maxWeightPerVault) {
+>             InvalidWeight.selector.revertWith();
+>         }
+>         if (totalWeight != ONE_HUNDRED_PERCENT) {
+>             InvalidRewardAllocationWeights.selector.revertWith();
+>         }
+>
+>         ```
+>         {% endcode %}
+> * **보상 집중 한도 초과 시 자동 revert**
+>   * vault별 전체 할당 합계 추적
+>     * 모든 operator가 특정 vault에 할당한 전체 합계가 한도를 초과하면 해당 vault는 RewardAllocation에 포함 불가(큐잉 자체가 revert)
+>   *   코드 근거: 위협 2의 여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지 부분 참고
+>
+>       {% code overflow="wrap" %}
+>       ```solidity
+>       require(vaultTotalAllocations[vault] + newWeight <= VAULT_TOTAL_ALLOCATION_LIMIT, "Vault allocation limit exceeded");
+>
+>       ```
+>       {% endcode %}
+> * **실시간 파라미터 조정 및 커뮤니티 감시**
+>   * BlockRewardController 파라미터, RewardAllocation 정책 등은 거버넌스/운영자만 변경 가능
+>     * BlockRewardController의 보상 파라미터 거버넌스 관리 참고
 
 #### Best Practice&#x20;
 
-`커스텀 코드`
+`커스텀 코드`&#x20;
+
+<details>
+
+<summary><strong>BlockRewardController의 보상 파라미터 거버넌스 관리</strong></summary>
+
+{% code overflow="wrap" %}
+```solidity
+/// @inheritdoc IBlockRewardController
+function setBaseRate(uint256 _baseRate) external onlyOwner {
+    if (_baseRate > MAX_BASE_RATE) {
+        InvalidBaseRate.selector.revertWith();
+    }
+    emit BaseRateChanged(baseRate, _baseRate);
+    baseRate = _baseRate;
+}
+
+/// @inheritdoc IBlockRewardController
+function setRewardRate(uint256 _rewardRate) external onlyOwner {
+    if (_rewardRate > MAX_REWARD_RATE) {
+        InvalidRewardRate.selector.revertWith();
+    }
+    emit RewardRateChanged(rewardRate, _rewardRate);
+    rewardRate = _rewardRate;
+}
+
+/// @inheritdoc IBlockRewardController
+function setMinBoostedRewardRate(uint256 _minBoostedRewardRate) external onlyOwner {
+    if (_minBoostedRewardRate > MAX_MIN_BOOSTED_REWARD_RATE) {
+        InvalidMinBoostedRewardRate.selector.revertWith();
+    }
+    emit MinBoostedRewardRateChanged(minBoostedRewardRate, _minBoostedRewardRate);
+    minBoostedRewardRate = _minBoostedRewardRate;
+}
+
+/// @inheritdoc IBlockRewardController
+function setBoostMultiplier(uint256 _boostMultiplier) external onlyOwner {
+    if (_boostMultiplier > MAX_BOOST_MULTIPLIER) {
+        InvalidBoostMultiplier.selector.revertWith();
+    }
+    emit BoostMultiplierChanged(boostMultiplier, _boostMultiplier);
+    boostMultiplier = _boostMultiplier;
+}
+
+/// @inheritdoc IBlockRewardController
+function setRewardConvexity(uint256 _rewardConvexity) external onlyOwner {
+    if (_rewardConvexity == 0 || _rewardConvexity > MAX_REWARD_CONVEXITY) {
+        InvalidRewardConvexity.selector.revertWith();
+    }
+    emit RewardConvexityChanged(uint256(rewardConvexity), _rewardConvexity);
+    // store as int256 to avoid casting during computation
+    rewardConvexity = int256(_rewardConvexity);
+}
+```
+{% endcode %}
+
+
+
+</details>
+
+<details>
+
+<summary><strong>보상 분배 공식 예시</strong> </summary>
+
+```solidity
+/// @inheritdoc IBlockRewardController
+function computeReward(
+    uint256 boostPower,
+    uint256 _rewardRate,
+    uint256 _boostMultiplier,
+    int256 _rewardConvexity
+)
+    public
+    pure
+    returns (uint256 reward)
+{
+    // On conv == 0, mathematical result should be max reward even for boost == 0 (0^0 = 1)
+    // but since BlockRewardController enforces conv > 0, we're not adding code for conv == 0 case
+    if (boostPower > 0) {
+        // Compute intermediate parameters for the reward formula
+        uint256 one = FixedPointMathLib.WAD;
+
+        if (boostPower == one) {
+            // avoid approx errors in the following code
+            reward = FixedPointMathLib.mulWad(_rewardRate, _boostMultiplier);
+        } else {
+            // boost^conv ∈ (0, 1]
+            uint256 tmp_0 = uint256(FixedPointMathLib.powWad(int256(boostPower), _rewardConvexity));
+            // 1 + mul * boost^conv ∈ [1, 1 + mul]
+            uint256 tmp_1 = one + FixedPointMathLib.mulWad(_boostMultiplier, tmp_0);
+            // 1 - 1 / (1 + mul * boost^conv) ∈ [0, mul / (1 + mul)]
+            uint256 tmp_2 = one - FixedPointMathLib.divWad(one, tmp_1);
+
+            // @dev Due to splitting fixed point ops, [mul / (1 + mul)] * (1 + mul) may be slightly > mul
+            uint256 coeff = FixedPointMathLib.mulWad(tmp_2, one + _boostMultiplier);
+            if (coeff > _boostMultiplier) coeff = _boostMultiplier;
+
+            reward = FixedPointMathLib.mulWad(_rewardRate, coeff);
+        }
+    }
+}
+```
+
+
+
+</details>
 
 ```solidity
 // BGT 위임 시 순환 부스팅 방지
@@ -610,45 +756,77 @@ function checkInflationLimit() external view returns (bool) {
 #### 가이드라인
 
 > * **보상 금고 내의 인센티브 토큰 최소 보유량을 제한**
->   * minimumIncentiveThreshold 상태 변수 추가
+>   * `minIncentiveBalance` 상태 변수 추가
 >   * setter로 변경 가능
->   * 이벤트 추가
+>   * 이벤트 로그 추가
 >   * 현재 보상금고의 인센티브 토큰 잔액을 알 수 있는 getCurrentIncentiveBalance() 함수 추가
 > * **검증자의 경우 BGT를 분배할 보상 금고를 선택할때 인센티브 토큰이 해당 보유량 보다 낮은 보상금고에는 보상 할당 불가**
 >   * \_validateWeights, \_checkIfStillValid 함수에서\
 >     각 금고의 인센티브 잔액이 threshold 미만이면 reward allocation에 포함 불가(revert)
+> * guaranteeBlocks은 현재 BeraChef에서 rewardAllocationBlockDelay가 2000블록으로 설정되어있어서 통일 시키기 위함
+> * guaranteeBlocks은 현재 BeraChef에서 rewardAllocationBlockDelay가 2000블록으로 설정되어있어서 통일 시키기 위함
+> * minIncentiveBalance는 가장 최근 BGT 발행량에 각 인센티브 토큰의 incentiveRate, 보상할당 구간(guaranteeBlocks)을 곱해서 한 구간당 발행 BGT에대한 인센티브 양으로 계산.
+> * getCurrentIncentiveBalance를 통해 보상 할당 시 모든 인센티브 토큰이 minIncentiveBalance 이상의 수량이 있는지 확인. 부족하면 할당 못함.
 
 #### Best Practice&#x20;
 
-`커스텀 코드`
+`커스텀 코드`&#x20;
 
 ```solidity
-// 기존 RewardVault.sol 개선
-// RewardVault.sol
+contract RewardVault {
+    // ... (기존 상태 변수 및 코드 생략) ...
 
-uint256 public minimumIncentiveThreshold;
+    // 토큰별 최소 인센티브 잔고
+    mapping(address => uint256) public minIncentiveBalance;
 
-event MinimumIncentiveThresholdUpdated(uint256 newThreshold);
+    uint256 public guaranteeBlocks = 2000; // 현재 벨리데이터 보상 할당 딜레이가 2000블록
+    
 
-function setMinimumIncentiveThreshold(uint256 _threshold) external onlyFactoryOwner {
-    minimumIncentiveThreshold = _threshold;
-    emit MinimumIncentiveThresholdUpdated(_threshold);
+    // ... (기존 코드 생략) ...
+    
+    /// @notice 최소 인센티브 보장 블록 수를 변경 (onlyFactoryOwner)
+    function setGuaranteeBlocks(uint256 _guaranteeBlocks) external onlyFactoryOwner {
+        require(_guaranteeBlocks > 0, "RewardVault: guaranteeBlocks must be positive");
+        guaranteeBlocks = _guaranteeBlocks;
+    }
+
+    /// @dev BGT 발행량과 incentiveRate를 기준으로 토큰별 최소 인센티브 잔고 갱신
+    function _updateMinIncentiveBalance(address token, uint256 bgtEmitted) internal {
+        uint256 incentiveRate = incentives[token].incentiveRate;
+        // 2000블록 동안 예상 지급량 = bgtEmitted(이번 분배량) * 2000 / 1 (PRECISION 적용)
+        minIncentiveBalance[token] = bgtEmitted * GUARANTEE_BLOCKS * incentiveRate / FixedPointMathLib.PRECISION;
+    }
+
+    /// @dev 인센티브 분배 시마다 최소 잔고 갱신
+    function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
+        // ... 기존 코드 ...
+        uint256 whitelistedTokensCount = whitelistedTokens.length;
+        for (uint256 i; i < whitelistedTokensCount; ++i) {
+            address token = whitelistedTokens[i];
+            Incentive storage incentive = incentives[token];
+            // ... 기존 분배 로직 ...
+            // 분배 후 최소 잔고 업데이트
+            _updateMinIncentiveBalance(token, bgtEmitted);
+        }
+    }
+
+    /// @notice 모든 인센티브 토큰의 잔고가 각 토큰별 최소 잔고 이상인지 확인
+		function getCurrentIncentiveBalance() external view returns (bool) {
+		    uint256 len = whitelistedTokens.length;
+		    for (uint256 i = 0; i < len; ++i) {
+		        address token = whitelistedTokens[i];
+		        if (incentives[token].amountRemaining < minIncentiveBalance[token]) {
+		            return false; // 하나라도 부족하면 false 반환
+		        }
+		    }
+		    return true; // 모두 충분하면 true 반환
+		}
+
+    // ... (나머지 기존 코드) ...
 }
-
-// 예시: rewardToken이 하나라면 아래처럼 작성
-function getCurrentIncentiveBalance() external view returns (uint256) {
-    return incentives[rewardToken].amountRemaining;
-}
-
-// 여러 토큰 지원 시
-function getCurrentIncentiveBalance(address token) external view returns (uint256) {
-    return incentives[token].amountRemaining;
-}
-
 ```
 
 ```solidity
-// BeraChef 또는 Validator 선택 로직 개선
 function _validateWeights(bytes memory valPubkey, Weight[] calldata weights) internal {
     if (weights.length > maxNumWeightsPerRewardAllocation) {
         TooManyWeights.selector.revertWith();
@@ -668,12 +846,10 @@ function _validateWeights(bytes memory valPubkey, Weight[] calldata weights) int
             NotWhitelistedVault.selector.revertWith();
         }
 
-        // **추가: 인센티브 임계값 체크**
+        // 인센티브 임계값 체크: 모든 인센티브 토큰 잔고가 임계값 이상이어야 함
         address vault = weight.receiver;
-        uint256 threshold = RewardVault(vault).minimumIncentiveThreshold();
-        uint256 incentiveBalance = RewardVault(vault).getCurrentIncentiveBalance();
-
-        if (incentiveBalance < threshold) {
+        bool isSufficient = RewardVault(vault).getCurrentIncentiveBalance();
+        if (!isSufficient) {
             // 인센티브 부족한 vault는 reward allocation에 포함 불가
             InvalidWeight.selector.revertWith();
         }
@@ -699,17 +875,15 @@ function _checkIfStillValid(Weight[] memory weights) internal view returns (bool
         if (!isWhitelistedVault[vault]) {
             return false;
         }
-        // **추가: 인센티브 임계값 체크**
-        uint256 threshold = RewardVault(vault).minimumIncentiveThreshold();
-        uint256 incentiveBalance = RewardVault(vault).getCurrentIncentiveBalance();
-        if (incentiveBalance < threshold) {
+        // 인센티브 임계값 체크: 모든 인센티브 토큰 잔고가 임계값 이상이어야 함
+        bool isSufficient = RewardVault(vault).getCurrentIncentiveBalance();
+        if (!isSufficient) {
             return false;
         }
         unchecked { ++i; }
     }
     return true;
 }
-
 ```
 
 ***
