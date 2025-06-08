@@ -336,6 +336,8 @@ function getReward(
 > * **보상 수령 금액의 정확성을 검증하는 로직 추가**
 >   * **`_verifyRewardCalculation`**  함수를 통해 계산 결과를 역연산하여 보상 금액 검증
 >   * 오차 범위 0.01%로 설정 (대부분 금융에서 사용하는 오차 범위)
+> * **FixedPointMathLib 사용 권장**
+>   * `mulDiv`와 같이 정밀도를 최대한 보존하면서 안전하게 곱셈과 나눗셈을 수행
 > *   **사용자 유리한 반올림 정책**
 >
 >     * 보상 받을 금액이 존재하지만 나눗셈 절삭되어 0이 된다면 최소값(1 wei) 으로 보장
@@ -367,6 +369,7 @@ contract RewardVault is ... {
             for (uint256 i; i < whitelistedTokensCount; ++i) {
                 // ...
                 
+                // FixedPointMathLib 사용 권장
                 uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
                 
                 uint256 amountRemaining = incentive.amountRemaining;
@@ -406,6 +409,7 @@ contract StakingRewards is ... {
         uint256 earnedAmount = FixedPointMathLib.fullMulDiv(balance, rewardPerTokenDelta, PRECISION);
         
         // 잔액이 있지만 계산 결과가 0인 경우 최소값 보장
+        // 나눗셈 결과로 0이 되는 것을 방지하여 정밀도 관련 취약점(레퍼런스) 방어 
         if (balance > 0 && earnedAmount == 0 && rewardPerTokenDelta > 0) {
             earnedAmount = 1; // 최소 1 wei 보장
         }

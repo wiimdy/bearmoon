@@ -329,8 +329,9 @@ function _checkForDuplicateReceivers(bytes memory valPubkey, Weight[] calldata w
 
 <summary>하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지</summary>
 
-<pre class="language-solidity"><code class="lang-solidity"><strong>// operator별, vault별 전체 할당 비율(누적)
-</strong>mapping(address operator => mapping(address vault => uint96 totalAllocated)) public operatorVaultAllocations;
+```solidity
+// operator별, vault별 전체 할당 비율(누적)
+mapping(address operator => mapping(address vault => uint96 totalAllocated)) public operatorVaultAllocations;
 
 // validator(pubkey)별, 마지막으로 활성화된 RewardAllocation의 weights 저장
 mapping(bytes valPubkey => Weight[]) internal lastActiveWeights;
@@ -349,27 +350,27 @@ function _validateOperatorTotalAllocation(
     // 기존 할당에서 oldWeights만큼 빼고, newWeights만큼 더함
 
     // 1. 기존 operatorVaultAllocations 복사
-    for (uint i = 0; i &#x3C; newWeights.length; i++) {
+    for (uint i = 0; i < newWeights.length; i++) {
         address vault = newWeights[i].receiver;
         tempTotal[vault] = operatorVaultAllocations[operator][vault];
     }
-    for (uint i = 0; i &#x3C; oldWeights.length; i++) {
+    for (uint i = 0; i < oldWeights.length; i++) {
         address vault = oldWeights[i].receiver;
         tempTotal[vault] = operatorVaultAllocations[operator][vault];
     }
 
     // 2. oldWeights만큼 빼기
-    for (uint i = 0; i &#x3C; oldWeights.length; i++) {
+    for (uint i = 0; i < oldWeights.length; i++) {
         address vault = oldWeights[i].receiver;
         tempTotal[vault] -= oldWeights[i].percentageNumerator;
     }
 
     // 3. newWeights만큼 더하기 및 한도 체크
-    for (uint i = 0; i &#x3C; newWeights.length; i++) {
+    for (uint i = 0; i < newWeights.length; i++) {
         address vault = newWeights[i].receiver;
         tempTotal[vault] += newWeights[i].percentageNumerator;
         require(
-            tempTotal[vault] &#x3C;= maxTotalPerVault,
+            tempTotal[vault] <= maxTotalPerVault,
             "Too much allocation to one vault for this operator"
         );
     }
@@ -381,12 +382,12 @@ function _updateOperatorVaultAllocations(
     Weight[] calldata newWeights
 ) internal {
     // oldWeights만큼 빼기
-    for (uint i = 0; i &#x3C; oldWeights.length; i++) {
+    for (uint i = 0; i < oldWeights.length; i++) {
         address vault = oldWeights[i].receiver;
         operatorVaultAllocations[operator][vault] -= oldWeights[i].percentageNumerator;
     }
     // newWeights만큼 더하기
-    for (uint i = 0; i &#x3C; newWeights.length; i++) {
+    for (uint i = 0; i < newWeights.length; i++) {
         address vault = newWeights[i].receiver;
         operatorVaultAllocations[operator][vault] += newWeights[i].percentageNumerator;
     }
@@ -427,7 +428,7 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 
     // lastActiveWeights 갱신
     delete lastActiveWeights[valPubkey];
-    for (uint i = 0; i &#x3C; qra.weights.length; i++) {
+    for (uint i = 0; i < qra.weights.length; i++) {
         lastActiveWeights[valPubkey].push(qra.weights[i]);
     }
 
@@ -436,7 +437,7 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
     delete queuedRewardAllocations[valPubkey];
 }
 
-</code></pre>
+```
 
 
 

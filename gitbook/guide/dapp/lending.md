@@ -6,7 +6,7 @@ icon: plane-arrival
 
 
 
-<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3-recovery-mode">#id-3-recovery-mode</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-4-owner">#id-4-owner</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="lending.md#id-5">#id-5</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="582.4453125">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3-recovery-mode">#id-3-recovery-mode</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-4-owner">#id-4-owner</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-5">#id-5</a></td><td align="center"><code>Medium</code></td></tr></tbody></table>
 
 ### 위협 1: 플래시론 재진입 공격
 
@@ -16,7 +16,7 @@ icon: plane-arrival
 
 `Medium`
 
-랜딩 프로토콜에서 반복적인 플래쉬론을 통해 가용자산보다 몇배 큰 규모의 공격이 가능하고 재진입 취약점이 존재할 경우 대규모 프로토콜 자산이 탈취당할 위험이 있음. 그렇지만 재진입 자체의 취약점은 발생 가능성이 미미하기 때문에 `Meduim`으로 평가한다.
+랜딩 프로토콜에서 반복적인 플래쉬론을 통해 가용자산보다 몇배 큰 규모의 공격이 가능하고 재진입 취약점이 존재할 경우 대규모 프로토콜 자산이 탈취당할 위험이 있다. 그렇지만 재진입 자체의 취약점은 발생 가능성이 미미하기 때문에 `Meduim`으로 평가한다.
 
 #### 가이드라인
 
@@ -129,9 +129,9 @@ Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제
 
 #### 영향도&#x20;
 
-`Informational`
+`Low`
 
-Recovery Mode에서는 담보 인출 금지 및 부채 증가 시 엄격한 담보비율 검증으로 인해 공격의 가능성이 낮으므로 `Informational`로 평가한다.
+Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토콜에 잠재적 손실을 끼칠 수 있다. 하지만 담보 인출 금지 및 다중 담보 비율(ICR/TCR) 검증과 같은 강력한 보호 장치들이 이미 중첩되어 있어, 실제 공격이 성공하여 발생하는 피해 규모는 매우 제한적이므로 `Low`로 평가한다.
 
 #### 가이드라인
 
@@ -193,9 +193,9 @@ Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적
 
 #### 영향도&#x20;
 
-`Informational`
+`Low`
 
-Owner의 악의적인 행동은 가능성이 낮기 때문에`Informational`로 평가한다.
+Owner의 악의적인 파라미터 변경은 사용자에게 직접적인 자금 손실을 입힐 수 있는 심각한 위협이다. 과거 DeFi 사례에서 보듯, 이는 기술적 취약점뿐만 아니라 신뢰를 받던 핵심 그룹이 돌아서는 '거버넌스 리스크'를 포함한다. 그러나 이러한 권한은 다중 서명과 Timelock로 통제되므로, 실제 성공 가능성은 낮아 `Low`로 평가한다.
 
 #### 가이드라인
 
@@ -240,38 +240,86 @@ if (newInterestRate != interestRate) {
 
 ### 위협 5: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
-대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들에게 과도한 슬리피지로 인한 자산 손실을 강요한다.&#x20;
+대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들의 담보 자산 손실 및 프로토콜의 부실 채권을 생성한다.&#x20;
 
 #### 영향도&#x20;
 
-`Informational`
+`Medium`
 
-개별 담보비율 기준 순차 청산 및 위험 담보 점진적 감소 메커니즘으로 대량 청산 완화 로직이 구현되어 있으며, 이는 정상적인 시스템의 동작이기 때문에`Informational`로 평가한다.
+사용자에게 과도한 담보 손실을 강요하고, 심각할 경우 프로토콜에 회수 불가능한 부실 채권을 남겨 시스템의 지급 불능을 초래할 수 있다. 발생 확률이 시장 상황에 따라 존재하며 과거 사례를 통해 피해가 치명적일 수 있어(레퍼런스 추가) `Medium`로 평가한다.
 
 #### 가이드라인
 
-> * **연쇄반응 방지 메커니즘**
->   * 시간대별 청산 한도 설정
->   * Recovery Mode에서 추가 청산 제한 강화
+> *   **연쇄반응 방지 메커니즘**
+>
+>     *   Recovery Mode에서 담보 상환 제한
+>
+>
+>
+>         ```solidity
+>         function _requireValidAdjustmentInCurrentMode(...) {...
+>              // recoveryMode에서 담보 상환 불가
+>              if (_isRecoveryMode) {
+>                 require(_collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode");
+>                 if (_isDebtIncrease) {
+>                     _requireICRisAboveCCR(newICR);
+>                     _requireNewICRisAboveOldICR(newICR, oldICR);
+>                 }
+>                 ...
+>         }
+>                     
+>         // recoveryMode에서 대출 포지션 닫기 불가            
+>         function closeDen(...) {
+>         ...
+>         require(!isRecoveryMode, "BorrowerOps: Operation not permitted during Recovery Mode");
+>         }
+>         ```
+>
+>
 > * **Dynamic Risk Parameters**
->   * 변동성 증가 시 MCR 자동 상향 조정 메커니즘
->   * 시장 스트레스 지수 기반 청산 지연 시스템
->   * 대량 청산 감지 시 새로운 차용 일시 중단
+>   *   recoveryMode 시 청산 기준 하향 조정 메커니즘
+>
+>
+>
+>       ```solidity
+>       function liquidateDens(..) {
+>
+>       // 일반 모드일 경우
+>       if (ICR <= _LSP_CR_LIMIT) {
+>           singleLiquidation = _liquidateWithoutSP(denManager, account);
+>           _applyLiquidationValuesToTotals(totals, singleLiquidation);
+>       } else if (ICR < applicableMCR) {
+>           singleLiquidation = _liquidateNormalMode(
+>               denManager,
+>               account,
+>               debtInStabPool,
+>               denManagerValues.sunsetting
+>           );
+>           debtInStabPool -= singleLiquidation.debtToOffset;
+>           _applyLiquidationValuesToTotals(totals, singleLiquidation);
+>       } else break; // break if the loop reaches a Den with ICR >= MCR
+>
+>       // recoverMode일 경우 
+>       // recoverMode 체크 (CCR > TCR) && 청산 대상인지 체크 (ICR < TCR)
+>
+>       {
+>           uint256 TCR = BeraborrowMath._computeCR(entireSystemColl, entireSystemDebt);
+>           if (TCR >= borrowerOperations.BERABORROW_CORE().CCR() || ICR >= TCR)
+>               break;
+>       }
+>
+>       // 현재 recoverMode가 켜져 있고 해당 Den의 ICR이 TCR 보다 작으면 청산 진행
+>       singleLiquidation = _tryLiquidateWithCap(
+>           denManager,
+>           account,
+>           debtInStabPool,
+>           _getApplicableMCR(account, denManagerValues),
+>           denManagerValues.price
+>       );
+>       ```
 
 #### **Best practice**
 
-[**`DenManager.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol)
+[**`LiquidationManager.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/LiquidationManager.sol#L331-L368)
 
-```solidity
-function startSunset() external onlyOwner {
-    sunsetting = true;
-    _accrueActiveInterests();
-    interestRate = SUNSETTING_INTEREST_RATE;
-    lastActiveIndexUpdate = block.timestamp;
-    redemptionFeeFloor = 0;
-    maxSystemDebt = 0;
-    baseRate = 0;
-    maxRedemptionFee = 0;
-}
-```
-
+[**`BorrowOperations.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L413-L423)
