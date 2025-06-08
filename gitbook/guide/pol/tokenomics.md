@@ -168,7 +168,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 
 > * **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
 >   * Weight 구조체를 통해 생성되어 있는 모든 보상 금고 주소(receiver) 관리
->   * 보상 금고 주소(receiver)로 보상을 받기 위해서는 거버넌스를 통해 whitelist에 등록되어야함
+>   * 보상 금고 주소(receiver)로 보상을 받기 위해서는 [거버넌스를 통해 whitelist에 등록](../../undefined.md#id-19-iswhitelistedvault-_checkforduplicatereceivers-100)되어야함
 >     * 단순 Weight 구조체로 생성되었다고 보상을 할당 받을 수 있는것이 아님\
 >
 > *   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
@@ -188,7 +188,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >         }
 >     ```
 >
->     * 보상 할당에 딜레이(약 2000블록)을 두어 보상 할당이 바로 반영되지 않도록 하고 각 할당마다 전체 보상의 100%를 모두 분배하도록 하여서 여러 트랜잭션을 이용해 보상을 나눠 분배하는 것을 방지\
+>     * [보상 할당에 딜레이(약 2000블록)](../../undefined.md#id-17-30-rewardallocationblockdelay)을 두어 보상 할당이 바로 반영되지 않도록 하고 각 할당마다 전체 보상의 100%를 모두 분배하도록 하여서 여러 트랜잭션을 이용해 보상을 나눠 분배하는 것을 방지\
 >
 > * **하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지**
 >   * **queueNewRewardAllocation**: operator 전체 할당 한도 체크
@@ -197,7 +197,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >   * **operatorVaultAllocations**: operator별 vault별 전체 할당 비율 추적
 >   * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-4) 참고\
 >
-> * **여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지**
+> * [**여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지**](../../undefined.md#id-18-weight-receiver-percentagenumerator-maxweightpervault-3000-30)
 >   *   모든 운영자들이 특정 금고에 할당한 전체 합계가 일정 한도를 초과하면,
 >
 >       해당 금고에 대한 보상 할당을 일시적으로 중단(=RewardAllocation에서 해당 vault를 선택 불가)하는 기능 도입
@@ -563,7 +563,7 @@ BGT 인플레이션과 보상 집중이 일부 소수에게 유리하게 작용�
 > * **보상 집중 시 자동 감지 및 제한**
 >   *   한 검증자/금고/주소에 보상이 과도하게 집중될 경우
 >
->       * 보상 분배 공식에서 convexity, boostMultiplier 등 파라미터를 조정해 집중될수록 추가 보상 효율이 급격히 감소하도록 설계
+>       * 보상 분배 공식에서 convexity, boostMultiplier 등[ 파라미터를 조정](../../undefined.md#id-20-bgt)해 집중될수록 추가 보상 효율이 급격히 감소하도록 설계
 >       *   computeReward()의 공식 설계
 >
 >           ![](../../.gitbook/assets/image.png)
@@ -756,7 +756,7 @@ function checkInflationLimit() external view returns (bool) {
 #### 가이드라인
 
 > * **보상 금고 내의 인센티브 토큰 최소 보유량을 제한**
->   * `minIncentiveBalance` 상태 변수 추가
+>   * &#x20;[`minIncentiveBalance`](../../undefined.md#id-21-minimumincentivethreshold) 상태 변수 추가
 >   * setter로 변경 가능
 >   * 이벤트 로그 추가
 >   * 현재 보상금고의 인센티브 토큰 잔액을 알 수 있는 getCurrentIncentiveBalance() 함수 추가
