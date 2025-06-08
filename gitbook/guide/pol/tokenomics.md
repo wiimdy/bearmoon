@@ -763,9 +763,9 @@ function checkInflationLimit() external view returns (bool) {
 > * **검증자의 경우 BGT를 분배할 보상 금고를 선택할때 인센티브 토큰이 해당 보유량 보다 낮은 보상금고에는 보상 할당 불가**
 >   * \_validateWeights, \_checkIfStillValid 함수에서\
 >     각 금고의 인센티브 잔액이 threshold 미만이면 reward allocation에 포함 불가(revert)
-> * **guaranteeBlocks은 현재 BeraChef에서 rewardAllocationBlockDelay가 2000블록으로 설정되어있어서 통일 시키기 위함**
-> * **minIncentiveBalance는 가장 최근 BGT 발행량에 각 인센티브 토큰의 incentiveRate, 보상할당 구간(guaranteeBlocks)을 곱해서 한 구간당 발행 BGT에대한 인센티브 양으로 계산.**
-> * **getCurrentIncentiveBalance를 통해 보상 할당 시 모든 인센티브 토큰이 minIncentiveBalance 이상의 수량이 있는지 확인. 부족하면 할당 못함.**
+>   * guaranteeBlocks은 현재 BeraChef에서 rewardAllocationBlockDelay가 2000블록으로 설정되어있어서 통일 시키기 위함
+> * **minIncentiveBalance는 가장 최근 BGT 발행량에 각 인센티브 토큰의 incentiveRate, 보상할당 구간(guaranteeBlocks)을 곱해서 한 구간당 발행 BGT에대한 인센티브 양으로 계산**
+> * **getCurrentIncentiveBalance를 통해 보상 할당 시 모든 인센티브 토큰이 minIncentiveBalance 이상의 수량이 있는지 확인, 부족하면 할당 불가**
 
 #### Best Practice&#x20;
 
