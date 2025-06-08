@@ -40,7 +40,11 @@ BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있�
 
 `Medium`&#x20;
 
-totalsupply가 0이 된 후 유동성 공급자의 자금을 탈취할 수 있으나 볼트 생성 초기 혹은 totalsupply가 0에 도달 할 경우에만 공격이 가능하므로 영향도를 `Medium`으로 평가한다.
+이 공격은 LiquidStabilityPool(LSP)의 총 공급량(totalSupply)이 0에 가까워지는 특수한 조건 하에서만 실행 가능하다. 하지만 성공할 경우 LSP 예치자의 자금을 직접적으로 탈취할 수 있으므로 **`Medium`**&#xC73C;로 평가한다. 영향도 평가는 다음 근거에 기반한다.
+
+1. **제한된 공격 표면:** 이 공격 시나리오는 BeraBorrow에서 담보로 허용된 모든 자산이 아닌, **특정 DEX의 LP 토큰**에서 시작된다. 공격자는 BeraBorrow가 담보로 사용하는 LP 토큰 중에서도 상대적으로 유동성이 낮아 가격 조작이 용이한 풀을 타겟으로 해야 하므로 공격의 전제 조건이 제한적이다. 또한, 인플레이션 공격 자체도 BeraBorrow 내의 **모든 볼트가 아닌  LiquidStabilityPool과 같이 virtual accounting 방어 로직이 부족한 특정 볼트**에 한정된다.
+2. **조건부 공격 가능성 (LSP 고갈 상황):** 공격의 핵심 단계는 LSP의 totalSupply가 거의 0으로 수렴하는 것이다. 이는 정상적인 프로토콜 상태가 아니며, 대규모 연쇄 청산과 예치자들의 대량 인출이라는 **극단적인 시장 스트레스 상황**에서만 발생할 수 있다. 따라서 공격자는 시장을 원하는 방향으로 움직일 막대한 자본이 필요하며, 공격 시점이 매우 제한적이다.
+3. [취약점 패턴 레퍼런스](https://docs.openzeppelin.com/contracts/5.x/erc4626)**:** LSP의 totalSupply가 0에 가까워졌을 때 1 wei 예치를 통해 지분을 독점하고, 이후 자산 기부로 share의 가치를 부풀려 후속 예치자의 자금을 탈취하는 방식은 잘 알려진 **ERC-4626 인플레이션 공격** 벡터다. OpenZeppelin 등 다수의 보안 감사 보고서에서는 이러한 공격의 위험성을 경고하고 방어 기법 적용을 권장하고 있어, 이 공격이 BeraBorrow의 LSP에 이론적으로 적용 가능하다는 점은 무시할 수 없는 위험이다.
 
 #### 가이드라인
 
@@ -70,11 +74,12 @@ totalsupply가 0이 된 후 유동성 공급자의 자금을 탈취할 수 있�
 ```solidity
 // LP 토큰의 건정성을 확인하는 함수
 function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwner {
+// owner의 권한 분산을 위해 실제 구현 시에는 onlyOwner를 Multi-Sig, Timelock 등으로 변경이 필요하다.
     require(_lpToken != address(0), "LP token: zero address"); 
     if (lpTokenIsHighRisk[_lpToken] != _isHighRisk) {
         lpTokenIsHighRisk[_lpToken] = _isHighRisk;
         emit LpTokenRiskStatusUpdated(_lpToken, _isHighRisk);
-        // 이 이벤트는 오프체인 경고 시스템에 의해 감지되어 사용자에게 알림을 보낼 수 있습니다.
+        // 이 이벤트는 오프체인 경고 시스템에 의해 감지되어 사용자에게 알림을 보낼 수 있다.
     }
 }
 ```
@@ -110,50 +115,154 @@ HONEY의 시장 가격이 폭락했음에도  Beraborrow의`PermissionlessPSM.so
 
 NECT의 가격 결정 메커니즘: \_whitelistStable 함수 내에서 `wadOffset = (10 ** (nect.decimals() - stable.decimals())`로 HONEY와 NECT 간의 교환 비율 오프셋을 설정한다. 이는 단순히 두 토큰의 소수점 자릿수 차이를 보정하는 역할만 하며, HONEY의 실제 시장 가격을 반영하는 오라클과 연동되어 있지 않는다. 따라서 HONEY의 외부 시장 가격이 폭락하더라도 Beraborrow의 PermissionlessPSM.sol은 여전히 고정된 오프셋인 1:1로 NECT를 민팅해준다.
 
-공격 시나리오
+[PermissionlessPSM](https://berascan.com/address/0xb2f796fa30a8512c1d27a1853a9a1a8056b5cc25#readContract) 컨트랙트와 [HONEY](https://berascan.com/address/0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce) 토큰 주소의 온체인 데이터를 직접 분석한 결과, HONEY를 이용한 NECT 발행 한도(**mintCap**)는 **15,000,000 NECT**로 설정되어 있음을 확인할 수 있었다.
 
-1. HONEY의 가격이 급락하여 공격자가 차익 거래 기회를 포착하고 HONEY를 대량 매집한다.&#x20;
-2. 이 HONEY를 가지고 PermissionlessPSM.sol의 deposit 함수를 호출하여 NECT를 대량 Mint한다.&#x20;
-3. 이때 wadOffset은 HONEY의 시장가격과 상관 없이 NECT를 1대1로 민팅해준다.
-4. 저가에 매수한 NECT로 빚을 상환하거나 sNECT로 교환 후 매도하여 수익을 실현한다.
+이는 프로토콜이 **최대 1천 5백만 달러 규모의 잠재적 위험에 직접적으로 노출되어 있음**을 의미한다. 해당 취약점은 단순한 이론적 가능성이 아니라 컨트랙트에 명시된 한도만큼 실제 자산 유출로 이어질 수 있는 명백하고 매우 심각한 위협이다.
+
+**시뮬레이션: 현재 mintCap(15M) 기반의 손실 규모 분석**
+
+* **상황 가정**: 외부 요인으로 HONEY의 시장 가치가 **$0.50으로 폭락**
+* **공격 실행**
+  * 공격자는 외부 시장에서 **$7,500,000**를 투입하여 mintCap 한도인 15,000,000 HONEY를 전량 매집
+  * 공격자는 PermissionlessPSM.sol의 deposit 함수를 호출하여 15,000,000 HONEY를 입금하고, 가격 오라클이 없는 시스템의 허점을 이용해 약 **15,000,000 NECT** (수수료 제외 시 약 14,955,000)를 발행
+* **프로토콜 손실 규모**
+  * 프로토콜의 금고에는 실제 가치 **$7,500,000**의 자산(HONEY)이 들어옴
+  * 프로토콜의 부채는 시스템 내에서 $1로 취급되는 **$15,000,000** 만큼 증가함
+  * 결과적으로, 이 공격이 성공할 경우 프로토콜은 **약 $7,500,000의 자산을 즉시 상실**
 
 #### 영향도
 
 `Low`
 
-디페깅난 자산으로 NECT를 발행해 담보를 바꾸면 공격자는 이득을 볼 수 있다. 이런 차익 거래를 통해 디페깅이 회복이 되지만 대출 프로토콜의 입장에서는 불안정한 자산(HONEY)을 받아 스테이블 코인(NECT)을 발행하므로 손해를 볼 수 있다. 따라서 영향도를 `Low`로 평가한다.
-
-
+디페깅 시 공격자가 저가 HONEY로 NECT를 민팅해 차익을 실현할 수 있으며, 프로토콜은 자산 손실 위험에 노출됨. 영향도는 HONEY 디페깅 정도와 프로토콜 자산 규모에 따라 `Low`에서 `Medium`으로 조정될 수 있으며, 차익 거래로 HONEY 가치 회복 가능성은 제한적일 수 있음.
 
 #### 가이드라인
 
-> * **NECT 발행 로직에 HONEY 가격 오라클을 연동하여 실시간 가치를 반영하고, 가격 급락 시 발행 수수료를 동적으로 인상하거나 해당 스테이블 코인을 통한 발행을 일시 중단한다.**&#x20;
-> * **스테이블 코인별 발행 총량을 관리하여 급격한 민팅을 방지한다.**
+> * **신뢰할 수 있는 가격 오라클 연동**
+>   * deposit 및 mint 함수 로직을 수정하여 NECT 발행량을 계산할 때 반드시 외부 가격 오라클을 통해 HONEY/USD 가격을 조회하도록 변경해야 한다.
+>   * 다중 오라클 시스템을 도입하여 가격 데이터의 조작이나 일시적인 장애에 대응해야 한다.
+> * **동적 수수료 및 발행량 제한 메커니즘 도입**
+>   * 오라클 가격이 단기간에 급락하는 경우, deposit에 대한 수수료를 동적으로 인상하는 로직을 추가한다. 이를 통해 소규모 디페깅 상황에서 차익 거래 공격의 유인을 감소시키는 효과가 있다.
+> * **거버넌스 및 비상 대응 프로토콜 강화**
+>   * 다중 서명을 주체가 HONEY를 이용한 NECT 신규 발행을 즉시 중지시킬 수 있는 pauseDeposit과 같은 함수를 permissionlessPSM.sol에 구현해야 한다.
 
 #### Best Practice
 
 `커스텀 코드`
 
 ```solidity
-// HONEY의 건전성 체크
-function setHoneyPriceInstability(bool _isUnstable) external onlyOwner {
-    if (isHoneyPriceUnstable != _isUnstable) {
-        isHoneyPriceUnstable = _isUnstable;
-        emit HoneyPriceInstabilityTriggered(_isUnstable, msg.sender);
-    }
-}
+// Best Practice가 적용될 컨트랙트: PermissionlessPSM.sol
 
-// HONEY 가격 불안정 시 $NECT를 통한 1:1 가치 상환 제한
-function repayDebtWithNect(uint256 _amountToRepay) external {
-    address user = msg.sender;
-    require(_amountToRepay > 0, "Repayment amount must be positive");
-    require(userDebtInNect[user] >= _amountToRepay, "Amount exceeds debt");
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.26;
 
-    if (isHoneyPriceUnstable) {
-        emit NectRepaymentBlocked(user, _amountToRepay, "$HONEY price is unstable. $NECT repayments temporarily suspended.");
-        revert("Repayments with $NECT are temporarily suspended due to $HONEY price instability.");
+// --- 기존 import 구문 ---
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {FeeLib} from "src/libraries/FeeLib.sol";
+import {IMetaBeraborrowCore} from "src/interfaces/core/IMetaBeraborrowCore.sol";
+import {IDebtToken} from "src/interfaces/core/IDebtToken.sol";
+import {IFeeHook} from "src/interfaces/utils/integrations/IFeeHook.sol";
+// --- 신규 import ---
+import {IPriceFeed} from "src/interfaces/IPriceFeed.sol"; // Beraborrow의 가격 피드 인터페이스
+
+/**
+ * @title PermissionlessPSM
+ * @author Beraborrow Team
+ * @notice 가격 오라클과 연동되고, 스테이블코인별 입금 정지 기능이 추가된 PSM
+ */
+contract PermissionlessPSM {
+    // --- 기존 상태 변수 ---
+    using Math for uint;
+    using SafeERC20 for IERC20;
+    using FeeLib for uint;
+
+    uint16 public constant DEFAULT_FEE = 30; // 0.3%
+    uint16 constant BP = 1e4;
+
+    IMetaBeraborrowCore public metaBeraborrowCore;
+    IDebtToken public nect;
+    IFeeHook public feeHook;
+    address public feeReceiver;
+    bool public paused; // 전체 컨트랙트 일시정지
+    mapping(address stable => uint) public nectMinted;
+    mapping(address stable => uint) public mintCap;
+    mapping(address => uint64 wadOffset) public stables;
+    
+    // --- 신규/수정된 상태 변수 ---
+    IPriceFeed public priceFeed;
+    // 특정 스테이블코인의 입금 가능/불가능 상태 관리
+    mapping(address stable => bool) public depositPausedFor; 
+
+    // --- 기존 에러 및 이벤트 ---
+    error OnlyOwner(address caller);
+    error AddressZero();
+    error AmountZero();
+    error Paused();
+    error NotListedToken(address token);
+    error AlreadyListed(address token);
+    error PassedMintCap(uint mintCap, uint minted);
+    error SurpassedFeePercentage(uint feePercentage, uint maxFeePercentage);
+    error DepositForTokenPaused(address stable); // 신규 에러
+
+    // ... (기존 이벤트) ...
+    event DepositForTokenPauseSet(address indexed stable, bool isPaused); // 신규 이벤트
+    event PriceFeedSet(address newPriceFeed); // 신규 이벤트
+
+
+    // --- 핵심 수정 함수: previewDeposit ---
+    function previewDeposit(address stable, uint stableAmount, uint16 maxFeePercentage) public view returns (uint mintedNect, uint nectFee) {
+        // 방어 로직
+        if (depositPausedFor[stable]) revert DepositForTokenPaused(stable);
+        
+        uint64 wadOffset = stables[stable];
+        if (wadOffset == 0) revert NotListedToken(stable);
+
+        // --- 가격 오라클 연동 로직 ---
+        uint stablePrice = priceFeed.fetchPrice(stable); // 1. 오라클에서 stable/USD 가격 조회
+        require(stablePrice > 0, "Invalid price from oracle");
+
+        // 2. 입금된 stable 토큰의 실제 USD 가치 계산 (토큰의 소수점 자리수 고려)
+        uint stableValueInUSD = (stableAmount * stablePrice) / (10 ** IERC20Metadata(stable).decimals());
+        
+        // 3. NECT는 $1 가치를 가지므로, 계산된 USD 가치가 곧 발행될 NECT의 양이 됨
+        uint grossMintedNect = stableValueInUSD;
+        // --- ---
+
+        uint fee = feeHook.calcFee(msg.sender, stable, grossMintedNect, IFeeHook.Action.DEPOSIT);
+        fee = fee == 0 ? DEFAULT_FEE : fee;
+        if (fee > maxFeePercentage) revert SurpassedFeePercentage(fee, maxFeePercentage);
+
+        nectFee = grossMintedNect.feeOnRaw(fee);
+        mintedNect = grossMintedNect - nectFee;
     }
-    ...
+
+    // --- 거버넌스용 신규/수정 함수 ---
+
+    /**
+     * @notice (기존 아이디어 구현) 특정 스테이블코인의 가격 불안정성을 설정하여 입금을 중단/재개
+     * @dev onlyOwner: 거버넌스 또는 신뢰된 주체만이 호출 가능
+     * @param stable 불안정성이 감지된 스테이블코인 주소 (예: HONEY)
+     * @param isUnstable true로 설정 시 해당 토큰의 입금(deposit)이 중단됨
+     */
+    function setTokenPriceInstability(address stable, bool isUnstable) external onlyOwner {
+        if (stables[stable] == 0) revert NotListedToken(stable); // 등록된 토큰인지 확인
+        
+        depositPausedFor[stable] = isUnstable;
+        emit DepositForTokenPauseSet(stable, isUnstable);
+    }
+    
+    /**
+     * @notice 가격 피드 컨트랙트 주소 설정
+     */
+    function setPriceFeed(address _newPriceFeed) external onlyOwner {
+        if (_newPriceFeed == address(0)) revert AddressZero();
+        priceFeed = IPriceFeed(_newPriceFeed);
+        emit PriceFeedSet(_newPriceFeed);
+    }
+
+    // ... deposit, mint, withdraw 등 다른 모든 함수는 그대로 유지 ...
 }
 ```
 
