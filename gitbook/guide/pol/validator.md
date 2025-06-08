@@ -21,7 +21,7 @@ icon: user-check
 
 > * **동일 timestamp 중복 처리 방지 메커니즘 구현**
 >   * timestamp를 eip-4788의 history\_buf\_length로 mod 연산을 하여 `_processedTimestampsBuffer`에 삽입
->   * 최소 4.55 시간 (8191 \* 2초)이 지나면 가장 오래된 타임스탬프 처리 기록이 새로운 기록으로 덮어씌워지며 중복 검증 진행
+>   * EIP-4788의 ring buffer 메커니즘에 따라 8191 슬롯(약 4.55시간, 2초 간격 기준) 후 덮어씌워짐, 이는 보상 주기와 일치함&#x20;
 > *   **Beacon block root과 proposer index/pubkey 의 암호학적 검증**
 >
 >     * `SSZ.verifyProof` 함수를 사용하여, 특정 타임스탬프의 비콘 루트를 기준으로 해당 제안자의 보상 자격을 검증
@@ -146,7 +146,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 `Low`&#x20;
 
-자발적 출금 로직 부재로 자금이 일시적으로 동결되지만 이는 자산의 직접적인 손실이나 탈취가 아니며 향후 검증자 자격(cap) 변동 시 회수 가능하기 때문에 `Low`로 평가한다.
+자발적 출금 로직 부재로 자금 동결되지만, 베라체인의 ValidatorSetCap에 따라 강제 퇴출 시 회수 가능하며, 이는 자산 손실보다는 네트워크 안정성에 잠재적 영향을 미쳐 `Low`로 평가한다.
 
 #### 가이드라인&#x20;
 
