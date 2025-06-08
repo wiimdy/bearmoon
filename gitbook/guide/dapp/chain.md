@@ -299,20 +299,100 @@ Infrared 프로토콜은 베라체인의 PoL 경제에서 사실상 보상 엔�
 
 > * **모든 연계 프로토콜의 핵심 지표를 실시간 통합 모니터링**
 > * **위협 발생 시 사람의 개입 없이 자동으로 방어 메커니즘 실행. 서킷 브레이커로 자동으로 시스템 일시 정지**
+>   * 오라클 최신 가격이 1시간 이상 업데이트 되지 않을 시 정지
+>   * &#x20;TVL이 20% 이상 급락시 정지&#x20;
+>     * 심각하지만 아직은 회복 가능할 수 있는 경험적인 임계치로 20%설정
+>   * 자동화 봇이 `checkAndTriggerPause` 함수를 주기적으로 호출하여 24시간 감시 체계를 구축, 조건 충족 시 즉시 시스템 정지
 > * **프로토콜 간 상호 의존도 매핑 및 위험 전파 경로 사전 분석**
 
 #### Best Practice
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
-// Circuit Breaker 예시
-function setSystemPause(bool _pause, string calldata _reason) external onlyOwner {
-    if (_pause) {
-        require(currentSystemStatus != SystemStatus.Paused, "System already paused");
-        currentSystemStatus = SystemStatus.Paused;
-        recoveryLevelPercentage = 0; // 일시 중지 시 운영 레벨 0%
-        emit SystemPaused(msg.sender, _reason);
+constructor(
+    address _multiSigAdmin,
+    address _automationAgent,
+    address _priceOracleAddress
+) {
+    // Multi-Sig에게 관리자 역할을 부여 (수동 제어)
+    _grantRole(MULTI_SIG_ADMIN_ROLE, _multiSigAdmin);
+    // 자동화 에이전트에게 자동화 역할을 부여
+    _grantRole(AUTOMATION_ROLE, _automationAgent);
+
+    priceOracle = AggregatorV3Interface(_priceOracleAddress);
+    tvlDropThresholdPercentage = 20; // 기본값: TVL 20% 하락 시 위기
+    currentSystemStatus = SystemStatus.Normal;
+}
+
+/**
+ * @notice 자동화 에이전트가 주기적으로 호출하여 위기 상황을 감지하고 시스템을 중지시키는 함수
+ * @dev 실제 구현에서는 여러 지표(TVL, 가격 변동성 등)를 복합적으로 판단해야 함
+ */
+function checkAndTriggerPause() external onlyRole(AUTOMATION_ROLE) {
+    require(currentSystemStatus != SystemStatus.Paused, "System already paused");
+
+    (bool isCrisis, string memory reason) = isCrisisCondition();
+
+    if (isCrisis) {
+        _pauseSystem(reason);
     }
 }
+
+/**
+ * @notice Multi-Sig 관리자가 시스템을 수동으로 중지시키는 함수
+ * @param _reason 수동으로 시스템을 중지시키는 사유
+ */
+function manualPause(string calldata _reason) external onlyRole(MULTI_SIG_ADMIN_ROLE) {
+    require(currentSystemStatus != SystemStatus.Paused, "System already paused");
+    _pauseSystem(_reason);
+}
+
+/**
+ * @notice Multi-Sig 관리자가 시스템을 재개하는 함수
+ */
+function resumeSystem() external onlyRole(MULTI_SIG_ADMIN_ROLE) {
+    require(currentSystemStatus == SystemStatus.Paused, "System is not paused");
+    currentSystemStatus = SystemStatus.Normal;
+    emit SystemResumed(msg.sender);
+}
+
+
+function _pauseSystem(string memory _reason) internal {
+    currentSystemStatus = SystemStatus.Paused;
+    emit SystemPaused(msg.sender, _reason);
+}
+
+/**
+ * @dev 위기 상황을 판단하는 내부 로직. 다양한 조건을 여기에 추가할 수 있음
+ * @return isCrisis 시스템을 중지해야 할 위기 상황인지 여부
+ * @return reason 위기 상황으로 판단한 이유
+ */
+function isCrisisCondition() public view returns (bool, string memory) {
+    // 조건 1: 오라클 가격 데이터가 오래되었거나 유효하지 않은 경우 (가장 기본적인 체크)
+    (
+        int price,
+        uint updatedAt,
+    ) = priceOracle.latestRoundData();
+
+    // 오라클이 1시간 이상 업데이트되지 않았을 경우
+    if (block.timestamp - updatedAt > 1 hours) {
+        return (true, "Price oracle is stale");
+    }
+    // 오라클 가격이 0 이하일 경우
+    if (price <= 0) {
+        return (true, "Invalid price from oracle");
+    }
+
+    // 조건 2: TVL 급락 (개념적인 예시)
+     uint256 currentTvl = IYourProtocol(monitoredProtocolAddress).totalValueLocked();
+     if (currentTvl < lastMonitoredTvl * (100 - tvlDropThresholdPercentage) / 100) {
+         return (true, "Significant TVL drop detected.");
+     }
+
+    // 모든 조건 통과 시 정상 상태 반환
+    return (false, "");
+}
 ```
+{% endcode %}
