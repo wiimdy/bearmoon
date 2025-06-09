@@ -77,14 +77,17 @@ function _getReward(address account, address recipient)
 >
 >     * 인센티브 토큰 추가 시 `minIncentive > 0`  검증 진행
 >
+>     {% code overflow="wrap" %}
 >     ```solidity
 >     // validate `minIncentiveRate` value
 >     if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
 >     if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
 >     ```
+>     {% endcode %}
 >
 >     * 인센티브 비율 변경시 최소 비율보다 높게 설정
 >
+>     {% code overflow="wrap" %}
 >     ```solidity
 >     // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
 >     if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
@@ -92,6 +95,7 @@ function _getReward(address account, address recipient)
 >     // The incentive rate should be greater than or equal to the `minIncentiveRate`.
 >     if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
 >     ```
+>     {% endcode %}
 >
 >     * 현재 incentive manager 권한
 >       * `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
@@ -101,6 +105,7 @@ function _getReward(address account, address recipient)
 
 [`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L164-L174)&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
     // incentive token 현재 활성화 상태 체크
@@ -135,6 +140,7 @@ function whitelistIncentiveToken(
     // ...
 }
 ```
+{% endcode %}
 
 ***
 
@@ -164,6 +170,7 @@ ERC-20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션
 
 &#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
 
+{% code overflow="wrap" %}
 ```solidity
 // 토큰 화이트리스트 관리
 address[] public whitelistedTokens;
@@ -190,6 +197,7 @@ function addIncentive(
     // ...
 }
 ```
+{% endcode %}
 
 ***
 
@@ -215,6 +223,7 @@ function addIncentive(
 
 &#x20;[`BlockRewardController.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BlockRewardController.sol#L71-L88)&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 function initialize(
     address _bgt,
@@ -238,6 +247,7 @@ function initialize(
     beaconDepositContract = IBeaconDeposit(_beaconDepositContract);
 }
 ```
+{% endcode %}
 
 &#x20;[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L117-L123)
 
@@ -351,6 +361,7 @@ function getReward(
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
 // 기존 RewardVault.sol의 _processIncentives 함수 개선
 contract RewardVault is ... {
@@ -392,7 +403,9 @@ contract RewardVault is ... {
     // ... 기존 코드 ...
 }
 ```
+{% endcode %}
 
+{% code overflow="wrap" %}
 ```solidity
 // 기존 StakingRewards.sol의 earned 함수 개선
 contract StakingRewards is ... {
@@ -429,6 +442,7 @@ contract StakingRewards is ... {
     // ... 기존 코드 ...
 }
 ```
+{% endcode %}
 
 ***
 
@@ -451,6 +465,7 @@ contract StakingRewards is ... {
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
 // 최소 LP 토큰 예치 요구사항 적용
 contract RewardVaultFactory {
@@ -490,7 +505,9 @@ contract RewardVaultFactory {
     // ... 기존 코드 ...
 }
 ```
+{% endcode %}
 
+{% code overflow="wrap" %}
 ```solidity
 contract RewardVault is RewardVault {
     // ... 기존 코드 ...
@@ -550,6 +567,7 @@ contract RewardVault is RewardVault {
     // ... 기존 코드 ...
 }
 ```
+{% endcode %}
 
 ***
 
@@ -587,6 +605,7 @@ contract RewardVault is RewardVault {
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
 // 1. 상태변수 및 구조체 선언
 // 추가 요청 구조체
@@ -684,5 +703,6 @@ function addIncentive(
 
 
 ```
+{% endcode %}
 
 [^1]: 보상 청구 핵심 함수로 onlyOperatorOrUser 접근 제어와 updateReward 수정자로 상태 동기화 보장

@@ -27,6 +27,7 @@ icon: square-poll-vertical
 
 [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     (uint256 againstVotes, uint256 forVotes,) = proposalVotes(proposalId);
@@ -34,10 +35,11 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
     return forVotes >= threshold;
 }
 ```
+{% endcode %}
 
 `커스텀 코드`&#x20;
 
-<pre class="language-solidity"><code class="lang-solidity">// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
+<pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
 contract ConcentrationWarning {
     event ConcentrationWarning(address indexed user, uint256 concentration);
     
@@ -102,6 +104,7 @@ contract ConcentrationWarning {
 
 [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
     (uint256 againstVotes, uint256 forVotes,) = proposalVotes(proposalId);
@@ -109,9 +112,11 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
     return forVotes >= threshold;
 }
 ```
+{% endcode %}
 
 `커스텀 코드`&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 // 제안을 기술적 검토 → 경제적 검토 → 보안 감사 단계로 나누어 각 단계별 승인자가 순차적으로 검증하는 시스템
 
@@ -130,6 +135,7 @@ contract ComponentValidator {
     }
 }
 ```
+{% endcode %}
 
 ***
 
@@ -170,6 +176,7 @@ if (guardian != address(0)) {
 
 `커스텀 코드`&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 // 제안 거부 시 구체적인 사유와 거부자, 시간을 기록하여 투명성을 확보하고 커뮤니티가 거부 사유를 확인할 수 있는 시스템
 
@@ -189,6 +196,7 @@ contract TransparentGovernance {
     }
 }
 ```
+{% endcode %}
 
 ***
 
@@ -215,6 +223,7 @@ contract TransparentGovernance {
 
 [`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L110-L127)
 
+{% code overflow="wrap" %}
 ```solidity
 function _countVote(
     uint256 proposalId,
@@ -235,6 +244,7 @@ function _countVote(
     return GovernorCountingSimpleUpgradeable._countVote(proposalId, account, support, totalWeight, params);
 }
 ```
+{% endcode %}
 
 &#x20;[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L61-L66)&#x20;
 
@@ -249,6 +259,7 @@ InitialGovernorParameters memory params = InitialGovernorParameters({
 
 `커스텀 코드`&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 // 포럼 투표 투명성 및 시빌 저항성을 위한 온체인 검증 시스템
 contract ForumVoteTracker {
@@ -274,6 +285,7 @@ contract ForumVoteTracker {
     }
 }
 ```
+{% endcode %}
 
 ***
 
@@ -300,6 +312,7 @@ contract ForumVoteTracker {
 
 &#x20;[**`BerachainGovernance.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L134-L151)
 
+{% code overflow="wrap" %}
 ```solidity
 function state(uint256 proposalId) public view override returns (ProposalState) {
     return GovernorTimelockControlUpgradeable.state(proposalId);
@@ -309,9 +322,11 @@ function proposalNeedsQueuing(uint256 proposalId) public view override returns (
     return GovernorTimelockControlUpgradeable.proposalNeedsQueuing(proposalId);
 }
 ```
+{% endcode %}
 
 `커스텀 코드`&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 // 제안의 영향도에 따라 차등적인 공지 기간을 설정하여 사용자에게 충분한 준비 시간을 제공하는 알림 시스템
 contract GovernanceNotificationSystem {
@@ -333,4 +348,5 @@ contract GovernanceNotificationSystem {
     }
 }
 ```
+{% endcode %}
 

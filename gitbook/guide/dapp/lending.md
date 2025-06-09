@@ -26,6 +26,7 @@ icon: plane-arrival
 >
 >
 >
+>         {% code overflow="wrap" %}
 >         ```solidity
 >         function _requireValidAdjustmentInCurrentMode(...) {...
 >              // recoveryMode에서 담보 상환 불가
@@ -44,6 +45,7 @@ icon: plane-arrival
 >         require(!isRecoveryMode, "BorrowerOps: Operation not permitted during Recovery Mode");
 >         }
 >         ```
+>         {% endcode %}
 >
 >
 > * **Dynamic Risk Parameters**
@@ -51,6 +53,7 @@ icon: plane-arrival
 >
 >
 >
+>       {% code overflow="wrap" %}
 >       ```solidity
 >       function liquidateDens(..) {
 >
@@ -87,6 +90,7 @@ icon: plane-arrival
 >           denManagerValues.price
 >       );
 >       ```
+>       {% endcode %}
 
 #### **Best practice**
 
@@ -153,6 +157,7 @@ function _decimalsOffset() internal view override virtual returns (uint8) {
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
 // totalSupply가 0이 되는 것을 방지.
 
@@ -178,6 +183,7 @@ if (block.timestamp < bootstrapEndTime) {
     require(assets >= MIN_DEPOSIT_NORMAL, "Deposit amount below normal minimum");
 }
 ```
+{% endcode %}
 
 ***
 
@@ -204,6 +210,7 @@ Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토
 
 [`BorrowerOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L182-L184)
 
+{% code overflow="wrap" %}
 ```solidity
 // 현재 TCR 체크 
 function checkRecoveryMode(uint256 TCR) public view returns (bool) {
@@ -226,9 +233,11 @@ if (isRecoveryMode) {
     _requireNewTCRisAboveCCR(newTCR);
 }
 ```
+{% endcode %}
 
 [`BeraborrowOperations.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/BorrowerOperations.sol#L511-L530)
 
+{% code overflow="wrap" %}
 ```solidity
 if (_isRecoveryMode) {
     require(_collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode");
@@ -241,6 +250,7 @@ if (_isRecoveryMode) {
     _requireNewTCRisAboveCCR(newTCR);
 }
 ```
+{% endcode %}
 
 ***
 
@@ -277,12 +287,15 @@ Owner의 악의적인 파라미터 변경은 사용자에게 직접적인 자금
 
 [`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L254-L257)
 
+{% code overflow="wrap" %}
 ```solidity
 require((_paused && msg.sender == guardian()) || msg.sender == owner(), "Unauthorized");
 ```
+{% endcode %}
 
 [`DenManager.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Beraborrow/src/core/DenManager.sol#L326-L336)
 
+{% code overflow="wrap" %}
 ```solidity
 uint256 newInterestRate = (INTEREST_PRECISION * params.interestRateInBps) / (BP * SECONDS_IN_YEAR);
 if (newInterestRate != interestRate) {
@@ -292,5 +305,6 @@ if (newInterestRate != interestRate) {
     interestRate = newInterestRate;
 }
 ```
+{% endcode %}
 
 ***

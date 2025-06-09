@@ -27,6 +27,7 @@ icon: d-and-d
 
 [`InfraredBERA.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/staking/InfraredBERA.sol#L213-L232)
 
+{% code overflow="wrap" %}
 ```solidity
 function mint(address receiver) public payable returns (uint256 shares) {
     compound(); // 미반영 수익 정산 및 반영 절차 적용
@@ -47,6 +48,7 @@ function mint(address receiver) public payable returns (uint256 shares) {
     emit Mint(receiver, amount, shares);
 }
 ```
+{% endcode %}
 
 ***
 

@@ -48,6 +48,7 @@ icon: honey-pot
 
 &#x20;[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 uint256 private constant DEFAULT_PEG_OFFSET = 0.002e18;
 uint256 private constant MAX_PEG_OFFSET = 0.02e18;
@@ -60,6 +61,7 @@ function isPegged(address asset) public view returns (bool) {
     return (1e18 - lowerPegOffsets[asset] <= data.price) && (data.price <= 1e18 + upperPegOffsets[asset]);
 }
 ```
+{% endcode %}
 
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)&#x20;
 
@@ -77,6 +79,7 @@ function setMaxFeedDelay(uint256 maxTolerance) external {
 
 `커스텀 코드`&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 contract EnhancedMultiOracleSystem {
     struct OracleData {
@@ -137,6 +140,7 @@ contract EnhancedMultiOracleSystem {
 
 }
 ```
+{% endcode %}
 
 ***
 
@@ -167,7 +171,7 @@ contract EnhancedMultiOracleSystem {
 
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
 
-<pre class="language-solidity"><code class="lang-solidity">function isBasketModeEnabled(bool isMint) public view returns (bool) {
+<pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">function isBasketModeEnabled(bool isMint) public view returns (bool) {
     if (forcedBasketMode) return true;
     
     for (uint256 i = 0; i &#x3C; registeredAssets.length; i++) {
@@ -181,6 +185,7 @@ contract EnhancedMultiOracleSystem {
 
 `커스텀 코드`&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 contract StabilityRecovery {
     struct RecoveryState {
@@ -221,6 +226,7 @@ contract StabilityRecovery {
     }
 }
 ```
+{% endcode %}
 
 ***
 
@@ -248,6 +254,7 @@ contract StabilityRecovery {
 
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L368-L418)&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 function redeem(address asset, uint256 honeyAmount, address receiver, bool expectBasketMode) 
     external whenNotPaused returns (uint256 redeemedAssets) {
@@ -267,10 +274,11 @@ function redeem(address asset, uint256 honeyAmount, address receiver, bool expec
     }
 }
 ```
+{% endcode %}
 
 `커스텀 코드`&#x20;
 
-<pre class="language-solidity"><code class="lang-solidity">// 상환 전 디페깅된 자산 포함 여부와 예상 손실을 미리 계산하여 사용자에게 경고하고 위험 인지 확인을 받는 사전 고지 시스템
+<pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">// 상환 전 디페깅된 자산 포함 여부와 예상 손실을 미리 계산하여 사용자에게 경고하고 위험 인지 확인을 받는 사전 고지 시스템
 
 contract RedeemWarningSystem {
     struct RedeemWarning {

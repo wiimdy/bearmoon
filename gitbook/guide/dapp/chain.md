@@ -71,6 +71,7 @@ BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있�
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
 // LP 토큰의 건정성을 확인하는 함수
 function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwner {
@@ -83,7 +84,9 @@ function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwne
     }
 }
 ```
+{% endcode %}
 
+{% code overflow="wrap" %}
 ```solidity
 // 1. Virtual accounting 추가
 mapping(address => uint) internal virtualAssetBalance;
@@ -104,6 +107,7 @@ function _depositAndMint(/*...*/) private {
     // 기존 로직...
 }
 ```
+{% endcode %}
 
 ***
 
@@ -150,6 +154,7 @@ NECT의 가격 결정 메커니즘: \_whitelistStable 함수 내에서 `wadOffse
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
 // Best Practice가 적용될 컨트랙트: PermissionlessPSM.sol
 
@@ -265,6 +270,7 @@ contract PermissionlessPSM {
     // ... deposit, mint, withdraw 등 다른 모든 함수는 그대로 유지 ...
 }
 ```
+{% endcode %}
 
 ***
 

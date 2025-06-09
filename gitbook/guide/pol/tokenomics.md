@@ -26,14 +26,16 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 > * **컨트랙트 내 충분한 네이티브 토큰 보유량 확보**
 >   * 리딤 이후 최종성 보장
 >     * \_invariantCheck를 통해 리딤 과정이 종료된 뒤 현재 BGT 총 발행량과 보유 네이티브 토큰 수량을 비교하여 충분한 양의 네이티브 토큰을 보유하고 있는지 검증
->   *   체인 스펙 상 BERA발행 설정
+>   *   체인 스펙 상 BERA 발행 설정
 >
+>       {% code overflow="wrap" %}
 >       ```toml
 >       # Deneb1 value changes
 >       # BGT 토큰 컨트랙트 주소로 블록당 5.75 BERA 발행
 >       evm-inflation-address-deneb-one = "0x656b95E550C07a9ffe548bd4085c72418Ceb1dba"
 >       evm-inflation-per-block-deneb-one = 5_750_000_000
 >       ```
+>       {% endcode %}
 > * **초과 토큰 보유량 관리 및 적절한 버퍼 유지**
 >   * BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
 >     * BlockRewardController의 computeReward 함수에 boostPower로 100%를 입력하여 한 블록당 나올 수 있는 BGT 최대치를 계산
@@ -45,6 +47,7 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 
 &#x20;[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L369)
 
+{% code overflow="wrap" %}
 ```solidity
 /// @inheritdoc IBGT
 function redeem(
@@ -99,9 +102,11 @@ function _invariantCheck() private view {
     if (address(this).balance < totalSupply()) InvariantCheckFailed.selector.revertWith();
 }
 ```
+{% endcode %}
 
 [`BlockRewardController.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BlockRewardController.sol#L167-L210)
 
+{% code overflow="wrap" %}
 ```solidity
 /// @inheritdoc IBlockRewardController
 function computeReward(
@@ -151,6 +156,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 
 
 ```
+{% endcode %}
 
 ***
 
@@ -173,6 +179,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >
 > *   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
 >
+>     {% code overflow="wrap" %}
 >     ```solidity
 >     /// @notice The delay in blocks before a new reward allocation can go into effect.
 >     uint64 public rewardAllocationBlockDelay;
@@ -187,6 +194,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >             InvalidRewardAllocationWeights.selector.revertWith();
 >         }
 >     ```
+>     {% endcode %}
 >
 >     * 보상 할당에 딜레이(약 2000블록)을 두어 보상 할당이 바로 반영되지 않도록 하고 각 할당마다 전체 보상의 100%를 모두 분배하도록 하여서 여러 트랜잭션을 이용해 보상을 나눠 분배하는 것을 방지\
 >
@@ -210,6 +218,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 
 &#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L392-L394)
 
+{% code overflow="wrap" %}
 ```solidity
 /// @notice Mapping of receiver address to whether they are white-listed or not.
 mapping(address receiver => bool) public isWhitelistedVault;
@@ -318,6 +327,7 @@ function _checkForDuplicateReceivers(bytes memory valPubkey, Weight[] calldata w
     }
 }
 ```
+{% endcode %}
 
 `커스텀 코드`
 
@@ -325,6 +335,7 @@ function _checkForDuplicateReceivers(bytes memory valPubkey, Weight[] calldata w
 
 <summary>하나의 운영자가 여러 검증자를 운영할 경우, 그를 통해 여러 검증자의 보상을 특정 금고에 집중하는 것을 방지</summary>
 
+{% code overflow="wrap" %}
 ```solidity
 // operator별, vault별 전체 할당 비율(누적)
 mapping(address operator => mapping(address vault => uint96 totalAllocated)) public operatorVaultAllocations;
@@ -434,6 +445,7 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 }
 
 ```
+{% endcode %}
 
 
 
@@ -443,6 +455,7 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 
 <summary>여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지</summary>
 
+{% code overflow="wrap" %}
 ```solidity
 // vault별 전체 할당 합계(모든 operator의 합)
 mapping(address vault => uint96 totalAllocatedByAllOperators) public vaultTotalAllocations;
@@ -531,6 +544,7 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 }
 
 ```
+{% endcode %}
 
 
 
@@ -668,6 +682,7 @@ function setRewardConvexity(uint256 _rewardConvexity) external onlyOwner {
 
 <summary><strong>보상 분배 공식 예시</strong> </summary>
 
+{% code overflow="wrap" %}
 ```solidity
 /// @inheritdoc IBlockRewardController
 function computeReward(
@@ -706,12 +721,13 @@ function computeReward(
     }
 }
 ```
+{% endcode %}
 
 
 
 </details>
 
-<pre class="language-solidity"><code class="lang-solidity">// BGT 위임 시 순환 부스팅 방지
+<pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">// BGT 위임 시 순환 부스팅 방지
 mapping(address => mapping(address => uint256)) public vaultOriginBGT;
 mapping(address => uint256) public lastVaultRewardTime;
 
@@ -770,6 +786,7 @@ function checkInflationLimit() external view returns (bool) {
 
 `커스텀 코드`&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 contract RewardVault {
     // ... (기존 상태 변수 및 코드 생략) ...
@@ -823,7 +840,9 @@ contract RewardVault {
     // ... (나머지 기존 코드) ...
 }
 ```
+{% endcode %}
 
+{% code overflow="wrap" %}
 ```solidity
 function _validateWeights(bytes memory valPubkey, Weight[] calldata weights) internal {
     if (weights.length > maxNumWeightsPerRewardAllocation) {
@@ -883,6 +902,7 @@ function _checkIfStillValid(Weight[] memory weights) internal view returns (bool
     return true;
 }
 ```
+{% endcode %}
 
 ***
 
@@ -909,6 +929,7 @@ function _checkIfStillValid(Weight[] memory weights) internal view returns (bool
 
 &#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L373)
 
+{% code overflow="wrap" %}
 ```solidity
 function addIncentive(
     address token,
@@ -938,6 +959,7 @@ function getReward(
     // ...
 }
 ```
+{% endcode %}
 
 ***
 
@@ -961,6 +983,7 @@ claimFees() 프론트 러닝으로 일부 사용자의 수수료 보상이 일�
 
 `커스텀 코드`
 
+{% code overflow="wrap" %}
 ```solidity
 function claimFees(
     address _recipient,
@@ -1003,6 +1026,7 @@ function claimFees(
     if (queuedPayoutAmount != 0) _setPayoutAmount();
 }
 ```
+{% endcode %}
 
 [^1]: 30일 쿨다운 기준\
     rewardAllocationBlockDelay를 통한 보상 할당 지연 정책, 연속적 트랜잭션으로 특정 금고 집중 방지

@@ -27,17 +27,19 @@ icon: user-check
 >     * &#x20;[`SSZ.verifyProof`](../../reference.md#ssz.verifyproof-simple-serialize-merkle-proposer-index) 함수를 사용하여, 특정 타임스탬프의 비콘 루트를 기준으로 해당 제안자의 보상 자격을 검증
 >     * 검증 실패시 revert 발생
 >
+>     {% code overflow="wrap" %}
 >     ```solidity
 >     if (!SSZ.verifyProof(proposerIndexProof, beaconBlockRoot, proposerIndexRoot, proposerIndexGIndex)) {
 >       InvalidProof.selector.revertWith();
 >     }
 >     ```
+>     {% endcode %}
 
 #### Best Practice&#x20;
 
 [`Distributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/Distributor.sol#L100-L121)
 
-{% code fullWidth="false" %}
+{% code overflow="wrap" fullWidth="false" %}
 ```solidity
 // 검증자 보상 수령시 timestamp 기록, beacon block과 index 일치 비교
 function distributeFor( ...
@@ -209,6 +211,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 #### Best Practice&#x20;
 
+{% code overflow="wrap" %}
 ```solidity
 // 출금 로직 추가 및 lock time, emergency 구현
 function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentrant {
@@ -268,3 +271,4 @@ if (request.isEmergency) {
 
 }
 ```
+{% endcode %}
