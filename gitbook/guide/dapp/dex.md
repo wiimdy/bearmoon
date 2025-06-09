@@ -339,9 +339,9 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 #### 가이드라인
 
 > * **자동화된 수수료 관리:**
->   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 [자동 수집 트리거](https://app.gitbook.com/o/paLYLYbq0LaQ4bE9L5Bz/s/YP3bdzxjL3dDtiZZXw1l/~/changes/370/reference#undefined-2)되도록 프로토콜 레벨에서 처리
+>   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 [자동 수집 트리거](../../reference.md#undefined-2)되도록 프로토콜 레벨에서 처리
 >
->       $$\scriptsize (\text{Example: AccumulatedFees} \geq \text{Threshold})$$
+>       $$\left( \text{balance0} \times 1000 - \text{amount0In} \times 3 \right) \times\left( \text{balance1} \times 1000 - \text{amount1In} \times 3 \right)\geq\text{reserve0} \times \text{reserve1} \times 1000^2 \\  \scriptsize \text{- balance0, balance1: swap 이후 풀에 남은 토큰0, 1의 잔액}\\ \text{- amount0In, amount1In: swap에 사용된 입력 토큰 0, 1의 양}\\ \text{- reserve0, reserve1: swap 이전의 토큰 0,1의 잔액}$$
 >   *   Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지\
 >       $$\scriptsize (\text{Example: Current Time} - \text{Last Collection Time} \geq \text{Collection Interval})$$
 >
@@ -349,8 +349,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 > * **권한 및 변경 관리:**
 >   *   대량 인출 또는 민감한 관리자 함수 실행 시  [타임락 적용](../../reference.md#makerdao-48)을 아래 수식과 같이 적용
 >
->       $$\scriptsize \text{(Example: Execute Time} = \text{Request Time} + \text{Time} - \text{Lock Period})$$
->   * Uniswap, Curve 등과 같이 수수료 변경 시 한 번에 적용하는 것이 아닌 [단계적](../../reference.md#undefined-3)으로 수수료 적용 (예: 0.05%) \[출처: [Uniswap Docs](https://docs.uniswap.org/concepts/protocol/fees)]
+>       $$\scriptsize \text{Execute Time} = \text{Request Time} + \text{2 days} \text{ (UniswapV2 Example)}$$
 
 #### Best Practice
 
@@ -396,13 +395,15 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
 >   * 다른 AMM 및 DEX 스마트 컨트랙트와 같이 모든 풀 상태 변경을 [단일 트랜잭션 내 처리](../../reference.md#require-assert)하여 관련 변수를 한 번에 갱신
 >   * require/assert 등의 키워드를 이용하여 중간 실행 단계에서 오류 발생 시 전체 거래가 롤백되는 메커니즘을 적용하여 중간 상태가 남지 않도록 설계
 > * **중간 상태 검증:**
->   * Uniswap 등의 AMM에서 사용하는 `X * Y = K` 수식을 이용하여 각 풀 업데이트 직후 불변량 검증을 통해 가격 오류, 아비트라지, 손실 발생 가능성 차단
+>   *   Uniswap 등의 단순 AMM에서 사용하는 X \* Y = K 수식 또는 Balancer와 같은 가중치 불변량 검증 수식을 이용하여 각 풀 업데이트 직후 불변량 검증을 통해 가격 오류, 아비트라지, 손실 발생 가능성 차단\
+>       (Berachain의 경우 [Balancer 방식의 가중치 불변량 검증 수식](https://github.com/balancer/balancer-v2-monorepo/blob/36d282374b457dddea828be7884ee0d185db06ba/pkg/pool-weighted/contracts/WeightedMath.sol#L56-L74) 사용)
+>
+>       $$V = \Pi^{n}_{i=1}B_i^{W_i}$$
 >   *   여러 풀 또는 토큰 간의 연동으로 인해 발생하는 아비트라지를 줄이기 위해 정해진 수식을 이용하여 풀 간 가격 일관성 확인 및 [총 토큰 공급량 보존 검증](../../reference.md#balancer-weightedmath-x-y-k)
 >
 >       $$\scriptsize (\text{Example: }\sum_{i=1}^{n} \text{Token Supply}_i = \text{Total Supply}\space (n=\text{BlockNum}) )$$
 > * **풀 상태 동기화:**
 >   * 여러 풀/체인 간 동기화가 필요한 경우 상태 불일치가 정해진 임계값을 넘으면 경고 및 자동 대응 설정
->   * 상태 불일치가 감지되어 정해진 임계값 초과 시 자동 재동기화 함수 실행 및 동기화 동기화 실패 시 풀 일시 중단
 
 #### Best Practice
 

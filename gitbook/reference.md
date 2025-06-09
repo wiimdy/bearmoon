@@ -123,26 +123,26 @@ Loss = AssetValueAtPeg × DepegRatio
 
 #### 대량 거래 분할 처리 1inch 방식 여러 풀 분할 실행, 각 분할 거래 간 최소 블록 간격으로 MEV 공격과 슬리피지 최소화
 
-#### 수수료 자동화 관리 임계값 도달 시 자동 수집과 정기 분배 주기 설정, 예측 불가능한 대량 인출 방지
+#### 수수료 자동화 관리 임계값 도달 시 자동 수집과 정기 분배 주기 설정, 예측 불가능한 대량 인출 방지 ([Uniswap V2 기준 수수료 자동 관리 예시](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L180-L181))
 
-#### 수수료 변경 타임락 적용 MakerDAO 48시간 타임락 방식으로 민감한 관리자 함수 실행 지연, 단계적 수수료 적용
+#### 수수료 변경 타임락 적용 Uniswap V2 [2일 타임락](https://docs.uniswap.org/concepts/governance/process#phase-3-governance-proposal)과 같은 방식으로 민감한 관리자 함수 실행 지연, 단계적 수수료 적용
 
 #### 수수료 변경 거버넌스 보호 권한 검증과 상한 제한, 배치 수수료 처리로 투명한 분배 메커니즘 보장
 
-#### 풀 상태 업데이트 원자적 거래 보장 단일 트랜잭션 내 모든 상태 변경 처리, require/assert로 실패 시 전체 롤백으로 중간 상태 방지
+#### 풀 상태 업데이트 원자적 거래 보장 단일 트랜잭션 내 모든 상태 변경 처리, 상태 변경 중 재진입 방지를 위해 [Uniswap V2의 lock 매커니즘](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L31-L36)과 같은 Re-entrancy Gaurd를 적용해야함
 
 #### Balancer WeightedMath 불변량 검증 가중치 기반 X\*Y=K 불변량 계산과 총 공급량 보존 검증, 풀 간 가격 일관성 확인
 
-#### 초기 유동성 예치 보호 Lido 방식 최소 지분 예치로 zero totalsupply 방지, 극소량 예치를 통한 교환 비율 왜곡 차단
+#### 초기 유동성 예치 보호 Lido 방식 최소 지분 예치로 zero totalsupply 방지, [극소량 예치를 통한 교환 비율 왜곡 차단](https://github.com/lidofinance/core/blob/005b0876d6594b7f7864e0577cdaa44eff115b73/contracts/0.4.24/Lido.sol#L930-L936)
 
 #### 실시간 자산 동기화 Uniswap V3 방식 블록 단위 업데이트와 compound() 선반영으로 미반영 수익 정산 후 거래 처리
 
-#### 수수료 변경 시점 악용 방지 updateFee() 실행 시 미정산 보상 선반영과 KEEPER\_ROLE 권한 제한으로 수수료 변경과 보상 수확 동시 실행 차단
+#### 수수료 변경 시점 악용 방지 updateFee() 실행 시 미정산 보상 선반영과 KEEPER\_ROLE 권한 제한으로 [수수료 변경과 보상 수확 동시 실행 차단](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Factory.sol#L61-L72)
 
 #### Bribe 시스템 토큰 검증 화이트리스트 운영과 최소 Bribe 금액 한도 설정, BribeCollector 최소 권한 원칙과 타임락 적용으로 시스템 오염 방지
 
+(Curve Finance 파생 LSD 플랫폼 Votium의 [4% Bribe rate](https://github.com/oo-00/Votium/blob/3993b7cb0d98cfc7a97d7a7ad8828ab6ce363ad1/contracts/Votium.sol#L25) 적용 예시)
+
 #### 검증자 스테이킹 한도 제한 MAX\_EFFECTIVE\_BALANCE로 개별 검증자 최대 스테이킹 제한, 자금 집중 방지와 보상 분산으로 중앙화 완화
 
-#### 검증자 상태 실시간 추적 비정상 행위 감지 시 자동 강제 종료 시스템, 장기간 비활성 검증자 제거로 네트워크 안정성 보장
-
-#### 자동 자금 분산 위임 리스테이킹과 신규 위임의 여러 검증자 자동 분산, 중앙화 방지와 참여 유인 확보로 탈중앙성 강화
+#### 자동 자금 분산 위임 리스테이킹과 신규 위임의 여러 검증자 자동 분산, 중앙화 방지와 참여 유인 확보로 탈중앙성 강화 ([Lido 예시](https://docs.terra.lido.fi/introduction/stake-distribution/))
