@@ -16,7 +16,7 @@ icon: rotate-reverse
 
 플래시론을 이용해 단일 거래 내 대규모 자금으로 유동성 풀 가격을 인위적으로 조작할 수 있으며 일반 사용자의 거래에 직접적인 영향을 미칠 수 있기 때문에 `Medium`으로 평가한다.
 
-#### [가이드라인](../../reference.md#id-1-1.5-twap)
+#### [가이드라인](../../reference.md#undefined-11)
 
 > * **플래시론 공격 방지**
 >   * 프로토콜 수준에서 단일 거래가 유동성 풀 가격에 미칠 수 있는 최대 변동률을 하드캡으로 강제
@@ -25,7 +25,7 @@ icon: rotate-reverse
 > * **오라클 가격 검증**
 >   * 최소 2개 이상의 독립적 오라클 가격 소스 활용하여 오라클 간 가격 편차가 1.5%를 초과할 경우 해당거래 거부 또는 추가 검증 실시
 >     * Chainlink, Band Protocol 등의 오라클 네트워크에서 운용하는 임계값
->   * Compound, [Synthetix](../../reference.md#synthetix-compound-synthetix-1-3) 등의 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지\
+>   * Compound, [Synthetix](../../reference.md#synthetix) 등의 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지\
 >     $$\Delta P \approx \sigma \times \sqrt{t}  \\\space {\scriptsize (\text{Example: } \sigma = 0.5\%, t = 3 \text{min} \implies \Delta P \approx 0.5\% \times \sqrt{3} \approx 0.866\%) }$$&#x20;
 >   * TWAP(Time-Weighted Average Price) 등 평균 가격을 사용해 단일 거래의 가격 조작 영향 최소화
 > * **최소 유동성 요구사항**
@@ -91,7 +91,7 @@ LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자�
 >   * 새로운 유동성의 풀 전체 대비 정확한 비중 계산
 > * **수치 정밀도 보장:**
 >   * SafeMath, FixedPointMathLib 등과 같은 고정소수점 연산 라이브러리 필수 사용하여 최소 18자리의 소수점 연산 정밀도 사용
->   * 연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 [계산 결과](../../reference.md#lp-18-lp-0.1)의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지
+>   * 연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 [계산 결과](../../reference.md#lp)의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지
 >   * 덧셈/곱셈 순서를 최적화하여 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산하며, SafeMath, FixedPointMathLib 등의 수치 정밀도를 보장하는 수식 연산 모듈을 사용
 > * **실시간 검증:**
 >   *   아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교
@@ -140,10 +140,10 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 >   *   Uniswap V3 등의 사례와 같이 유동성 제거 요청 시점의 오라클/TWAP 가격을 고정을 고정하여 실제 제거가 처리될 때까지 최초 요청 가격을 기준으로 정산 검증
 >
 >       $$\text{Remove Value} = \text{Liquidity Amount} \times \text{Price}_{\text{request}}$$
->   *   유동성 제거 시, 최근 N 블록의 평균 가격(TWAP)을 정산 기준으로 활용하여 [일시적 가격 조작방지](../../reference.md#twap-n-n)
+>   *   유동성 제거 시, 최근 N 블록의 평균 가격(TWAP)을 정산 기준으로 활용하여 [일시적 가격 조작방지](../../reference.md#twap-n)
 >
 >       $$\text{TWAP} = \frac{1}{N}\Sigma^{N}_{j=1} \text{Price}_{\text{block }j} \space \scriptsize (N=\text{Block Number})$$
->   *   Curve, Balancer 등과 같이 프로토콜 레벨에서 유동성 제공 후 LP 토큰 수령 시 [최소 보유 기간](../../reference.md#twap-lp-mev)이 지나야만 유동성 제거가 가능하도록 조건 추가
+>   *   Curve, Balancer 등과 같이 프로토콜 레벨에서 유동성 제공 후 LP 토큰 수령 시 [최소 보유 기간](../../reference.md#undefined-12)이 지나야만 유동성 제거가 가능하도록 조건 추가
 >
 >       $$(\text{Example: } \text{Current Time} - \text{LP Mint Time} \geq \text{Min Hold Period})$$
 
@@ -177,7 +177,7 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 >   *   Uniswap, Curve 등의 AMM 서비스와 같이 유동성 풀 내 자산 가치 비율 유지를 위한 목표 비율 대비 편차 [임계값 설정](../../reference.md#undefined)하여 초과 시 리밸런싱을 트리거 하도록 실시
 >
 >       $$\text{Example: } \text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A+\text{Value}_B}, \quad \text{Threshold} \approx \frac{C_{gas} + C_{swap}}{\text{Value}_A + Value_B} \\ \scriptsize (|\text{Ratio}_A-\text{Target Ratio}_A| > \text{Threshold} \Rightarrow \text{Rebalance Trigger}) \\ \scriptsize C_{gas}\text{: 리밸런싱 트랜잭션을 실행하는 데 필요한 네트워크 가스 비용} \\ \scriptsize C_{swap}\text{: 유동성 풀에 지불하는 스왑 수수료} \\  \scriptsize \text{Value}_A + \text{Value}_B\text{: 풀에 예치된 자산 A와 B의 총 시장가치}$$
->   * Uniswap의 [x\*y=k ](../../reference.md#curve-stableswap-x-y-k)곡선과 같이 편차 발생 시 스마트 컨트랙트에서 시 자동 리밸런싱하는 트리거를 제공하여 가격 균형 회복 유도
+>   * Uniswap의 [x\*y=k ](../../reference.md#curve-stableswap)곡선과 같이 편차 발생 시 스마트 컨트랙트에서 시 자동 리밸런싱하는 트리거를 제공하여 가격 균형 회복 유도
 > * **불균형 모니터링**
 >   * 기존 DEX 서비스와 유사하게 풀내 자산 비율, TVL 등의 주요 지표를 실시간 대시보드에서 추적 및 계산하는 기능 제공 필요
 >   * 운영하는 유동성 풀 비율이 목표치를 크게 벗어날 경우 편차 단계별 경고 시스템을 통해 관리자가 즉시 대응할 수 있는 경고 시스템 구축
@@ -246,12 +246,12 @@ function addLiquiditySingle(
 > * **슬리피지 허용 한도 설정 및 검증:**
 >   * Uniswap, SushiSwap 등의 주요 DEX와 같이 사용자가 직접 슬리피지 한도를 입력하도록 유도하여 거래 전 최대 슬리피지 임계값 사전 정의하고 한도 초과 시 자동 취소\
 >     (Uniswap의 경우 swap 과정에서 사용자가 UI 상에서 슬리피지 비율을 직접 지정할 수 있음)
->   *   사용자가 입력한 최소 수량과 실제 계산된 최소 아웃풋이 일치하는지 [검증하기 위해 수식](../../reference.md#undefined-1)을 활용하여 실제 지급량 확인 (프로토콜에 따라 수식 종류가 다를 수 있음)
+>   *   사용자가 입력한 최소 수량과 실제 계산된 최소 아웃풋이 일치하는지 [검증하기 위해 수식](../../reference.md#undefined-14)을 활용하여 실제 지급량 확인 (프로토콜에 따라 수식 종류가 다를 수 있음)
 >
 >       $${\scriptsize (\text{Example: }\text{Minimum Output} = \text{Input Amount} \times (1 - \text{Slippage Tolerance}))}$$
 >   * 주요 DEX와 동일하게 슬리피지 한도 초과 감지 시 거래 자동 취소 처리
 > * **대량 거래 시 분할 처리:**
->   * [1inch](../../reference.md#id-1inch-mev) 네트워크 등의 DEX와 동일하게 여러 DEX / 유동성 풀에 대형 거래를 분할하여 슬리피지를 최소화하고 각  거래별 슬리피지 검증 실시
+>   * [1inch](../../reference.md#undefined-15) 네트워크 등의 DEX와 동일하게 여러 DEX / 유동성 풀에 대형 거래를 분할하여 슬리피지를 최소화하고 각  거래별 슬리피지 검증 실시
 >   *   플래시론/MEV 공격 방지, 시장 안정성 확보를 위해 각 분할 거래를 서로 다른 블록에 실행하도록 제한하기 위해 분할 거래 간 최소 블록 간격 설정
 >
 >       (UniswapV3 기준으로 N값을 시간에 따라 유동적으로 지정하며 일반적으로 [30분 \~ 1시간](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Pool.sol#L246C17-L246C28) 사이를 지정함)
@@ -339,7 +339,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 #### 가이드라인
 
 > * **자동화된 수수료 관리:**
->   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 [자동 수집 트리거](../../reference.md#undefined-2)되도록 프로토콜 레벨에서 처리
+>   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 [자동 수집 트리거](../../reference.md#undefined-16)되도록 프로토콜 레벨에서 처리
 >
 >       $$\left( \text{balance0} \times 1000 - \text{amount0In} \times 3 \right) \times\left( \text{balance1} \times 1000 - \text{amount1In} \times 3 \right)\geq\text{reserve0} \times \text{reserve1} \times 1000^2 \\  \scriptsize \text{- balance0, balance1: swap 이후 풀에 남은 토큰0, 1의 잔액}\\ \text{- amount0In, amount1In: swap에 사용된 입력 토큰 0, 1의 양}\\ \text{- reserve0, reserve1: swap 이전의 토큰 0,1의 잔액}$$
 >   *   Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지\
@@ -347,7 +347,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 >
 >
 > * **권한 및 변경 관리:**
->   *   대량 인출 또는 민감한 관리자 함수 실행 시  [타임락 적용](../../reference.md#makerdao-48)을 아래 수식과 같이 적용
+>   *   대량 인출 또는 민감한 관리자 함수 실행 시  [타임락 적용](../../reference.md#undefined-18)을 아래 수식과 같이 적용
 >
 >       $$\scriptsize \text{Execute Time} = \text{Request Time} + \text{2 days} \text{ (UniswapV2 Example)}$$
 
@@ -399,7 +399,7 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
 >       (Berachain의 경우 [Balancer 방식의 가중치 불변량 검증 수식](https://github.com/balancer/balancer-v2-monorepo/blob/36d282374b457dddea828be7884ee0d185db06ba/pkg/pool-weighted/contracts/WeightedMath.sol#L56-L74) 사용)
 >
 >       $$V = \Pi^{n}_{i=1}B_i^{W_i}$$
->   *   여러 풀 또는 토큰 간의 연동으로 인해 발생하는 아비트라지를 줄이기 위해 정해진 수식을 이용하여 풀 간 가격 일관성 확인 및 [총 토큰 공급량 보존 검증](../../reference.md#balancer-weightedmath-x-y-k)
+>   *   여러 풀 또는 토큰 간의 연동으로 인해 발생하는 아비트라지를 줄이기 위해 정해진 수식을 이용하여 풀 간 가격 일관성 확인 및 [총 토큰 공급량 보존 검증](../../reference.md#balancer-weightedmath)
 >
 >       $$\scriptsize (\text{Example: }\sum_{i=1}^{n} \text{Token Supply}_i = \text{Total Supply}\space (n=\text{BlockNum}) )$$
 > * **풀 상태 동기화:**
