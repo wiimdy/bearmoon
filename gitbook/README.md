@@ -1,11 +1,6 @@
 ---
 icon: hand-wave
-cover: https://gitbookio.github.io/onboarding-template-images/header.png
-coverY: 0
 layout:
-  cover:
-    visible: true
-    size: full
   title:
     visible: true
   description:
@@ -20,7 +15,7 @@ layout:
 
 # 머릿말
 
-<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 이 문서는 베라체인의 메커니즘인 **PoL(Proof of Liquidity)** 시스템에서 발생할 수 있는 보안 위협 요소를 식별하고 이를 예방하기 위한 실질적인 가이드라인을 제시합니다.
 
