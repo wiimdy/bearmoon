@@ -103,7 +103,7 @@ function _verifyProposerIndexInBeaconBlock(
 > * **거버넌스 또는 신뢰할 수 있는 제3자를 통한 운영자 강제 변경/취소 메커니즘**
 >   * `cancelOperatorChange` 의 msg.sender가 operator, governance 인지 검증 진행
 >   * 운영자의 의도적인 commission 급상승, 급하락 같은 행위에 페널티 부여
-> * **운영자 변경 시 기존 예치 잔액에 대한** [**잠금 기간 설정 및 점진적 권한**](../../reference.md#undefined) **이전**
+> * **운영자 변경 시 기존 예치 잔액에 대한** [**잠금 기간 설정 및 점진적 권한**](../../reference.md#beacondeposit) **이전**
 >   * 운영자에 대한 booster들의 판단이 진행 되도록 처음에는 보상 분배 권한만 부여 → unboost할 수 있는 시간(unboost delay = 2000 block)을 주어진 후 commission 변경 권한 부여
 > * **운영자 주소가 zero address로 적용되지 않도록 방지**
 
