@@ -31,4 +31,4 @@
 
 ***
 
-* [레퍼런스](undefined.md)
+* [레퍼런스](reference.md)

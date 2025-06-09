@@ -16,11 +16,11 @@ icon: plane-arrival
 
 `Medium`
 
-사용자에게 과도한 담보 손실을 강요하고, 심각할 경우 프로토콜에 회수 불가능한 부실 채권을 남겨 시스템의 지급 불능을 초래할 수 있다. 발생 확률이 시장 상황에 따라 존재하며 [과거 사례](../../undefined.md#liquity-2021.5.19)를 통해 피해가 치명적일 수 있어(레퍼런스 추가) `Medium`로 평가한다.
+사용자에게 과도한 담보 손실을 강요하고, 심각할 경우 프로토콜에 회수 불가능한 부실 채권을 남겨 시스템의 지급 불능을 초래할 수 있다. 발생 확률이 시장 상황에 따라 존재하며 [과거 사례](../../reference.md#liquity-2021.5.19)를 통해 피해가 치명적일 수 있어(레퍼런스 추가) `Medium`로 평가한다.
 
 #### 가이드라인
 
-> *   [**연쇄반응**](../../undefined.md#recovery-mode-mcr) **방지 메커니즘**
+> *   [**연쇄반응**](../../reference.md#recovery-mode-mcr) **방지 메커니즘**
 >
 >     *   Recovery Mode에서 담보 상환 제한
 >
@@ -98,7 +98,7 @@ icon: plane-arrival
 
 
 
-### 위협 2: [ERC-4626 인플레이션](../../undefined.md#erc-4626-virtual-shares-9-decimal-offset-69-share) 공격
+### 위협 2: [ERC-4626 인플레이션](../../reference.md#erc-4626-virtual-shares-9-decimal-offset-69-share) 공격
 
 공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다. 유사한 [과거 사례](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)도 존재한다.
 
@@ -185,7 +185,7 @@ if (block.timestamp < bootstrapEndTime) {
 
 Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제로는 위험한 상태임에도 정상 작동하는 것처럼 보이게 만들어, 추가적인 부실 대출을 허용하고 손실을 확대시킨다.
 
-공격자가 담보 비율(ICR/TCR) 검증 로직을 우회하여 시스템이 [Recovery Mode](../../undefined.md#recovery-mode-tcr-less-than-ccr-icr-tcr)임에도 과도하게 대출을 하면, 해당 대출은 부실화될 위험이 매우 커진다.
+공격자가 담보 비율(ICR/TCR) 검증 로직을 우회하여 시스템이 [Recovery Mode](../../reference.md#recovery-mode-tcr-less-than-ccr-icr-tcr)임에도 과도하게 대출을 하면, 해당 대출은 부실화될 위험이 매우 커진다.
 
 #### 영향도&#x20;
 
@@ -196,7 +196,7 @@ Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토
 #### 가이드라인
 
 > * **모든 포지션 변경 시 개별 ICR(개별 담보 비율)과 시스템 TCR(총 담보율) 동시 검증**
-> * [**Mode Transition 안정성**](../../undefined.md#recovery-mode-checkrecoverymode-tcr-icr-tcr-mode)
+> * [**Mode Transition 안정성**](../../reference.md#recovery-mode-checkrecoverymode-tcr-icr-tcr-mode)
 >   * TCR 계산 시 최신 가격 및 이자 반영 보장
 >   * Mode 전환 시 모든 포지션 상태 일괄 업데이트
 
@@ -252,12 +252,12 @@ Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적
 
 `Low`
 
-Owner의 악의적인 파라미터 변경은 사용자에게 직접적인 자금 손실을 입힐 수 있는 심각한 위협이다. [과거 DeFi 사례](https://medium.com/@alymarguerite/wonderland-dao-too-good-to-be-true-8832313aff81)에서 보듯, 이는 기술적 취약점뿐만 아니라 신뢰를 받던 핵심 그룹이 돌아서는 '[거버넌스 리스크](../../undefined.md#wonderland-dao-defi-owner)'를 포함한다. 그러나 이러한 권한은 다중 서명과 Timelock로 통제되므로, 실제 성공 가능성은 낮아 `Low`로 평가한다.
+Owner의 악의적인 파라미터 변경은 사용자에게 직접적인 자금 손실을 입힐 수 있는 심각한 위협이다. [과거 DeFi 사례](https://medium.com/@alymarguerite/wonderland-dao-too-good-to-be-true-8832313aff81)에서 보듯, 이는 기술적 취약점뿐만 아니라 신뢰를 받던 핵심 그룹이 돌아서는 '[거버넌스 리스크](../../reference.md#wonderland-dao-defi-owner)'를 포함한다. 그러나 이러한 권한은 다중 서명과 Timelock로 통제되므로, 실제 성공 가능성은 낮아 `Low`로 평가한다.
 
 #### 가이드라인
 
 > * **거버넌스 권한 분산**
->   * 모든 중요 파라미터 변경에 [멀티시그 + 타임락 적용](../../undefined.md#owner--mcr-ccr-7)
+>   * 모든 중요 파라미터 변경에 [멀티시그 + 타임락 적용](../../reference.md#owner--mcr-ccr-7)
 >   * 긴급 상황 외 paused 상태 변경 금지
 >   * 가격 피드 변경 시 공지
 > * **파라미터 변경 제한**
