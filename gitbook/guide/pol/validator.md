@@ -20,11 +20,11 @@ icon: user-check
 #### 가이드 라인
 
 > * **동일 timestamp 중복 처리 방지 메커니즘 구현**
->   * timestamp를 eip-4788의 [history\_buf\_length](../../reference.md#history_buf_length-eip-4788-8191-12-2)로 mod 연산을 하여 `_processedTimestampsBuffer`에 삽입
->   * EIP-4788의 ring buffer 메커니즘에 따라 8191 슬롯([약 4.55시간, 2초 간격 기준](../../reference.md#id-4.55-8191-2-8)) 후 덮어씌워짐, 이는 보상 주기와 일치함&#x20;
+>   * timestamp를 eip-4788의 [history\_buf\_length](../../reference.md#history_buf_length)로 mod 연산을 하여 `_processedTimestampsBuffer`에 삽입
+>   * EIP-4788의 ring buffer 메커니즘에 따라 8191 슬롯([약 4.55시간, 2초 간격 기준](../../reference.md#id-4.55-8191-2)) 후 덮어씌워짐, 이는 보상 주기와 일치함&#x20;
 > *   **Beacon block root과 proposer index/pubkey 의 암호학적 검증**
 >
->     * &#x20;[`SSZ.verifyProof`](../../reference.md#ssz.verifyproof-simple-serialize-merkle-proposer-index) 함수를 사용하여, 특정 타임스탬프의 비콘 루트를 기준으로 해당 제안자의 보상 자격을 검증
+>     * &#x20;[`SSZ.verifyProof`](../../reference.md#ssz.verifyproof) 함수를 사용하여, 특정 타임스탬프의 비콘 루트를 기준으로 해당 제안자의 보상 자격을 검증
 >     * 검증 실패시 revert 발생
 >
 >     {% code overflow="wrap" %}
@@ -97,13 +97,13 @@ function _verifyProposerIndexInBeaconBlock(
 
 #### 가이드라인
 
-> * **운영자 변경 시**[ **queue 메커니즘과 시간 지연**](../../reference.md#beacondeposit-24)**을 통한 급작스러운 변경 방지**
+> * **운영자 변경 시**[ **queue 메커니즘과 시간 지연**](../../reference.md#beacondeposit)**을 통한 급작스러운 변경 방지**
 >   * key = pubkey, value = new operator로 설정하여 운영자 변경 요청 queue 삽입
 >   * 운영자 변경시 delay 1일 (현재 컨트랙트 코드에 구현) 지나야 가능
 > * **거버넌스 또는 신뢰할 수 있는 제3자를 통한 운영자 강제 변경/취소 메커니즘**
 >   * `cancelOperatorChange` 의 msg.sender가 operator, governance 인지 검증 진행
 >   * 운영자의 의도적인 commission 급상승, 급하락 같은 행위에 페널티 부여
-> * **운영자 변경 시 기존 예치 잔액에 대한** [**잠금 기간 설정 및 점진적 권한**](../../reference.md#greater-than-20) **이전**
+> * **운영자 변경 시 기존 예치 잔액에 대한** [**잠금 기간 설정 및 점진적 권한**](../../reference.md#undefined) **이전**
 >   * 운영자에 대한 booster들의 판단이 진행 되도록 처음에는 보상 분배 권한만 부여 → unboost할 수 있는 시간(unboost delay = 2000 block)을 주어진 후 commission 변경 권한 부여
 > * **운영자 주소가 zero address로 적용되지 않도록 방지**
 
@@ -148,7 +148,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 `Low`&#x20;
 
-[자발적 출금 로직 부재](../../reference.md#queue-2)로 자금 동결되지만, 베라체인의 [ValidatorSetCap](../../reference.md#validatorsetcap)에 따라 강제 퇴출 시 회수 가능하며, 이는 자산 손실보다는 네트워크 안정성에 잠재적 영향을 미쳐 `Low`로 평가한다.
+[자발적 출금 로직 부재](../../reference.md#undefined-1)로 자금 동결되지만, 베라체인의 [ValidatorSetCap](../../reference.md#validatorsetcap)에 따라 강제 퇴출 시 회수 가능하며, 이는 자산 손실보다는 네트워크 안정성에 잠재적 영향을 미쳐 `Low`로 평가한다.
 
 #### 가이드라인&#x20;
 
@@ -272,3 +272,4 @@ if (request.isEmergency) {
 }
 ```
 {% endcode %}
+
