@@ -21,8 +21,7 @@ icon: d-and-d
 
 > * **교환 비율 계산 시 복리 효과 선적용으로 미반영된 수익이 정산되는 현상이 발생하지 않도록 누적 보상을 선반영하는 절차를 Lido 프로토콜과 유사하게** [**입/출금 트랜잭션 처리 전 compound() 함수 호출**](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/libraries/RewardsLib.sol#L80)**하여 처리**
 > * **외부에서 직접 컨트랙트로 자금이 유입되거나 내부 회계가** [**실시간 동기화**](../../reference.md#uniswap-v3-compound)**되지 않으면 교환 비율이 왜곡되는 현상을 방지하기 위해,** [**Uniswap V2 컨트랙트 코드**](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L185)**와 같이 내부 회계 상 실시간 반영되도록 적용**
-> * **최초 유동성이 없는 상태에서 극소량의 예치금을 통한 교환 비율 왜곡 현상을 방지하기 위해 컨트랙트 배포 단계에서 최소 지분을 예치하여** [**zero totalsupply, zero division 현상 방지**](../../reference.md#lido-zero-totalsupply)\
->   (Ex: Lido의 경우 최소 지분 양을 사전에 지정하여 예치 시 확인하도록 적용(각주))
+> * **최초 유동성이 없는 상태에서 극소량의 예치금을 통한 교환 비율 왜곡 현상을 방지하기 위해 컨트랙트 배포 단계에서 최소 지분을 예치하여** [**zero totalsupply, zero division 현상 방지**](../../reference.md#lido-zero-totalsupply)
 
 #### Best Practice
 
@@ -172,8 +171,8 @@ function claimFees(
 #### 가이드라인
 
 > * **이더리움, 솔라나 등 주요 PoS 체인에서 제기된 대형 검증자에 대한 자금 집중을 해결하기 위한 검증자 별 최대** [**스테이킹 한도 설정**](../../reference.md#max_effective_balance)**을 통한 보상 불균형 및 중앙화 발생 방지**
-> * **검증자의 장기간 비정상 행위로 인한 네트워크 안정성 저해를 방지하기 위해** [**실시간 상태 추적**](../../reference.md#undefined-4)**과 자동 강제 종료 시스템 도입 필요**
-> * **리스테이킹이나 신규 위임이 소수 검증자에게 집중될 경우 중앙화와 보상 불균형이 발생할 가능성을 방지하기 위해 자금이 여러 검증자에게** [**자동 분산**](../../reference.md#undefined-3)**되도록 위임 정책 적용**
+> * **검증자의 장기간 비정상 행위로 인한 네트워크 안정성 저해를 방지하기 위해** [**실시간 상태 추적**](../../reference.md#uniswap-v3-compound)**과 자동 강제 종료 시스템 도입 필요**
+> * **리스테이킹이나 신규 위임이 소수 검증자에게 집중될 경우 중앙화와 보상 불균형이 발생할 가능성을 방지하기 위해 자금이 여러 검증자에게** [**자동 분산**](../../reference.md#lido)**되도록 위임 정책 적용**
 > * **사용자 참여도 저조로 인한 네트워크 탈중앙성 및 유동성 약화를 방지하기 위해** [**Curve Finance의 LP 토큰 보상**](https://github.com/curvefi/curve-dao-contracts/blob/fa127b1cb7bf83e4f3d605f7244b7b4ed5ebe053/contracts/gauges/LiquidityGaugeV2.vy#L205-L254)**과 유사한 방식의 활동 보상을 제공하여 참여와 자금 분산을 촉진**
 
 #### Best Practice

@@ -262,7 +262,7 @@ function addLiquiditySingle(
 >   * Chainlink, Band 등의 여러 오라클에서 가격을 받아 다중 가격 소스 활용 및 교차 검증하고 편차가 크면 거래 취소 또는 대체 소스 전환
 >   *   아래 수식과 같은 방식으로 현재 유동성 기반 실시간 슬리피지 예측 공식 적용하여 모니터링 및 검증 실시
 >
->       $$\text{Price Impact} = 1 - \frac{x}{x + \Delta x} \scriptsize {(x = PoolAmount, \Delta x =\text{TradeSize})}$$
+>       $$\scriptsize \text{Price Impact} = 1 - \frac{x}{x + \Delta x} \scriptsize {(x = \text{PoolAmount}, \Delta x =\text{TradeSize})}$$
 
 #### Best Practice
 
@@ -392,7 +392,7 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
 #### 가이드라인
 
 > * **원자적 거래 보장:**
->   * 다른 AMM 및 DEX 스마트 컨트랙트와 같이 모든 풀 상태 변경을 [단일 트랜잭션 내 처리](../../reference.md#require-assert)하여 관련 변수를 한 번에 갱신
+>   * 모든 풀 상태 변경을 단일 트랜잭션 내 처리하여 관련 변수를 한 번에 갱신해야 하며, 상태 변경 중 재진입 방지를 위해 [Uniswap V2의 lock 매커니즘](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L31-L36)과 같은 Re-entrancy Gaurd 적용
 >   * require/assert 등의 키워드를 이용하여 중간 실행 단계에서 오류 발생 시 전체 거래가 롤백되는 메커니즘을 적용하여 중간 상태가 남지 않도록 설계
 > * **중간 상태 검증:**
 >   *   Uniswap 등의 단순 AMM에서 사용하는 X \* Y = K 수식 또는 Balancer와 같은 가중치 불변량 검증 수식을 이용하여 각 풀 업데이트 직후 불변량 검증을 통해 가격 오류, 아비트라지, 손실 발생 가능성 차단\

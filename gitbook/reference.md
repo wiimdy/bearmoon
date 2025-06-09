@@ -101,7 +101,7 @@ Loss = AssetValueAtPeg × DepegRatio
 
 #### 토큰 가격 조작 및 플래시론 공격 방지 가격 변동률 하드캡, 플래시론 1% 추가 수수료, 오라클 간 1.5% 편차 초과 시 거래 거부와 TWAP으로 조작 저항성 강화
 
-#### Synthetix 오라클 괴리 허용 기준 Compound/Synthetix 1% 오라클 괴리 허용 한계, 3분 이상 미갱신 시 거래 일시 정지로 유동성 공급자 손실 방지
+#### Synthetix 오라클 괴리 허용 기준 Compound/[Synthetix 1% 오라클 괴리 허용 한계](https://sips.synthetix.io/sips/sip-32/), 3분 이상 미갱신 시 거래 일시 정지로 유동성 공급자 손실 방지
 
 #### LP 토큰 가치 계산 정확성 고정소수점 18자리 정밀도와 실시간 오라클 가격 반영, LP 토큰-풀 자산 가치 0.1% 편차 임계값 검증
 
