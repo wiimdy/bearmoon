@@ -15,7 +15,7 @@ icon: user-check
 
 `Low`
 
-검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나 Merkle root 검증 기법으로 공격 성공 가능성이 매우 낮기 때문에`Low`로 평가한다.&#x20;
+검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나 Merkle root 검증 기법으로 공격 성공 가능성이 매우 낮기 때문에 `Low`로 평가한다.&#x20;
 
 #### 가이드 라인
 
@@ -101,7 +101,7 @@ function _verifyProposerIndexInBeaconBlock(
 >   * key = pubkey, value = new operator로 설정하여 운영자 변경 요청 queue 삽입
 >   * 운영자 변경시 delay 1일 (현재 컨트랙트 코드에 구현) 지나야 가능
 > * **거버넌스 또는 신뢰할 수 있는 제3자를 통한 운영자 강제 변경/취소 메커니즘**
->   * `cancelOperatorChange` msg.sender가 operator, governance 인지 검증 진행
+>   * `cancelOperatorChange` 의 msg.sender가 operator, governance 인지 검증 진행
 >   * 운영자의 의도적인 commission 급상승, 급하락 같은 행위에 페널티 부여
 > * **운영자 변경 시 기존 예치 잔액에 대한** [**잠금 기간 설정 및 점진적 권한**](../../reference.md#greater-than-20) **이전**
 >   * 운영자에 대한 booster들의 판단이 진행 되도록 처음에는 보상 분배 권한만 부여 → unboost할 수 있는 시간(unboost delay = 2000 block)을 주어진 후 commission 변경 권한 부여
@@ -201,7 +201,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 >         * Additional\_Penalty\_Factor: 잠금 기간을 일찍 어길수록 추가로 부과되는 페널티 계수 (예: 10%)
 
 {% hint style="danger" %}
-**긴급 인출 기능 구현 시 페널티 메커니즘 적용**
+**긴급 인출 기능 사용 시 페널티 메커니즘 적용**
 
 **페널티 계산 수식 예시:**
 

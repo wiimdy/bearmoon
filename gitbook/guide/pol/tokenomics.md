@@ -20,12 +20,12 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 
 > * **BGT 리딤 시 유효성 검증**
 >   * 컨트랙트 잔액 확인
->     * redeem 함수에서 BERA transfer시 safeTransferETH사용하여 잔액 부족 시 revert
+>     * redeem 함수에서 BERA transfer시 `safeTransferETH`사용하여 잔액 부족 시 revert
 >   * 리딤 요청량 검증
->     * checkUnboostedBalance 함수를 이용하여 사용자의 리딤 요청량이 unboost한 BGT 수량보다 적거나 같은지 검증
+>     * `checkUnboostedBalance` 함수를 이용하여 사용자의 리딤 요청량이 unboost한 BGT 수량보다 적거나 같은지 검증
 > * **컨트랙트 내 충분한 네이티브 토큰 보유량 확보**
 >   * 리딤 이후 최종성 보장
->     * \_invariantCheck를 통해 리딤 과정이 종료된 뒤 현재 BGT 총 발행량과 보유 네이티브 토큰 수량을 비교하여 충분한 양의 네이티브 토큰을 보유하고 있는지 검증
+>     * `_invariantCheck`를 통해 리딤 과정이 종료된 뒤 현재 BGT 총 발행량과 보유 네이티브 토큰 수량을 비교하여 충분한 양의 네이티브 토큰을 보유하고 있는지 검증
 >   *   체인 스펙 상 BERA 발행 설정
 >
 >       {% code overflow="wrap" %}
@@ -38,7 +38,7 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 >       {% endcode %}
 > * **초과 토큰 보유량 관리 및 적절한 버퍼 유지**
 >   * BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
->     * BlockRewardController의 computeReward 함수에 boostPower로 100%를 입력하여 한 블록당 나올 수 있는 BGT 최대치를 계산
+>     * BlockRewardController의 `computeReward` 함수에 boostPower로 100%를 입력하여 한 블록당 나올 수 있는 BGT 최대치를 계산
 >     * EIP-4788에 맞게 HISTORY\_BUFFER\_LENGTH를 8191로 설정
 >     * 위의 두 값으로 잠재적 BGT 발행량을 계산한 뒤, 현재 BGT 발행량에 더해 outstandingRequiredAmount를 계산
 >     * 네이티브 토큰 잔액이 outstandingRequiredAmount값을 넘으면 burnExceedingReserves 함수를 통해 초과한 양 만큼 zero address로 소각
@@ -963,15 +963,15 @@ function getReward(
 
 ***
 
-### 위협 6: claimFees() 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
+### 위협 6: claimFees 함수 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
 
-`claimFees()`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상을 수령하지 못했지만 HONEY를 지불해야해서 손해가 발생할 수 있다.
+`claimFees`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상을 수령하지 못했지만 HONEY를 지불해야해서 손해가 발생할 수 있다.
 
 #### 영향도
 
 `Low`
 
-claimFees() 프론트 러닝으로 일부 사용자의 수수료 보상이 일시적으로 왜곡될 수 있지만, 이는 개별 사용자에게 제한적으로 발생하며 시스템 전체의 안정성이나 운영에는 큰 영향을 미치지 않기 때문에 `Low` 로 평가한다.
+`claimFees` 프론트 러닝으로 일부 사용자의 수수료 보상이 일시적으로 왜곡될 수 있지만, 이는 개별 사용자에게 제한적으로 발생하며 시스템 전체의 안정성이나 운영에는 큰 영향을 미치지 않기 때문에 `Low` 로 평가한다.
 
 #### 가이드라인
 

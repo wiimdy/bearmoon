@@ -238,7 +238,7 @@ contract StabilityRecovery {
 
 `Informational`
 
-사용자 편의성 측면에서의 위협이기에`Informational` 로 평가
+사용자 편의성 측면에서의 위협이기에 `Informational` 로 평가
 
 #### 가이드라인
 

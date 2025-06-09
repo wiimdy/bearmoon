@@ -324,7 +324,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 
 `Informational`&#x20;
 
-관리자가 수수료 비율을 갑자기 변경하거나 대량의 수수료를 인출할 경우 유동성 제공자에게 예기치 않은 손실이 발생할 수 있으나 시스템 전체의 보안에 직접적인 영향을 미치지 않는 운영상의 문제이기 때문에`Informational`로 평가한다.
+관리자가 수수료 비율을 갑자기 변경하거나 대량의 수수료를 인출할 경우 유동성 제공자에게 예기치 않은 손실이 발생할 수 있으나 시스템 전체의 보안에 직접적인 영향을 미치지 않는 운영상의 문제이기 때문에 `Informational`로 평가한다.
 
 #### 가이드라인
 
