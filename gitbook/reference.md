@@ -111,6 +111,8 @@ Loss = AssetValueAtPeg × DepegRatio
 
 #### TWAP 계산 N 블록 평균 일시적 가격 조작 방지를 위한 N 블록 평균 가격 기준 정산, 프로토콜별 블록 수 차이 고려
 
+(UniswapV3 기준으로 N값을 시간에 따라 유동적으로 지정하며 일반적으로 [30분 \~ 1시간 사이](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Pool.sol#L246)를 지정함)
+
 #### Curve LP 오라클 조작 방지 사례 LP 토큰 가격 조작 취약점과 대응 방법, 독립적 오라클 검증 필수
 
 #### Curve stableswap 수식 레퍼런스 x\*y=k 곡선과 자동 리밸런싱 메커니즘, 안정적 스왑 가격 유지 알고리즘

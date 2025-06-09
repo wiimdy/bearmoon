@@ -32,8 +32,9 @@ icon: rotate-reverse
 >   *   Balancer 기준 각 풀의 최근 N일 평균 거래량의 10% 또는 1만 달러 중 큰 값 이상을 최소 유동성으로 요구하며 이는 프로토콜 별 거버넌스에 따라 차이가 발생
 >
 >       $$\text{MinLiquidity} = \max\left( \text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha \right) \\ {\scriptsize ( \text{Example: } \text{MinLiquidity} = \max(10{,}000,\  150{,}000 \times 0.1 ) = 15{,}000)}$$
->   * Uniswap, KyberSwap 등의 AMM에서 슬리피지에 의한 시장 가격 왜곡을 방지하기 위해 단일 거래가 풀 잔고의 최대 10%를 넘지 못하도록 제한 (시장 상황에 따라 5 \~ 15% 범위 내에서 조정)\
->     $$\text{Price Impact}=1-\frac{x}{x+\Delta x} \\ {\scriptsize (\text{Example:}1-\frac{1}{1.1} \approx 0.0909 \approx 9.1 \% (x = 0.1))}$$
+>   * Uniswap, KyberSwap 등의 AMM에서 슬리피지에 의한 시장 가격 왜곡을 방지하기 위해 단일 거래가 풀 잔고의 정해진 비율을 넘지 못하도록 제한\
+>     (AMM 프로토콜의 리스크 모델에 따라 거래 규모 제한이 다를 수 있으며, 예시 코드 기준으로 30% 적용)\
+>     $$\text{Price Impact} = 1 - \frac{x}{x + \Delta x} \space \scriptsize (x = \text{Pool Balance}, \Delta x = \text{Asset Increment}) \\ \scriptsize (\text{Example: } 1 - \frac{1}{1 + 0.4286} \approx 0.3 \approx 30\%)$$
 
 #### Best Practice
 
@@ -83,7 +84,7 @@ LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자�
 #### 가이드라인
 
 > * **정확한 가치 계산:**
->   * Chainlink, Uniswap Twap 등 신뢰할 수 있는 오라클에서 각 토큰의 현재 시장 가격 실시간 반영하여 최소 1분 \~ 최대 3분 이내로 갱신된 데이터만 사용하며, 참고하는 오라클 간 가격 편차가 1.5% 이상이면 추가 검증
+>   * Chainlink, Uniswap Twap 등 신뢰할 수 있는 오라클에서 각 토큰의 현재 시장 가격 실시간 반영하여 최소 1분 \~ 최대 3분 이내로 갱신된 데이터만 사용하며, 참고하는 오라클 간 가격 편차가 일정 비율 이상(Ex: [Chainlink - 0.5% \~ 2% 이내](https://docs.chain.link/chainlink-nodes/oracle-jobs/all-jobs#spec-format-2))이면 추가 검증
 >   *   토큰별 유동성 비율을 곱해 가가중 평균 가격 계산 시 유동성 비중 적용
 >
 >       $$\text{Pool Value} = (\text{tokenA}_amount \times \text{priceA}) + (\text{tokenB}_amount \times \text{priceB})$$
@@ -91,13 +92,12 @@ LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자�
 > * **수치 정밀도 보장:**
 >   * SafeMath, FixedPointMathLib 등과 같은 고정소수점 연산 라이브러리 필수 사용하여 최소 18자리의 소수점 연산 정밀도 사용
 >   * 연산 중간값을 고정소수점 단위로 변환 후 사용하여 중간 [계산 결과](../../reference.md#lp-18-lp-0.1)의 정밀도가 1e18 미만으로 떨어지지 않도록 검증 및 유지
->   * 덧셈/곱셈 순서를 바꿔 작은 값이 먼저 반올림 되는것을 방지하기 위해 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산 순서 최적화
+>   * 덧셈/곱셈 순서를 최적화하여 큰 수부터 연산하고 마지막에 나누기 적용하는 방식으로 연산하며, SafeMath, FixedPointMathLib 등의 수치 정밀도를 보장하는 수식 연산 모듈을 사용
 > * **실시간 검증:**
 >   *   아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교
 >
->       $$\text{LP Total Supply} \times \text{Current LP Token Vaule}  \approx \text{LP Pool TVL}$$
+>       $$\text{LP Total Supply} \times \text{Current LP Token Value}  \approx \text{LP Pool TVL}$$
 >   * 유동성 추가 트랜잭션 실행 직후 계산된 발행 예정량과 실제 발행 LP 토큰 수량이 일치하는지 확인
->   * Uniswap 등의 기존 DeFi 서비스와 동일하게 LP 토큰 가치와 풀 자산 가치의 편차가 0.1% 이상으로 편차 임계값 초과 시 계산 로직 재검증
 
 #### Best Practice
 
@@ -129,9 +129,10 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 #### 가이드라인
 
 > * **최소 유동성 검증:**
->   *   유동성 제거 전 풀별 절대적 최소 유동성 임계값을 아래와 같이 스마트 컨트랙트에 적용하여 검증
+>   *   유동성 제거 전 풀별 최소 유동성 임계값을 아래와 같이 스마트 컨트랙트에 적용하여 검증\
+>       (⍺ 값은 풀의 불균형을 유발하는 행위에 대해 높은 비율의 페널티를 발생시키기 위해 사용하는 계수로 [Curve Finance 기준 10 \*\* 6 으로 설정](https://github.com/curvefi/curve-contract/blob/574f44027d089de0eac765f5a74ea5ae96aba968/contracts/pools/3pool/StableSwap3Pool.vy#L87))
 >
->       $$\text{MinLiquidity} = \max(\text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha) \\ {\scriptsize (\text{Pool Vaule}_\text {after removal} \geq \text{MinLiquidity})}$$
+>       $$\text{MinLiquidity} = \max\left(\text{BaseAmount},\ \text{AvgVolume}_{\text{N Days}} \times \alpha\right) \\ \scriptsize (\text{Pool Value}_\text{after removal} \geq \text{MinLiquidity})$$
 >   *   풀 내 각 토큰의 잔고 x 시장 가격의 합이 일정 수준 이하로 떨어지면 가격 조작/MEV 공격에 취약해지므로 유동성 제거 시점의 오라클 가격 기준으로 토큰 가치 기준 합산 후 임계값 이상인지 실시간 검증
 >
 >       $$\text{Pool Value} = \sum_{i=1}^{n} (\text{Token}_i\, \text{Balance} \times \text{Token}_i\, \text{Price}) \\ {\scriptsize (\text{Pool Vaule}_\text {after removal} \geq \text{MinLiquidity})}$$
@@ -141,14 +142,16 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 >       $$\text{Remove Value} = \text{Liquidity Amount} \times \text{Price}_{\text{request}}$$
 >   *   유동성 제거 시, 최근 N 블록의 평균 가격(TWAP)을 정산 기준으로 활용하여 [일시적 가격 조작방지](../../reference.md#twap-n-n)
 >
->       $$\text{TWAP} = \frac{1}{N} \sum_{j=1}^{N} \text{Price}_{\text{block }j} \space {\scriptsize (N= \text{Block Number})}$$
+>       $$\text{TWAP} = \frac{1}{N}\Sigma^{N}_{j=1} \text{Price}_{\text{block }j} \space \scriptsize (N=\text{Block Number})$$
 >   *   Curve, Balancer 등과 같이 프로토콜 레벨에서 유동성 제공 후 LP 토큰 수령 시 [최소 보유 기간](../../reference.md#twap-lp-mev)이 지나야만 유동성 제거가 가능하도록 조건 추가
 >
 >       $$(\text{Example: } \text{Current Time} - \text{LP Mint Time} \geq \text{Min Hold Period})$$
 
 #### Best Practice
 
-[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)&#x20;
+
+불변량 비율 제한은 프로토콜 리스크 모델에 따라 달라질 수 있으며, 아래의 코드는 Balancer의 가중치 불변량 공식에 따른 최대/최소 불변량 제한을 명시한 코드임
 
 <pre class="language-solidity"><code class="lang-solidity">// <a data-footnote-ref href="#user-content-fn-1">최대 300% 불변량 증가 제한</a>
 uint256 internal constant _MAX_INVARIANT_RATIO = 3e18;
@@ -173,15 +176,15 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 > * **자동 리밸런싱 메커니즘**
 >   *   Uniswap, Curve 등의 AMM 서비스와 같이 유동성 풀 내 자산 가치 비율 유지를 위한 목표 비율 대비 편차 [임계값 설정](../../reference.md#undefined)하여 초과 시 리밸런싱을 트리거 하도록 실시
 >
->       $$\text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A + \text{Value}_B} \\ {\scriptsize (|\text{Ratio}_A - \text{Target Ratio}_A| > \text{Threshold} \implies \text{Rebalance Trigger})}$$
+>       $$\text{Example: } \text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A+\text{Value}_B}, \quad \text{Threshold} \approx \frac{C_{gas} + C_{swap}}{\text{Value}_A + Value_B} \\ \scriptsize (|\text{Ratio}_A-\text{Target Ratio}_A| > \text{Threshold} \Rightarrow \text{Rebalance Trigger}) \\ \scriptsize C_{gas}\text{: 리밸런싱 트랜잭션을 실행하는 데 필요한 네트워크 가스 비용} \\ \scriptsize C_{swap}\text{: 유동성 풀에 지불하는 스왑 수수료} \\  \scriptsize \text{Value}_A + \text{Value}_B\text{: 풀에 예치된 자산 A와 B의 총 시장가치}$$
 >   * Uniswap의 [x\*y=k ](../../reference.md#curve-stableswap-x-y-k)곡선과 같이 편차 발생 시 스마트 컨트랙트에서 시 자동 리밸런싱하는 트리거를 제공하여 가격 균형 회복 유도
 > * **불균형 모니터링**
 >   * 기존 DEX 서비스와 유사하게 풀내 자산 비율, TVL 등의 주요 지표를 실시간 대시보드에서 추적 및 계산하는 기능 제공 필요
 >   * 운영하는 유동성 풀 비율이 목표치를 크게 벗어날 경우 편차 단계별 경고 시스템을 통해 관리자가 즉시 대응할 수 있는 경고 시스템 구축
 > * **자동 스왑 처리**
->   *   Curve, Balancer 등과 같이 단일 토큰으로 유동성 공급 시 자동으로 풀의 비율에 맞게 스왑 후 유동성 공급하여 풀 불균형, 가격 왜곡, 유동성 고갈을 방지
+>   *   Curve, Balancer 등과 같이 단일 토큰으로 유동성 공급 시 자동으로 풀의 비율에 맞게 스왑 후 유동성 공급하여 풀 불균형, 가격 왜곡, 유동성 고갈을 방지하며 Balancer v1 기준 공식은 아래와 같음
 >
->       $$\text{Deposit Amount}_A \implies \text{Swap Portion} = \text{Amount}_A \times (1 - \text{Target Ratio}_A) \\ {\scriptsize \text{(Result: 각 토큰 비율이 목표치에 최대한 근접하도록 자동 스왑})}$$
+>       $$V = \Pi^{n}_{i=1}B_i^{W_i} \\ \scriptsize \text{Example: } V = (B_A^{W_A}) \times (B_A^{W_A}) \times (B_C^{W_C}) \quad (n = 3) \\ (B_{A, B, C} : \text{Token}_{A,B,C}\space\text{ Balances}) \\ (W_{A, B, C}: \text{Token}_{A,B,C}\space\text{Weights})$$
 >
 >
 
@@ -209,7 +212,8 @@ function addLiquiditySingle(
     // LP토큰 발행을 위한 토큰 양 계산
     (amount0, amount1, mintAmount) = island.getMintAmounts(token0Balance, token1Balance);
     require(mintAmount >= amountSharesMin, "Staking: below min share amount");
-
+		
+    // 프로토콜별로 슬리피지 조건이 다르며, Kodiak 기준으로 10000 BPS (100%) 로 구현되어 있음.
     if (swapData.zeroForOne) require(amount1 >= token1Balance * (10000 - maxStakingSlippageBPS) / 10000, "Staking Slippage: below min amounts");
     else require(amount0 >= token0Balance * (10000 - maxStakingSlippageBPS) / 10000, "Staking Slippage: below min amounts");
 
@@ -240,7 +244,8 @@ function addLiquiditySingle(
 #### 가이드라인
 
 > * **슬리피지 허용 한도 설정 및 검증:**
->   * Uniswap, SushiSwap 등의 주요 DEX와 같이 사용자가 직접 슬리피지 한도를 입력하도록 유도하여 거래 전 최대 슬리피지 임계값 사전 정의하고 한도 초과 시 자동 취소
+>   * Uniswap, SushiSwap 등의 주요 DEX와 같이 사용자가 직접 슬리피지 한도를 입력하도록 유도하여 거래 전 최대 슬리피지 임계값 사전 정의하고 한도 초과 시 자동 취소\
+>     (Uniswap의 경우 swap 과정에서 사용자가 UI 상에서 슬리피지 비율을 직접 지정할 수 있음)
 >   *   사용자가 입력한 최소 수량과 실제 계산된 최소 아웃풋이 일치하는지 [검증하기 위해 수식](../../reference.md#undefined-1)을 활용하여 실제 지급량 확인 (프로토콜에 따라 수식 종류가 다를 수 있음)
 >
 >       $${\scriptsize (\text{Example: }\text{Minimum Output} = \text{Input Amount} \times (1 - \text{Slippage Tolerance}))}$$
@@ -249,7 +254,9 @@ function addLiquiditySingle(
 >   * [1inch](../../reference.md#id-1inch-mev) 네트워크 등의 DEX와 동일하게 여러 DEX / 유동성 풀에 대형 거래를 분할하여 슬리피지를 최소화하고 각  거래별 슬리피지 검증 실시
 >   *   플래시론/MEV 공격 방지, 시장 안정성 확보를 위해 각 분할 거래를 서로 다른 블록에 실행하도록 제한하기 위해 분할 거래 간 최소 블록 간격 설정
 >
->       $$\scriptsize {(\text(Example: \text{Total Slippage} = 1 - \prod_{i=1}^{n} (1 - \text{Slippage}_i)) \space (n = \text{BlockNum})}$$
+>       (UniswapV3 기준으로 N값을 시간에 따라 유동적으로 지정하며 일반적으로 [30분 \~ 1시간](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Pool.sol#L246C17-L246C28) 사이를 지정함)
+>
+>       $$\scriptsize {\text(Example: \text{Total Slippage} = 1 - \prod_{i=1}^{n} (1 - \text{Slippage}_i)) \space (n = \text{BlockNum})}$$
 > * **실시간 가격 모니터링 및 검증:**
 >   * DEX Screener, Aggregator 등과 같이 거래 실행 직전 오라클/풀 가격 재조회 및 가격 변동 임계값 초과 시 재계산 또는 예외처리 실시
 >   * Chainlink, Band 등의 여러 오라클에서 가격을 받아 다중 가격 소스 활용 및 교차 검증하고 편차가 크면 거래 취소 또는 대체 소스 전환
@@ -264,6 +271,8 @@ function addLiquiditySingle(
 ```solidity
 // 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
 // 풀 안정성 & 과도하게 큰 거래로 인한 가격변동 방지
+// 스왑 한도는 프로토콜 별로 프로토콜별 리스크 모델에 따라 다르며
+// Balancer의 경우 0.0001% ~ 10%로 사용
 
 uint256 internal constant _MAX_IN_RATIO = 0.3e18;
 uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
@@ -271,8 +280,9 @@ uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
 _require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
 // ... 중략 ...
 _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
-
 ```
+
+\[[Balancer 스왑 한도 출처](https://docs.balancer.fi/concepts/vault/swap-fee.html#setting-a-static-swap-fee)]
 
 [`KodiakIslandWithRouter.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol#L68-L93)
 
@@ -329,7 +339,7 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 #### 가이드라인
 
 > * **자동화된 수수료 관리:**
->   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 [자동 수집 트리거](../../reference.md#undefined-2)되도록 프로토콜 레벨에서 처리
+>   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 [자동 수집 트리거](https://app.gitbook.com/o/paLYLYbq0LaQ4bE9L5Bz/s/YP3bdzxjL3dDtiZZXw1l/~/changes/370/reference#undefined-2)되도록 프로토콜 레벨에서 처리
 >
 >       $$\scriptsize (\text{Example: AccumulatedFees} \geq \text{Threshold})$$
 >   *   Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지\
