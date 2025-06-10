@@ -24,8 +24,6 @@ icon: plane-arrival
 >
 >     *   Recovery Mode에서 담보 상환 제한
 >
->
->
 >         {% code overflow="wrap" %}
 >         ```solidity
 >         function _requireValidAdjustmentInCurrentMode(...) {...
@@ -50,8 +48,6 @@ icon: plane-arrival
 >
 > * **Dynamic Risk Parameters**
 >   *   recoveryMode 시 청산 기준 하향 조정 메커니즘
->
->
 >
 >       {% code overflow="wrap" %}
 >       ```solidity
@@ -100,8 +96,6 @@ icon: plane-arrival
 
 ***
 
-
-
 ### 위협 2: [ERC-4626 인플레이션](../../reference.md#erc-4626) 공격
 
 공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다. 유사한 [과거 사례](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)도 존재한다.
@@ -124,7 +118,7 @@ icon: plane-arrival
 
 #### Best Practice
 
-#### [`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Beraborrow/src/core/LiquidStabilityPool.sol#L131-L134)&#x20;
+[`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Beraborrow/src/core/LiquidStabilityPool.sol#L131-L134)&#x20;
 
 ```solidity
 modifier whenNotBootstrapPeriod() {

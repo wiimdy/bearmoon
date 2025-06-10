@@ -18,7 +18,7 @@ layout:
 
 # dApp 보안 가이드라인: 체이닝
 
-<table><thead><tr><th width="595">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#id-1-dex-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm.sol">#id-2-honey-permissionlesspsm.sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="595">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#id-1-dex-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm.sol">#id-2-honey-permissionlesspsm.sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="chain.md#id-4-dex">#id-4-dex</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: DEX 풀 불균형 연쇄청산으로 인한 ERC-4626 인플레이션 공격
 
@@ -434,3 +434,52 @@ function isCrisisCondition() public view returns (bool, string memory) {
     (Recovery Mode 진입점 출처: [beraborrow.gitbook.io](https://beraborrow.gitbook.io/docs/borrowing/collateral-ratio-and-liquidation))
 
 > **1 블록 공격비용 $128 K ↔︎ 잠재 부채 $883 K (≈ 6.5x 레버리지)**
+
+#### 영향도
+
+`Information`
+
+DEX 풀 불균형 → 담보 과대평가·과소평가 → 연쇄 청산 체이닝 공격은 단일 풀 조작으로도 Beraborrow·Infrared·PoL 인센티브 라인까지 도미노처럼 흔드는 시스템 위험이므로 실제 공격 발생 시 위험하나, 현재 베라체인의 대출프로토콜인 Beraborrow에서는 해당 위협을 인지하고 단일 블록 오라클 가격 피드를 반영하지 않으며 방어했으므로 `Informational`로 선정하였다.
+
+* NECT 공급·Stability Pool 건전성 동시에 압박
+* Infrared iBGT, PoL 보상, Kodiak TVL이 연결돼 있어 Berachain 핵심 유동성에 전이 가능
+
+#### 가이드라인
+
+> * **오라클·가격 입력**
+>   * Chainlink + RedStone (+30 min TWAP) 편차 > 1 % 시 담보 예치·차입 자동 중단 • 1 블록 ±1 % 이상 변동 시 `priceDeviationCircuitBreaker()` 발동
+> * **차입 한도**
+>   * TVL ≤ $10 M LP의 총 부채 상한 = TVL × 30 % • 담보 1 TX당 NECT 민트량 ≤ 현재 공급량 × 0.5 %
+> * **Stability Pool**
+>   * 위험 LP TVL의 ≥ 40 % 규모로 NECT 예치 유지 • 부족 시 sNECT 발행·Back-stop DAO 가동
+> *   **실시간 모니터링**
+>
+>     * DEX 가격 편차·Stability Pool 잔액을 Dune/Superset 대시보드로 스트리밍 • 대량 청산 트랜잭션 발생 시 LSP 인출 1-블록 지연 & 경고
+>
+>
+>
+>     #### 파라미터·공식
+>
+>     *   **필요 자본**
+>
+>         ΔWBERA ≈ _W_ (√1.10 – 1) → **50 K WBERA ≈ $128 K**
+>     *   **차입 한도**
+>
+>         Borrowable = Collateral / MCR = $1 M / 1.20 = **$833 K**
+>     *   **청산 임계값**
+>
+>         ICR < 120 % ⇒ Liquidate → SP (or Redistribute)
+
+#### Best Practice
+
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L37-L44)
+
+```solidity
+// 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
+uint256 internal constant _MAX_IN_RATIO = 0.3e18;
+uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
+// ... 중략 ...
+_require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
+// ... 중략 ...
+_require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
+```
