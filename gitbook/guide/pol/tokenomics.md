@@ -4,7 +4,7 @@ icon: coins
 
 # PoL 보안 가이드라인: 토크노믹스
 
-<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3-boost-bgt">#id-3-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-apr">#id-5-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-claimfees">#id-6-claimfees</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="595.53515625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3-lsd-boost-bgt">#id-3-lsd-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-apr">#id-5-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-claimfees">#id-6-claimfees</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: BGT 리딤 시 네이티브 토큰 부족으로 인한 유동성 위기
 
@@ -552,9 +552,9 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 
 ***
 
-### 위협 3: 유동성 공급자들의 Boost 담합으로 인한 과도한 BGT 인플레이션
+### 위협 3: 상위 LSD와 벨리데이터의 Boost 담합으로 인한 보상 독점, BGT 인플레이션
 
-상위 LSP와 벨리데이터 소수가 담합해 BGT 부스팅을 독점하면, BGT 인플레이션이 급격히 증가하고 BGT의 소유와 보상이 극소수에게 집중되는 구조가 현실화될 수 있다.
+상위 LSD와 벨리데이터 소수가 담합해 BGT 부스팅을 독점하면, BGT 인플레이션이 급격히 증가하고 BGT의 소유와 보상이 극소수에게 집중되는 구조가 현실화될 수 있다.
 
 #### 영향도
 
