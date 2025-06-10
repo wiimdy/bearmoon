@@ -18,7 +18,7 @@ layout:
 
 # dApp 보안 가이드라인: 체이닝
 
-<table><thead><tr><th width="595">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#id-1-dex-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm.sol">#id-2-honey-permissionlesspsm.sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="595">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#id-1-dex-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm.sol">#id-2-honey-permissionlesspsm.sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### 위협 1: DEX 풀 불균형 연쇄청산으로 인한 ERC-4626 인플레이션 공격
 
@@ -402,3 +402,35 @@ function isCrisisCondition() public view returns (bool, string memory) {
 }
 ```
 {% endcode %}
+
+***
+
+### 위협 4: DEX 풀 불균형으로 인한 담보 과대평가・연쇄 청산 공격
+
+베라체인의 PoL 구조 위에 구축된 Beraborrow는 iBGT·iBERA(Infrared)와 Kodiak·BEX LP 토큰을 담보로 허용해 유동성 풀과 대출 시스템이 강하게 얽혀 있다.
+
+공격자는 풀 TVL이 낮고 가격 충격에 민감한 LP에서 대량 스왑을 반복해 리저브 비율을 왜곡시켜 LP가격을 인위적으로 급등·급락시킬 수 있다.
+
+가격 급등 구간에선 동일 LP를 담보로 예치해 최소담보비율(MCR)을 여유 있게 충족하고 대량의 NECT를 민팅한 뒤, 곧바로 가격을 원위치로 되돌려 담보가치를 무너뜨려 연쇄 청산을 유도한다. 반대로 가격을 먼저 급락시키면 다른 이용자의 LP 담보 ICR이 MCR 아래로 떨어지면서 대규모 청산·Recovery Mode가 촉발돼 Stability Pool NECT 잔액이 고갈되고 추가 차입·상환 기능까지 중단될 수 있다.
+
+#### **공격 시나리오**
+
+1.  풀 펌핑 단계
+
+    공격자는 iBGT/WBERA v3(유동성 약 $6.3 M)에 WBERA ≈ 50 K(약 $128 K)를 일시 투입해 가격을 +10 % 올린다.
+
+    (iBGT/WBERA v3 유동성 출처: [dexscreener.com](https://dexscreener.com/berachain/0x12bf773f18cec56f14e7cb91d82984ef5a3148ee))
+2.  과대 차입 단계
+
+    인위적으로 가치가 올려진 LP를 담보로 $1 M 상당을 예치하여 Beraborrow MCR 120 % 기준 $833 K NECT를 차입한다.
+
+    (Beraborrow MCR 데이터 출처: [beraborrow.gitbook.io](https://beraborrow.gitbook.io/docs/borrowing/collateral-ratio-and-liquidation))
+3.  가격 복귀・청산 트리거
+
+    공격 자금을 회수해 풀 가격을 원위치(-10%)로 되돌리면 담보 가치가 $900 K로 축소하여 ICR이 108 %로 줄어들어 MCR 120%보다 작아지면서 즉시 청산당한다.
+4.  연쇄 청산・Recovery Mode
+
+    대량 청산이 Stability Pool NECT 잔액을 잠식하면 Redistribute 경로가 발동하여 다른 Den 부채로 전가되고, TCR은 CCR(=120 %) 미만으로 추락해 Recovery Mode에 진입한다.\
+    (Recovery Mode 진입점 출처: [beraborrow.gitbook.io](https://beraborrow.gitbook.io/docs/borrowing/collateral-ratio-and-liquidation))
+
+> **1 블록 공격비용 $128 K ↔︎ 잠재 부채 $883 K (≈ 6.5x 레버리지)**
