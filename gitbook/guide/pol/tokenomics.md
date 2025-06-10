@@ -552,7 +552,7 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 
 ***
 
-### 위협 3: 상위 LSD와 벨리데이터의 Boost 담합으로 인한 보상 독점, BGT 인플레이션
+### 위협 3: LSD와 벨리데이터의 Boost 담합으로 인한 보상 독점, BGT 인플레이션
 
 상위 LSD와 벨리데이터 소수가 담합해 BGT 부스팅을 독점하면, BGT 인플레이션이 급격히 증가하고 BGT의 소유와 보상이 극소수에게 집중되는 구조가 현실화될 수 있다.
 
