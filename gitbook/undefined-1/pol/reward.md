@@ -12,7 +12,7 @@ icon: sack-dollar
 
 #### 영향도
 
-`Medium`&#x20;
+`Medium`
 
 재진입 공격 성공 시 특정 사용자가 정당한 보상 이상을 중복으로 인출하여 프로토콜 또는 다른 사용자들에게 직접적인 재정적 손실을 야기할 수 있기 때문에 `Medium`으로 평가한다.
 
@@ -21,9 +21,9 @@ icon: sack-dollar
 > * **체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수**
 > * [**ReentrantGuard**](../../reference.md#oz-reentrancyguard-spec) **사용**
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L336)
+[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L336)
 
 <pre class="language-solidity"><code class="lang-solidity">function <a data-footnote-ref href="#user-content-fn-1">getReward</a>(
     address account,
@@ -39,7 +39,7 @@ icon: sack-dollar
 }
 </code></pre>
 
-&#x20;[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L139)
+[`StakingRewards.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/base/StakingRewards.sol#L139)
 
 ```solidity
 function _getReward(address account, address recipient)
@@ -73,21 +73,18 @@ function _getReward(address account, address recipient)
 >   * **인센티브 토큰 추가 권한:** Factory Owner
 >   * **인센티브 토큰 제거 권한:** Factory Vault Manager
 >   * 현재 인센티브 토큰 최대 3개 등록 가능
-> *   **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
+> * **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
+>   *   인센티브 토큰 추가 시 `minIncentive > 0` 검증 진행
 >
->     * 인센티브 토큰 추가 시 `minIncentive > 0`  검증 진행
->
->     {% code overflow="wrap" %}
->     ```solidity
->     // validate `minIncentiveRate` value
->     if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
->     if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
->     ```
->     {% endcode %}
->
->     * 인센티브 비율 변경시 최소 비율보다 높게 설정
->
->     {% code overflow="wrap" %}
+>       {% code overflow="wrap" %}
+>       ```solidity
+>       // validate `minIncentiveRate` value
+>       if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
+>       if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
+>       ```
+>       {% endcode %}
+>   * 인센티브 비율 변경시 최소 비율보다 높게 설정
+>   * {% code overflow="wrap" %}
 >     ```solidity
 >     // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
 >     if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
@@ -96,14 +93,13 @@ function _getReward(address account, address recipient)
 >     if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
 >     ```
 >     {% endcode %}
->
->     * 현재 incentive manager 권한
->       * `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
+>   * 현재 incentive manager 권한
+>     * `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
 > * **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
 
-#### Best Practice&#x20;
+#### Best Practice
 
-[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L164-L174)&#x20;
+[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L164-L174)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -150,7 +146,7 @@ function whitelistIncentiveToken(
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 ERC20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션에서 의도치 않은 토큰 전송 실패, 수량 불일치 등을 유발하여 부분적인 자산 손실이나 기능 장애를 초래할 수 있기 때문에 `Low`로 평가한다.
 
@@ -166,9 +162,9 @@ ERC20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션�
 >   * 지원 토큰 사전 심사 및 승인 절차
 >   * 악성 토큰 블랙리스트 운영 및 실시간 업데이트
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
+[`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -207,7 +203,7 @@ function addIncentive(
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다는 일시적인 기능의 정지 가능성 때문에 `Low`로 평가되지만, 업그레이드 가능한 컨트랙트의 경우 재초기화 방지가 중요하며, Parity Wallet과 같은 사례에서 보았듯이 심각한 결과를 초래할 수 있다.
 
@@ -217,11 +213,11 @@ function addIncentive(
 > * **초기 설정 매개변수들의 합리적 범위 검증**
 > * **초기 예치 루트 설정 등 초기 상태의 무결성 보장**
 > * **초기화 함수의 불변성 보장 및 재초기화 방지 메커니즘(\_\_disableInitializers() 사용)**
-> * **주요 파라미터 변경을 위한 롤백 메커니즘**&#x20;
+> * **주요 파라미터 변경을 위한 롤백 메커니즘**
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`BlockRewardController.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BlockRewardController.sol#L71-L88)&#x20;
+[`BlockRewardController.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BlockRewardController.sol#L71-L88)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -249,7 +245,7 @@ function initialize(
 ```
 {% endcode %}
 
-&#x20;[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L117-L123)
+[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L117-L123)
 
 ```solidity
 function initialize(address _owner) external initializer {
@@ -268,21 +264,21 @@ function initialize(address _owner) external initializer {
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 **`onlyOperatorOrUser`** modifier로 예치자 혹은 대리인만 수령 가능해 발생 가능성이 낮아 `Low`로 평가한다.
 
 #### 가이드라인
 
 > * **관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅**
-> * **`onlyOwner`, `onlyDistributor`등 modifier를 명확히 사용**&#x20;
+> * **`onlyOwner`, `onlyDistributor`등 modifier를 명확히 사용**
 > * **각 주소, 역할 또는 컴포넌트에 최소 권한 원칙 준수**
 
-<table><thead><tr><th width="135.546875" align="center">Role</th><th width="556.265625">Responsibilities &#x26; Permissions</th><th data-hidden>관련 함수 예시 (Example Functions)</th></tr></thead><tbody><tr><td align="center">Owner</td><td>- 컨트랙트의 전체 소유권 보유<br>- Admin 역할 임명 및 해임<br>- 컨트랙트의 가장 핵심적인 파라미터 설정 (예: 인센트브 토큰 추가, 일시 중지/재개 권한 위임 등)<br>- 컨트랙트 업그레이드 실행 (프록시 패턴 사용 시)</td><td>transferOwnership(address newOwner), addAdmin(address admin), removeAdmin(address admin), setProtocolFee(uint256 fee), pause(), unpause(), upgradeTo(address newImplementation)</td></tr><tr><td align="center">Operator </td><td>- 일상적인 시스템 운영 작업 수행 (Owner 보다 제한된, 특정 기능 실행 권한)<br>- 주기적인 프로세스 실행 (예: 보상 분배 로직 트리거, 오라클 가격 정보 업데이트)<br>- 시스템 상태 모니터링 및 관련 데이터 기록</td><td>triggerRewardDistribution(), updatePriceOracle(address asset, uint256 price), recordSystemMetrics()</td></tr><tr><td align="center">User </td><td>- 프로토콜의 핵심 기능 사용 (예: 자산 예치, 스왑, 대출, 상환)<br>- 자신의 계정 관련 정보 조회 및 관리 (예: 잔액 확인, 보상 청구)<br>- 거버넌스 참여 (토큰 홀더의 경우, 투표 등)</td><td>deposit(address asset, uint256 amount), withdraw(address asset, uint256 amount), claimRewards(), getBalance(address user, address asset), voteOnProposal(uint256 proposalId, bool support)</td></tr></tbody></table>
+<table><thead><tr><th width="135.546875" align="center">Role</th><th width="556.265625">Responsibilities &#x26; Permissions</th><th data-hidden>관련 함수 예시 (Example Functions)</th></tr></thead><tbody><tr><td align="center">Owner</td><td>- 컨트랙트의 전체 소유권 보유<br>- Admin 역할 임명 및 해임<br>- 컨트랙트의 가장 핵심적인 파라미터 설정 (예: 인센트브 토큰 추가, 일시 중지/재개 권한 위임 등)<br>- 컨트랙트 업그레이드 실행 (프록시 패턴 사용 시)</td><td>transferOwnership(address newOwner), addAdmin(address admin), removeAdmin(address admin), setProtocolFee(uint256 fee), pause(), unpause(), upgradeTo(address newImplementation)</td></tr><tr><td align="center">Operator</td><td>- 일상적인 시스템 운영 작업 수행 (Owner 보다 제한된, 특정 기능 실행 권한)<br>- 주기적인 프로세스 실행 (예: 보상 분배 로직 트리거, 오라클 가격 정보 업데이트)<br>- 시스템 상태 모니터링 및 관련 데이터 기록</td><td>triggerRewardDistribution(), updatePriceOracle(address asset, uint256 price), recordSystemMetrics()</td></tr><tr><td align="center">User</td><td>- 프로토콜의 핵심 기능 사용 (예: 자산 예치, 스왑, 대출, 상환)<br>- 자신의 계정 관련 정보 조회 및 관리 (예: 잔액 확인, 보상 청구)<br>- 거버넌스 참여 (토큰 홀더의 경우, 투표 등)</td><td>deposit(address asset, uint256 amount), withdraw(address asset, uint256 amount), claimRewards(), getBalance(address user, address asset), voteOnProposal(uint256 proposalId, bool support)</td></tr></tbody></table>
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L373)
+[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L373)
 
 ```solidity
 function addIncentive(
@@ -329,14 +325,14 @@ function getReward(
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 적게 지급될 수 있으나, 대부분의 금융 시스템에서의 허용(0.01%) 되는 미세한 차이고 의도적인 탈취가 아니기 때문에 `Low`로 평가한다.
 
 #### 가이드라인
 
 > * **보상 수령 금액의 정확성을 검증하는 로직 추가**
->   * **`_verifyRewardCalculation`**  함수를 통해 계산 결과를 역연산하여 보상 금액 검증
+>   * **`_verifyRewardCalculation`** 함수를 통해 계산 결과를 역연산하여 보상 금액 검증
 >   * [오차 범위 0.01%](../../reference.md#id-0.01)로 설정 (대부분 금융에서 사용하는 오차 범위)
 > * **FixedPointMathLib 사용 권장**
 >   * `mulDiv`와 같이 정밀도를 최대한 보존하면서 안전하게 곱셈과 나눗셈을 수행
@@ -350,7 +346,7 @@ function getReward(
 >     }
 >     ```
 
-#### Best Practice&#x20;
+#### Best Practice
 
 `커스텀 코드`
 
@@ -446,7 +442,7 @@ contract StakingRewards is ... {
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생할 수 있으나 totalsupply가 0이 될 발생 가능성이 낮아 `Low`로 평가한다.
 
@@ -454,7 +450,7 @@ contract StakingRewards is ... {
 
 > * **리워드 볼트 생성시 최소 LP 토큰 예치로 totalsupply가 0이 되는 것을 방지**
 
-#### Best Practice&#x20;
+#### Best Practice
 
 `커스텀 코드`
 
@@ -570,7 +566,7 @@ contract RewardVault is RewardVault {
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 잃게 된다. 하지만 관리자는 거버넌스에 의해 정해지기에 발생 가능성이 낮기 때문에 `Low`로 평가한다.
 
@@ -594,7 +590,7 @@ contract RewardVault is RewardVault {
 > * **보상 금고의 보상 구조 변경(토큰 추가/제거)은 사용자에게 사전 고지 및 명확한 UI 표시**
 >   * IncentiveTokenWhitelisted와 IncentiveTokenRemoved 이벤트를 읽어오는 봇을 만들어 변화가 생기면 프로토콜 사이트에 팝업 표시
 
-#### Best Practice&#x20;
+#### Best Practice
 
 `커스텀 코드`
 
