@@ -24,8 +24,8 @@ icon: honey-pot
 >   * **수정:** 기존 오라클에 대한 가중치 조정 시 최소 72시간 전 사전 공지 및 거버넌스 피드백 기간 필요
 >     * **72시간 사전공지:** 거버넌스 참여에 충분한 시간 확보
 >   * **삭제:** 오라클 피드 제거 시 대체 오라클 필요
->   * **긴급 중단:**&#x20;
->     * 권한자: 멀티시그 또는 거버넌스가 선출한 매니저로 제한&#x20;
+>   * **긴급 중단:**
+>     * 권한자: 멀티시그 또는 거버넌스가 선출한 매니저로 제한
 >     * 중단 후 처리: 및 24시간 내에 커뮤니티 공지 및 복구 계획 제출
 >     * 복구 절차: 거버넌스 승인 필요
 > * **오라클 이상 시 처리 로직 구체화**
@@ -46,7 +46,7 @@ icon: honey-pot
 
 #### Best Practice
 
-&#x20;[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -63,7 +63,7 @@ function isPegged(address asset) public view returns (bool) {
 ```
 {% endcode %}
 
-[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L163-L170)
 
 ```solidity
 // 오라클에서 최신 가격을 가져오도록 설계
@@ -77,7 +77,7 @@ function setMaxFeedDelay(uint256 maxTolerance) external {
 }
 ```
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 {% code overflow="wrap" %}
 ```solidity
@@ -146,7 +146,7 @@ contract EnhancedMultiOracleSystem {
 
 ### 위협 2: 지나치게 민감한 디페깅 기준 및 Basket 모드 활성화 조건 악용
 
-매우 낮은 수준의 가격 변동에도 디페깅으로 간주하는 기준은 사소한 시장 변동성에도 Basket 모드를 빈번하게 활성화시켜 사용자 경험을 저해할 수 있다.&#x20;
+매우 낮은 수준의 가격 변동에도 디페깅으로 간주하는 기준은 사소한 시장 변동성에도 Basket 모드를 빈번하게 활성화시켜 사용자 경험을 저해할 수 있다.
 
 또한, 공격자가 의도적으로 특정 구성 스테이블 코인의 미세한 디페깅을 유도하여 Basket 모드를 발동시키고 사용자가 예측하지 못한 자산 구성 비율로 민팅이나 리딤하도록 유도할 가능성이 존재한다.
 
@@ -169,7 +169,7 @@ contract EnhancedMultiOracleSystem {
 
 #### Best Practice
 
-[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)
 
 <pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">function isBasketModeEnabled(bool isMint) public view returns (bool) {
     if (forcedBasketMode) return true;
@@ -183,7 +183,7 @@ contract EnhancedMultiOracleSystem {
 }
 </code></pre>
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 {% code overflow="wrap" %}
 ```solidity
@@ -252,7 +252,7 @@ contract StabilityRecovery {
 
 #### Best Practice
 
-[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L368-L418)&#x20;
+[`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L368-L418)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -276,7 +276,7 @@ function redeem(address asset, uint256 honeyAmount, address receiver, bool expec
 ```
 {% endcode %}
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 <pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">// 상환 전 디페깅된 자산 포함 여부와 예상 손실을 미리 계산하여 사용자에게 경고하고 위험 인지 확인을 받는 사전 고지 시스템
 
@@ -338,9 +338,6 @@ function calculateLoss(address asset, uint256 honeyAmount) internal view returns
 }
 
 </code></pre>
-
-\
-
 
 [^1]: 다중 오라클 집계와 활성화된 오라클만 참조하는 페깅 상태 검증 로직, 신뢰성 있는 가격 판단
 

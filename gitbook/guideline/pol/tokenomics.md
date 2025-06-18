@@ -28,14 +28,12 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 >     * `_invariantCheck`를 통해 리딤 과정이 종료된 뒤 현재 BGT 총 발행량과 보유 네이티브 토큰 수량을 비교하여 충분한 양의 네이티브 토큰을 보유하고 있는지 검증
 >   *   체인 스펙 상 BERA 발행 설정
 >
->       {% code overflow="wrap" %}
 >       ```toml
 >       # Deneb1 value changes
 >       # BGT 토큰 컨트랙트 주소로 블록당 5.75 BERA 발행
 >       evm-inflation-address-deneb-one = "0x656b95E550C07a9ffe548bd4085c72418Ceb1dba"
 >       evm-inflation-per-block-deneb-one = 5_750_000_000
 >       ```
->       {% endcode %}
 >   * **초과 토큰 보유량 관리 및 적절한 버퍼 유지**
 >     * BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
 >       * BlockRewardController의 `computeReward` 함수에 boostPower로 100%를 입력하여 한 블록당 나올 수 있는 BGT 최대치를 계산
@@ -178,7 +176,6 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >     * 단순 Weight 구조체로 생성되었다고 보상을 할당 받을 수 있는것이 아님
 > *   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
 >
->     {% code overflow="wrap" %}
 >     ```solidity
 >     /// @notice The delay in blocks before a new reward allocation can go into effect.
 >     uint64 public rewardAllocationBlockDelay;
@@ -193,7 +190,6 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >             InvalidRewardAllocationWeights.selector.revertWith();
 >         }
 >     ```
->     {% endcode %}
 >
 >     * 보상 할당에 딜레이(약 2000블록)을 두어 보상 할당이 바로 반영되지 않도록 하고 각 할당마다 전체 보상의 100%를 모두 분배하도록 하여서 여러 트랜잭션을 이용해 보상을 나눠 분배하는 것을 방지\
 >
@@ -582,7 +578,6 @@ BGT 인플레이션과 보상 집중이 일부 소수에게 유리하게 작용�
 >       * RewardAllocation의 전체 합이 100%가 아니면 revert
 >       *   코드 근거: 위협 2의 코드 \_validateWeights 확인
 >
->           {% code overflow="wrap" %}
 >           ```solidity
 >           if (weight.percentageNumerator == 0 || weight.percentageNumerator > maxWeightPerVault) {
 >               InvalidWeight.selector.revertWith();
@@ -592,18 +587,15 @@ BGT 인플레이션과 보상 집중이 일부 소수에게 유리하게 작용�
 >           }
 >
 >           ```
->           {% endcode %}
 > * **보상 집중 한도 초과 시 자동 revert**
 >   * vault별 전체 할당 합계 추적
 >     * 모든 operator가 특정 vault에 할당한 전체 합계가 한도를 초과하면 해당 vault는 RewardAllocation에 포함 불가(큐잉 자체가 revert)
 >   *   코드 근거: 위협 2의 여러 운영자가 담합을 통해 특정 금고에 보상을 집중하는 상황 방지 부분 참고
 >
->       {% code overflow="wrap" %}
 >       ```solidity
 >       require(vaultTotalAllocations[vault] + newWeight <= VAULT_TOTAL_ALLOCATION_LIMIT, "Vault allocation limit exceeded");
 >
 >       ```
->       {% endcode %}
 > * **실시간 파라미터 조정 및 커뮤니티 감시**
 >   * BlockRewardController 파라미터, RewardAllocation 정책 등은 거버넌스/운영자만 변경 가능
 >     * BlockRewardController의 보상 파라미터 거버넌스 관리 참고

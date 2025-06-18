@@ -21,7 +21,6 @@ icon: plane-arrival
 > * [**연쇄반응**](../../reference.md#undefined-10) **방지 메커니즘**
 >   *   Recovery Mode에서 담보 상환 제한
 >
->       {% code overflow="wrap" %}
 >       ```solidity
 >       function _requireValidAdjustmentInCurrentMode(...) {...
 >            // recoveryMode에서 담보 상환 불가
@@ -40,14 +39,12 @@ icon: plane-arrival
 >       require(!isRecoveryMode, "BorrowerOps: Operation not permitted during Recovery Mode");
 >       }
 >       ```
->       {% endcode %}
 >
 >
 >
 > * **Dynamic Risk Parameters**
 >   *   recoveryMode 시 청산 기준 하향 조정 메커니즘
 >
->       {% code overflow="wrap" %}
 >       ```solidity
 >       function liquidateDens(..) {
 >
@@ -84,7 +81,6 @@ icon: plane-arrival
 >           denManagerValues.price
 >       );
 >       ```
->       {% endcode %}
 
 #### **Best practice**
 

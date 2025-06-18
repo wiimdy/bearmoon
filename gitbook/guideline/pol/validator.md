@@ -8,34 +8,32 @@ icon: user-check
 
 ### 위협 1: 블록 생성 보상 분배 시 검증자의 보상 중복 수령, 누락
 
-검증자가 블록 생성 보상을 실행 레이어에서 수령하므로 합의 레이어의 정보를 가져와야 한다. \
+검증자가 블록 생성 보상을 실행 레이어에서 수령하므로 합의 레이어의 정보를 가져와야 한다.\
 이 과정에서 정확하지 않는 정보 확인이 진행되면 블록 보상 제공 오류가 발생한다.
 
 #### 영향도
 
 `Low`
 
-검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나 Merkle root 검증 기법으로 공격 성공 가능성이 매우 낮기 때문에 `Low`로 평가한다.&#x20;
+검증자 보상 중복 수령 및 누락은 검증자의 손해를 초래하나 Merkle root 검증 기법으로 공격 성공 가능성이 매우 낮기 때문에 `Low`로 평가한다.
 
 #### 가이드 라인
 
 > * **동일 timestamp 중복 처리 방지 메커니즘 구현**
 >   * timestamp를 eip-4788의 [history\_buf\_length](../../reference.md#history_buf_length)로 mod 연산을 하여 `_processedTimestampsBuffer`에 삽입
->   * EIP-4788의 ring buffer 메커니즘에 따라 8191 슬롯([약 4.55시간, 2초 간격 기준](../../reference.md#id-4.55-8191-2)) 후 덮어씌워짐, 이는 보상 주기와 일치함&#x20;
+>   * EIP-4788의 ring buffer 메커니즘에 따라 8191 슬롯([약 4.55시간, 2초 간격 기준](../../reference.md#id-4.55-8191-2)) 후 덮어씌워짐, 이는 보상 주기와 일치함
 > *   **Beacon block root과 proposer index/pubkey 의 암호학적 검증**
 >
->     * &#x20;[`SSZ.verifyProof`](../../reference.md#ssz.verifyproof) 함수를 사용하여, 특정 타임스탬프의 비콘 루트를 기준으로 해당 제안자의 보상 자격을 검증
+>     * [`SSZ.verifyProof`](../../reference.md#ssz.verifyproof) 함수를 사용하여, 특정 타임스탬프의 비콘 루트를 기준으로 해당 제안자의 보상 자격을 검증
 >     * 검증 실패시 revert 발생
 >
->     {% code overflow="wrap" %}
 >     ```solidity
 >     if (!SSZ.verifyProof(proposerIndexProof, beaconBlockRoot, proposerIndexRoot, proposerIndexGIndex)) {
 >       InvalidProof.selector.revertWith();
 >     }
 >     ```
->     {% endcode %}
 
-#### Best Practice&#x20;
+#### Best Practice
 
 [`Distributor.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/Distributor.sol#L100-L121)
 
@@ -91,9 +89,9 @@ function _verifyProposerIndexInBeaconBlock(
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
-악의적 운영자로 인한 피해가 위임 자산의 직접적인 손실보다는 평판 저하 및 미래의 BGT 위임으로 수익 감소에 국한되기 때문에 `Low`로 평가한다.&#x20;
+악의적 운영자로 인한 피해가 위임 자산의 직접적인 손실보다는 평판 저하 및 미래의 BGT 위임으로 수익 감소에 국한되기 때문에 `Low`로 평가한다.
 
 #### 가이드라인
 
@@ -107,9 +105,9 @@ function _verifyProposerIndexInBeaconBlock(
 >   * 운영자에 대한 booster들의 판단이 진행 되도록 처음에는 보상 분배 권한만 부여 → unboost할 수 있는 시간(unboost delay = 2000 block)을 주어진 후 commission 변경 권한 부여
 > * **운영자 주소가 zero address로 적용되지 않도록 방지**
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`BeaconDeposit.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BeaconDeposit.sol#L84-L128)&#x20;
+[`BeaconDeposit.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BeaconDeposit.sol#L84-L128)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -146,11 +144,11 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 #### 영향도
 
-`Low`&#x20;
+`Low`
 
 [자발적 출금 로직 부재](../../reference.md#undefined-1)로 자금 동결되지만, 베라체인의 [ValidatorSetCap](../../reference.md#validatorsetcap)에 따라 강제 퇴출 시 회수 가능하며, 이는 자산 손실보다는 네트워크 안정성에 잠재적 영향을 미쳐 `Low`로 평가한다.
 
-#### 가이드라인&#x20;
+#### 가이드라인
 
 > * **예치, 인출 로직 추가 및 검증, 거버넌스를 통해 조정 가능한 출금 제한 및 잠금 기간 설정**
 >   *   **출금 대기 기간**
@@ -168,14 +166,11 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 >     * 호출자가 해당 출금 요청의 정당한 수령인인지
 >     * 출금 요청 상태가 READY\_FOR\_CLAIM인지
 >     * unlockTime이 실제로 지났는지
->   *   **출금 제한 및 출금 잠금 기간 고려 사항**
->
->       * 네트워크 안정성: 검증자가 갑자기 대량으로 이탈하여 네트워크 보안이 약화되는 것을 방지
->       * 유동성 관리: 프로토콜이 갑작스러운 유동성 유출에 대비하고 안정적으로 자금을 관리할 시간을 확보
->       * 의사결정 신중성: 검증자가 출금 결정을 내리기 전에 충분히 숙고할 시간을 제공
->       * 시장 변동성 대응: 급격한 시장 변동 시 패닉셀로 인한 연쇄적인 자금 이탈을 늦추는 효과
->
->
+>   * **출금 제한 및 출금 잠금 기간 고려 사항**
+>     * 네트워크 안정성: 검증자가 갑자기 대량으로 이탈하여 네트워크 보안이 약화되는 것을 방지
+>     * 유동성 관리: 프로토콜이 갑작스러운 유동성 유출에 대비하고 안정적으로 자금을 관리할 시간을 확보
+>     * 의사결정 신중성: 검증자가 출금 결정을 내리기 전에 충분히 숙고할 시간을 제공
+>     * 시장 변동성 대응: 급격한 시장 변동 시 패닉셀로 인한 연쇄적인 자금 이탈을 늦추는 효과
 > * **queue 시스템을 통한 단계별 출금 프로세스 구현**
 >   * **requestWithdrawal (검증자/사용자 호출):**
 >     * 검증자가 출금 요청 시, 해당 출금 요청액만큼 검증자의 예치금에서 즉시 차감하거나, 출금 대기 상태로 전환하여 추가적인 스테이킹 보상 계산에서 제외
@@ -209,7 +204,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 * Penalty\_Rate = Base\_Penalty\_Rate + (Time\_Remaining\_In\_Lock / Total\_Lock\_Period) \* Additional\_Penalty\_Factor
 {% endhint %}
 
-#### Best Practice&#x20;
+#### Best Practice
 
 {% code overflow="wrap" %}
 ```solidity
@@ -272,4 +267,3 @@ if (request.isEmergency) {
 }
 ```
 {% endcode %}
-
