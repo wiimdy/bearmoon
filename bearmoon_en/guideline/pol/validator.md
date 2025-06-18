@@ -6,7 +6,7 @@ icon: user-check
 
 <table><thead><tr><th width="609.89453125">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#threat-1-duplicate-or-missed-validator-rewards-during-block-reward-distribution">#threat-1-duplicate-or-missed-validator-rewards-during-block-reward-distribution</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#threat-2-exploitation-of-the-operator-change-process">#threat-2-exploitation-of-the-operator-change-process</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#threat-3-funds-frozen-until-validator-exits-cap-due-to-non-existent-withdrawal-logic">#threat-3-funds-frozen-until-validator-exits-cap-due-to-non-existent-withdrawal-logic</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
-### Threat 1: Duplicate or Missed Validator Rewards During Block Reward Distribution
+### Threat 1: Duplicate or Missed Validator Rewards During Block Reward Distribution <a href="#id-1" id="id-1"></a>
 
 Validators receive block creation rewards on the execution layer, so they must retrieve information from the consensus layer.\
 If incorrect information is verified during this process, block reward distribution errors can occur.
@@ -83,7 +83,7 @@ function _verifyProposerIndexInBeaconBlock(
 
 ***
 
-### Threat 2: Exploitation of the Operator Change Process
+### Threat 2: Exploitation of the Operator Change Process <a href="#id-2" id="id-2"></a>
 
 If the operator set by a validator is maliciously changed or their authority is hijacked, the BGT delegated to the validator could be managed improperly. This can lead to a loss of trust and reputation among delegators, resulting in a decrease in BGT delegation.
 
@@ -138,7 +138,7 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 
 ***
 
-### Threat 3: Funds Frozen Until Validator Exits Cap Due to Non-existent Withdrawal Logic
+### Threat 3: Funds Frozen Until Validator Exits Cap Due to Non-existent Withdrawal Logic <a href="#id-3" id="id-3"></a>
 
 Currently, Berachain does not have a logic for validators to voluntarily withdraw their deposited funds. Therefore, it is impossible to withdraw funds deposited on the chain in case of emergency or need.
 

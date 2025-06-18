@@ -6,7 +6,7 @@ icon: sack-dollar
 
 <table><thead><tr><th width="617.40625">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#threat-1-double-claiming-rewards-through-re-entrancy-attacks">#threat-1-double-claiming-rewards-through-re-entrancy-attacks</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#threat-2-manipulation-and-use-of-incentive-tokens-by-unauthorized-users">#threat-2-manipulation-and-use-of-incentive-tokens-by-unauthorized-users</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-3-threats-from-unverified-erc20-compliance-of-incentive-tokens">#threat-3-threats-from-unverified-erc20-compliance-of-incentive-tokens</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-4-system-errors-due-to-incorrect-configuration-during-contract-initialization">#threat-4-system-errors-due-to-incorrect-configuration-during-contract-initialization</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-5-unauthorized-reward-withdrawal-or-manipulation-due-to-incorrect-access-control">#threat-5-unauthorized-reward-withdrawal-or-manipulation-due-to-incorrect-access-control</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-6-cumulative-loss-of-user-rewards-due-to-precision-errors-in-division-operations-during-rewar">#threat-6-cumulative-loss-of-user-rewards-due-to-precision-errors-in-division-operations-during-rewar</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-7-double-accumulation-of-rewards-by-withdrawing-all-lp-tokens-and-calling-notifyrewardamount">#threat-7-double-accumulation-of-rewards-by-withdrawing-all-lp-tokens-and-calling-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-8-reward-suspension-due-to-normal-removal-of-an-incentive-token">#threat-8-reward-suspension-due-to-normal-removal-of-an-incentive-token</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
-### Threat 1: Double-claiming rewards through re-entrancy attacks
+### Threat 1: Double-claiming rewards through re-entrancy attacks <a href="#id-1" id="id-1"></a>
 
 Allowing re-entrancy on functions that control token flow within a contract can lead to unauthorized token withdrawal through re-entrancy attacks, resulting in system-wide losses.
 
@@ -57,7 +57,7 @@ function _getReward(address account, address recipient)
 
 ***
 
-### Threat 2: Manipulation and use of incentive tokens by unauthorized users
+### Threat 2: Manipulation and use of incentive tokens by unauthorized users <a href="#id-2" id="id-2"></a>
 
 An unauthorized user could add or duplicate incentive tokens, leading to excessive rewards from the system. Without a whitelist, token count limits, and duplication prevention logic, a malicious user could disrupt the incentive structure.
 
@@ -136,7 +136,7 @@ function whitelistIncentiveToken(
 
 ***
 
-### Threat 3: Threats from unverified ERC20 compliance of incentive tokens
+### Threat 3: Threats from unverified ERC20 compliance of incentive tokens <a href="#id-3" id="id-3"></a>
 
 Lack of verification procedures, such as checking for ERC20 standard compliance for incentive tokens, can lead to asset loss due to approval mismatches or transfer failures during the network reward processing.
 
@@ -193,7 +193,7 @@ function addIncentive(
 
 ***
 
-### Threat 4: System errors due to incorrect configuration during contract initialization
+### Threat 4: System errors due to incorrect configuration during contract initialization <a href="#id-4" id="id-4"></a>
 
 During the initial contract deployment, missing essential verification procedures and filtering functions can lead to system errors from incorrect settings.
 
@@ -254,7 +254,7 @@ function initialize(address _owner) external initializer {
 
 ***
 
-### Threat 5: Unauthorized reward withdrawal or manipulation due to incorrect access control
+### Threat 5: Unauthorized reward withdrawal or manipulation due to incorrect access control <a href="#id-5" id="id-5"></a>
 
 If contract access control is not handled correctly, it can lead to reward withdrawal or manipulation by unintended malicious users.
 
@@ -315,7 +315,7 @@ function getReward(
 
 ***
 
-### Threat 6: Cumulative loss of user rewards due to precision errors in division operations during reward calculation
+### Threat 6: Cumulative loss of user rewards due to precision errors in division operations during reward calculation <a href="#id-6" id="id-6"></a>
 
 During reward distribution calculations, division [precision errors](../../reference.md#undefined-2) can cause some users' rewards to be consistently lost below the decimal point, leading to accumulation of losses.
 
@@ -431,7 +431,7 @@ contract StakingRewards is ... {
 
 ***
 
-### Threat 7: Double accumulation of rewards by withdrawing all LP tokens and calling notifyRewardAmount
+### Threat 7: Double accumulation of rewards by withdrawing all LP tokens and calling notifyRewardAmount <a href="#id-7" id="id-7"></a>
 
 After calling `notifyRewardAmount`, withdrawing all LP tokens to make the balance zero can cause the reward balance to accumulate twice, leading to an abnormal increase in the total recorded rewards. If staking resumes, the APR could spike, and if the allowance is insufficient, an `InsolventReward` revert could occur.\
 Conversely, if `notifyRewardAmount` is called when the LP token balance is zero, the rewards for that period may not carry over and could be lost.
@@ -515,7 +515,7 @@ contract RewardVault is RewardVault {
 
 ***
 
-### Threat 8: Reward suspension due to normal removal of an incentive token
+### Threat 8: Reward suspension due to normal removal of an incentive token <a href="#id-8" id="id-8"></a>
 
 When a valid incentive token is removed, it can cause sudden user confusion due to the suspension of rewards and potential issues arising from changes to the reward structure.
 
