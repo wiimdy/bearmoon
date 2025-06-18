@@ -1,0 +1,268 @@
+---
+description: 📚 레퍼런스 각주 목록
+---
+
+# 레퍼런스
+
+#### history\_buf\_length
+
+EIP-4788 표준의 8191 슬롯 순환 버퍼, 베라체인은 12초 대신 2초 간격 사용으로 빠른 증명 처리
+
+#### SSZ.verifyProof
+
+Simple Serialize 기반 Merkle 증명 검증, 잘못된 proposer index 제출 시 트랜잭션 자동 실패 처리
+
+#### 최소 4.55 시간 (8191 \* 2초)
+
+버퍼 덮어쓰기 방지를 위한 최소 대기 시간, 이더리움 표준보다 8배 빠른 처리 주기
+
+#### BeaconDeposit 컨트랙트 운영자 변경 프로세스 (큐/타임락)
+
+거버넌스 공격 방지를 위한 24시간 지연 실행, 악의적 변경 시 커뮤니티 개입 시간 확보
+
+#### 운영자 역할 - 보상 분배, 커미션 설정 관련
+
+신규 운영자 신뢰성 검증을 위한 단계적 권한 부여, 급격한 수수료 인상(>20%) 시 자동 페널티
+
+#### ValidatorSetCap, 강제 퇴출 메커니즘
+
+네트워크 안정성 우선 정책으로 검증자 수 상한선 도달 시 자동 퇴출, 기존 검증자 자금 회수 경로 제공
+
+#### 자발적 출금 미지원 상태
+
+현재 구현 부재로 검증자 의존성 증가, 향후 queue 시스템과 2일 타임락 도입 예정
+
+#### RewardVault 컨트랙트 getReward()
+
+보상 청구 핵심 함수로 onlyOperatorOrUser 접근 제어와 updateReward 수정자로 상태 동기화 보장
+
+#### OZ ReentrancyGuard spec
+
+OpenZeppelin 표준 재진입 방지 라이브러리, nonReentrant 수정자로 함수 실행 중 재호출 차단
+
+#### OZ access control
+
+OpenZeppelin 역할 기반 접근 제어 시스템, Factory Owner(추가)와 Vault Manager(제거) 권한 분리로 견제와 균형
+
+#### Berachain Rewardvault, whitelist
+
+인센티브 토큰 최대 3개 제한과 minIncentiveRate > 0 검증으로 스팸 토큰 등록 방지
+
+#### OZ Initializable.sol - 업그레이드 초기화 표준
+
+ERC-20 토큰 표준 준수 검증과 SafeERC20 라이브러리 활용으로 전송 실패 시 자동 롤백 처리
+
+#### 정밀도 취약점 사례
+
+나눗셈 절삭으로 인한 미세 손실 누적 문제, FixedPointMathLib 등 고정소수점 라이브러리 사용 권장
+
+#### 오차 범위 0.01% (금융 시스템 표준)
+
+TradFi 표준 허용 오차로 베라체인 보상 계산 검증 기준, 1 wei 최소값 보장으로 사용자 보호
+
+#### 인센티브 보상 청구 대기시간의 최대치
+
+BGTIncentiveDistributor의 MAX\_REWARD\_CLAIM\_DELAY 3시간으로 통일하여 갑작스러운 토큰 제거 시 사용자 보호
+
+#### 베라체인 인센티브 관리 프로세스 - 거버넌스 제안 (토큰 제거 직접 지원 불가)
+
+FactoryVaultManager 제거 권한과 FactoryOwner 추가 권한 분리로 견제, 잔액 존재 시 제거 불가 정책
+
+#### 30일 쿨다운 기준
+
+rewardAllocationBlockDelay를 통한 보상 할당 지연 정책, 연속적 트랜잭션으로 특정 금고 집중 방지
+
+#### Weight 구조체 보상 금고 주소 관리
+
+receiver와 percentageNumerator로 구성, maxWeightPerVault 3000(30%) 제한으로 보상 분산 강제
+
+#### 화이트리스트 거버넌스 제안 관리
+
+isWhitelistedVault 검증과 \_checkForDuplicateReceivers로 중복 할당 차단, 총합 100% 강제
+
+#### 동적 보상 계산 파라미터
+
+BGT 인플레이션 실시간 모니터링과 파라미터 조정으로 담합을 통한 과도한 인플레이션 방지
+
+#### minimumIncentiveThreshold 상태 변수 스펙
+
+인센티브 토큰 최소 보유량 임계값 설정으로 고갈된 금고에 대한 보상 할당 차단 메커니즘
+
+#### **디페깅 기준치(0.1%, 0.2%, 0.5%) 근거**
+
+0.1% = 가스비 대비 차익거래 최소 수익률, 0.2% = Honey 시스템 DEFAULT\_PEG\_OFFSET 기준값, 0.5% = Chainlink 오라클 편차 허용 상한
+
+#### **시장 변동성 데이터**
+
+1분 지속 = 2블록 연속 확인으로 단일 블록 조작 방지, 1시간 = 180블록 안정성 검증으로 가격 복귀 신뢰도 확보
+
+#### isPegged 구현
+
+다중 오라클 집계와 활성화된 오라클만 참조하는 페깅 상태 검증 로직, 신뢰성 있는 가격 판단
+
+#### 베라체인 사용 오라클 (Chainlink 등)
+
+3개 이상 오라클 의무 참조와 비활성화/긴급중단 오라클 자동 제외로 조작 저항성 강화
+
+#### calculateLoss 수식 레퍼런스
+
+디페깅 비율 × 자산 가치로 손실 계산, 사용자 위험 고지와 acknowledgeRisk 확인 필수
+
+```solidity
+// 기본 손실 계산:
+Loss = AssetValueAtPeg × DepegRatio
+// 사용자 받을 자산량:
+UserAssetAmount = HoneyAmount × AssetWeight
+// 디페깅 비율:
+DepegRatio = (PegPrice - CurrentPrice) / PegPrice
+// 페그 기준 자산 가치:
+AssetValueAtPeg = UserAssetAmount × PegPrice
+// 최종 손실:
+Loss = AssetValueAtPeg × DepegRatio
+```
+
+#### Quadratic Voting
+
+BGT 보유량 제곱근 기반 투표권 계산으로 대량 보유자 영향력 축소, 15% 집중도 경고 시스템
+
+#### Berachain 타임락(2일), Guardian 개입(5-of-9 multisig)
+
+거버넌스 제안 악용 방지를 위한 2일 지연과 가디언 개입, 악의적 제안 차단 안전장치
+
+#### Defi 평균 피드백 소요 시간(2\~3주)
+
+Uniswap RFC 최소 7일, 전체 프로세스 14일 기준. Compound 제안 간격 평균 6.95일, 커뮤니티 논의→투표→실행 단계별 충분한 검토 시간 확보 필요. 복잡한 프로토콜 변경사항의 경우 기술적 검토, 경제적 영향 분석, 보안 감사를 포함한 다층적 검증을 위해 최소 2\~3주 소요
+
+#### 독립적 중재 위원회 프로토콜 사례
+
+거버넌스 거부 투명성 확보와 이의제기 메커니즘, 이해관계 공개로 재단 물량 30% 제한
+
+#### 거버넌스 완전 구현 관련
+
+온체인 이전까지 포럼 투표 5분 스냅샷과 100 BGT 최소 보유로 시빌 공격 방지
+
+#### DeFi 평균 공지 기간 (14일)
+
+거버넌스 제안 통과 후 실제 적용까지 최소 14일 공지 기간, 자산 영향 변경사항은 최대 30일 연장
+
+**Liquity 스트레스 테스트 사례 (2021.5.19)**
+
+* ETH 47% 급락 ($3,400 → $1,800) 상황에서 300+ Trove 청산 발생
+* Stability Pool이 93.5M LUSD 부채를 완전 흡수하여 시스템 건전성 유지
+* Recovery Mode에 빠른 진입/복구로 연쇄 청산 악순환 방지 실증
+
+#### ERC-4626 인플레이션 공격 방지
+
+Virtual Shares와 9자리 decimal offset 적용, 최소 69개 이상 share 강제 설정으로 부트스트랩 보호
+
+#### Recovery Mode 전환 안정성 보장
+
+checkRecoveryMode() TCR 실시간 검증과 ICR/TCR 동시 확인, Mode 전환 시 모든 포지션 일괄 업데이트로 상태 불일치 방지
+
+#### Recovery Mode 상태 판단 및 전환 메커니즘
+
+TCR < CCR 시 자동 진입, 담보 인출 차단과 ICR/TCR 동시 검증으로 부실 대출 방지
+
+#### Wonderland DAO 거버넌스 취약점 사례
+
+DeFi 프로토콜 창립자의 과거 러그풀 이력 미공개로 거버넌스 신뢰성 훼손, Owner 배경 검증과 투명성 확보 필요성 입증
+
+#### Owner 권한 남용 방지
+
+멀티시그+타임락으로 중요 파라미터 변경 제한, MCR/CCR/이자율 변경폭 제한과 7일 지연 적용
+
+#### 대량 청산 악순환 방지
+
+시간대별 청산 한도와 Recovery Mode 추가 제한, 변동성 증가 시 MCR 자동 상향 조정으로 연쇄 반응 완화
+
+#### 토큰 가격 조작 및 플래시론 공격 방지
+
+가격 변동률 하드캡, 플래시론 1% 추가 수수료, 오라클 간 1.5% 편차 초과 시 거래 거부와 TWAP으로 조작 저항성 강화
+
+#### Synthetix 오라클 괴리 허용 기준
+
+Compound/[Synthetix 1% 오라클 괴리 허용 한계](https://sips.synthetix.io/sips/sip-32/), 3분 이상 미갱신 시 거래 일시 정지로 유동성 공급자 손실 방지
+
+#### LP 토큰 가치 계산 정확성
+
+고정소수점 18자리 정밀도와 실시간 오라클 가격 반영, LP 토큰-풀 자산 가치 0.1% 편차 임계값 검증
+
+#### 유동성 제거 타이밍 공격 방지
+
+최소 유동성 임계값 검증과 TWAP 가격 고정, LP 토큰 최소 보유 기간으로 MEV 공격 차단
+
+#### Balancer 불변량 비율 제한
+
+최대 300% 증가, 최소 70% 감소 제한으로 유동성 풀 급격한 변동 방지
+
+#### TWAP 계산 N 블록 평균
+
+일시적 가격 조작 방지를 위한 N 블록 평균 가격 기준 정산, 프로토콜별 블록 수 차이 고려
+
+(UniswapV3 기준으로 N값을 시간에 따라 유동적으로 지정하며 일반적으로 [30분 \~ 1시간 사이](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Pool.sol#L246)를 지정함)
+
+#### Curve LP 오라클 조작 방지 사례
+
+LP 토큰 가격 조작 취약점과 대응 방법, 독립적 오라클 검증 필수
+
+#### Curve stableswap 수식 레퍼런스
+
+x\*y=k 곡선과 자동 리밸런싱 메커니즘, 안정적 스왑 가격 유지 알고리즘
+
+#### 유동성 풀 불균형 방지
+
+목표 비율 편차 임계값과 자동 리밸런싱, 단일 토큰 예치 시 자동 스왑으로 균형 유지
+
+#### 슬리피지 허용 한도 설정 및 검증
+
+사용자 지정 슬리피지 한도와 실시간 가격 모니터링, 최소 아웃풋 계산 오류 방지로 거래 안전성 보장
+
+#### 대량 거래 분할 처리
+
+1inch 방식 여러 풀 분할 실행, 각 분할 거래 간 최소 블록 간격으로 MEV 공격과 슬리피지 최소화
+
+#### 수수료 자동화 관리
+
+임계값 도달 시 자동 수집과 정기 분배 주기 설정, 예측 불가능한 대량 인출 방지 ([Uniswap V2 기준 수수료 자동 관리 예시](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L180-L181))
+
+#### 수수료 변경 타임락 적용
+
+Uniswap V2 [2일 타임락](https://docs.uniswap.org/concepts/governance/process#phase-3-governance-proposal)과 같은 방식으로 민감한 관리자 함수 실행 지연, 단계적 수수료 적용
+
+#### 수수료 변경 거버넌스 보호
+
+권한 검증과 상한 제한, 배치 수수료 처리로 투명한 분배 메커니즘 보장
+
+#### 풀 상태 업데이트 원자적 거래 보장
+
+단일 트랜잭션 내 모든 상태 변경 처리, 상태 변경 중 재진입 방지를 위해 [Uniswap V2의 lock 매커니즘](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L31-L36)과 같은 Re-entrancy Gaurd를 적용해야함
+
+#### Balancer WeightedMath 불변량 검증
+
+가중치 기반 X\*Y=K 불변량 계산과 총 공급량 보존 검증, 풀 간 가격 일관성 확인
+
+#### 초기 유동성 예치 보호
+
+Lido 방식 최소 지분 예치로 zero totalsupply 방지, [극소량 예치를 통한 교환 비율 왜곡 차단](https://github.com/lidofinance/core/blob/005b0876d6594b7f7864e0577cdaa44eff115b73/contracts/0.4.24/Lido.sol#L930-L936)
+
+#### 실시간 자산 동기화
+
+Uniswap V3 방식 블록 단위 업데이트와 compound() 선반영으로 미반영 수익 정산 후 거래 처리
+
+#### 수수료 변경 시점 악용 방지
+
+updateFee() 실행 시 미정산 보상 선반영과 KEEPER\_ROLE 권한 제한으로 [수수료 변경과 보상 수확 동시 실행 차단](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Factory.sol#L61-L72)
+
+#### Bribe 시스템 토큰 검증
+
+화이트리스트 운영과 최소 Bribe 금액 한도 설정, BribeCollector 최소 권한 원칙과 타임락 적용으로 시스템 오염 방지
+
+(Curve Finance 파생 LSD 플랫폼 Votium의 [4% Bribe rate](https://github.com/oo-00/Votium/blob/3993b7cb0d98cfc7a97d7a7ad8828ab6ce363ad1/contracts/Votium.sol#L25) 적용 예시)
+
+#### 검증자 스테이킹 한도 제한
+
+MAX\_EFFECTIVE\_BALANCE로 개별 검증자 최대 스테이킹 제한, 자금 집중 방지와 보상 분산으로 중앙화 완화
+
+#### 자동 자금 분산 위임
+
+리스테이킹과 신규 위임의 여러 검증자 자동 분산, 중앙화 방지와 참여 유인 확보로 탈중앙성 강화 ([Lido 예시](https://docs.terra.lido.fi/introduction/stake-distribution/))
