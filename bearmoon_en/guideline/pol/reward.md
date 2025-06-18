@@ -2,24 +2,24 @@
 icon: sack-dollar
 ---
 
-# PoL 보안 가이드라인: 보상 분배
+# PoL Security Guideline: Reward Distribution
 
-<table><thead><tr><th width="617.40625">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc20">#id-3-erc20</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc20">#id-3-erc20</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
-### 위협 1: 재진입 공격을 통해 보상 중복 청구
+### Threat 1: Double-claiming rewards through re-entrancy attacks
 
-컨트랙트 함수 중 토큰의 흐름을 제어하는 함수에 대한 재진입을 허용할 경우 재진입 공격에 의한 토큰 무단 인출 문제로 시스템 전체의 손해로 이어질 수 있다.
+Allowing re-entrancy on functions that control token flow within a contract can lead to unauthorized token withdrawal through re-entrancy attacks, resulting in system-wide losses.
 
-#### 영향도
+#### Impact
 
 `Medium`
 
-재진입 공격 성공 시 특정 사용자가 정당한 보상 이상을 중복으로 인출하여 프로토콜 또는 다른 사용자들에게 직접적인 재정적 손실을 야기할 수 있기 때문에 `Medium`으로 평가한다.
+A successful re-entrancy attack allows a user to withdraw more than their legitimate rewards, causing direct financial loss to the protocol or other users. Therefore, it is assessed as 'Medium'.
 
-#### 가이드라인
+#### Guideline
 
-> - **체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수**
-> - [**ReentrantGuard**](../../reference.md#oz-reentrancyguard-spec) **사용**
+> - **Adhere to the Checks-Effects-Interactions pattern**
+> - **Use [ReentrantGuard](../../reference.md#oz-reentrancyguard-spec)**
 
 #### Best Practice
 
@@ -30,7 +30,7 @@ icon: sack-dollar
     address recipient
 )
     external
-    // nonReentrant 가드 사용
+    // Use nonReentrant guard
     nonReentrant
     onlyOperatorOrUser(Account)
     returns (uint256)
@@ -49,7 +49,7 @@ function _getReward(address account, address recipient)
     returns (uint256)
 {
     // ...
-    // 미수령된 보상을 초기화 하고 전송 진행
+    // Initialize and send the unclaimed reward
     uint256 reward = info.unclaimedReward;
     // ...
 }
@@ -57,25 +57,25 @@ function _getReward(address account, address recipient)
 
 ---
 
-### 위협 2: 권한 없는 사용자의 인센티브 토큰 조작 및 사용
+### Threat 2: Manipulation and use of incentive tokens by unauthorized users
 
-권한이 없는 사용자가 인센티브 토큰을 임의로 추가하거나 중복 등록하여, 시스템에서 과도한 보상을 받는 상황이 발생할 수 있다. 화이트리스트와 토큰 개수 제한, 중복 방지 로직이 없다면 악의적 사용자가 인센티브 구조를 교란시킬 수 있다.
+An unauthorized user could add or duplicate incentive tokens, leading to excessive rewards from the system. Without a whitelist, token count limits, and duplication prevention logic, a malicious user could disrupt the incentive structure.
 
-#### 영향도
+#### Impact
 
 `Low`
 
-공격자가 악의적인 토큰을 인센티브 토큰에 추가하면 검증자 및 사용자의 보상을 가로채거나 인센티브율을 증가시켜 프로토콜의 인센티브 토큰을 빠르게 감소 시킬 수 있다. 그러나 토큰 등록은 거버넌스를 통한 과정이기 때문에 `Low`로 평가한다.
+If an attacker adds a malicious token to the incentive tokens, they could intercept validator and user rewards or increase the incentive rate, rapidly depleting the protocol's incentive tokens. However, since token registration is a process managed by governance, this is assessed as 'Low'.
 
-#### 가이드라인
+#### Guideline
 
-> - [**인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**](../../reference.md#berachain-rewardvault-whitelist)
->   - **인센티브 토큰 추가 권한:** Factory Owner
->   - **인센티브 토큰 제거 권한:** Factory Vault Manager
->   - 현재 인센티브 토큰 최대 3개 등록 가능
-> - **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
+> - **[Limit incentive token count and prevent duplicate registration when managing the incentive token whitelist](../../reference.md#berachain-rewardvault-whitelist)**
+>   - **Permission to add incentive tokens:** Factory Owner
+>   - **Permission to remove incentive tokens:** Factory Vault Manager
+>   - Currently, a maximum of 3 incentive tokens can be registered
+> - **Verify max/min range when setting reward rates and restrict manager permissions**
 >
->   - 인센티브 토큰 추가 시 `minIncentive > 0` 검증 진행
+>   - When adding incentive tokens, verify `minIncentive > 0`
 >
 >     ```solidity
 >     // validate `minIncentiveRate` value
@@ -83,7 +83,7 @@ function _getReward(address account, address recipient)
 >     if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
 >     ```
 >
->   - 인센티브 비율 변경시 최소 비율보다 높게 설정
+>   - When changing the incentive rate, set it higher than the minimum rate
 >   - ```solidity
 >     // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
 >     if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
@@ -92,10 +92,10 @@ function _getReward(address account, address recipient)
 >     if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
 >     ```
 >
->   - 현재 incentive manager 권한
->     - `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
+>   - Current incentive manager permissions
+>     - Can add incentive token supply with `addIncentive()`, `accountIncentives()`
 >
-> - **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
+> - **When recovering ERC20 tokens, transfer excluding incentive and deposited tokens**
 
 #### Best Practice
 
@@ -105,10 +105,10 @@ function _getReward(address account, address recipient)
 
 ```solidity
 function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
-    // incentive token 현재 활성화 상태 체크
+    // Check if the incentive token is currently active
     if (incentives[tokenAddress].minIncentiveRate != 0) CannotRecoverIncentiveToken.selector.revertWith();
 
-    // stake token 체크
+    // Check stake token
     if (tokenAddress == address(stakeToken)) {
         uint256 maxRecoveryAmount = IERC20(stakeToken).balanceOf(address(this)) - totalSupply;
         if (tokenAmount > maxRecoveryAmount) {
@@ -126,11 +126,11 @@ function whitelistIncentiveToken(
     onlyFactoryOwner
 {
     // ...
-    // 인센티브 토큰 종류 상한선 제한 체크
+    // Check the limit on the number of incentive token types
     if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
 
     // ...
-    // 인센티브 토큰 종류 상한선 제한 체크
+    // Check the limit on the number of incentive token types
     if (whitelistedTokens.length == maxIncentiveTokensCount || incentive.minIncentiveRate != 0) {
         TokenAlreadyWhitelistedOrLimitReached.selector.revertWith();
     }
@@ -142,27 +142,27 @@ function whitelistIncentiveToken(
 
 ---
 
-### 위협 3: 인센티브 토큰 ERC20 표준 미검증으로 인한 위협
+### Threat 3: Threats from unverified ERC20 compliance of incentive tokens
 
-인센티브 토큰에 대한 ERC20 표준 준수 여부 등의 검증 절차 누락 시 네트워크 보상 처리 과정에서 승인량 불일치나 전송 실패로 인해 자산 손실이 발생할 수 있다.
+Lack of verification procedures, such as checking for ERC20 standard compliance for incentive tokens, can lead to asset loss due to approval mismatches or transfer failures during the network reward processing.
 
-#### 영향도
+#### Impact
 
 `Low`
 
-ERC20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션에서 의도치 않은 토큰 전송 실패, 수량 불일치 등을 유발하여 부분적인 자산 손실이나 기능 장애를 초래할 수 있기 때문에 `Low`로 평가한다.
+Non-compliant ERC20 tokens or errors in the approval process can cause unintended token transfer failures or quantity mismatches in specific transactions, leading to partial asset loss or functional impairment. Therefore, it is assessed as 'Low'.
 
-**가이드라인**
+**Guideline**
 
-> - **안전한 토큰 승인 및 전송**
->   - 거래별 정확한 승인량 계산 및 설정
->   - 승인량과 실제 사용량 일치 검증
->   - 모든 토큰 전송 후 반환값 검증 및 전송 실패 시 전체 롤백
-> - **토큰 표준 호환성 검증**
->   - ERC20 표준 준수 여부 사전 검증
-> - **토큰 화이트리스트 관리**
->   - 지원 토큰 사전 심사 및 승인 절차
->   - 악성 토큰 블랙리스트 운영 및 실시간 업데이트
+> - **Secure token approval and transfer**
+>   - Calculate and set the exact approval amount for each transaction
+>   - Verify that the approved amount matches the actual usage
+>   - Verify return values after all token transfers and roll back the entire transaction on failure
+> - **Token standard compatibility verification**
+>   - Pre-verify ERC20 standard compliance
+> - **Token whitelist management**
+>   - Pre-screening and approval process for supported tokens
+>   - Operate a blacklist for malicious tokens with real-time updates
 
 #### Best Practice
 
@@ -171,11 +171,11 @@ ERC20 표준 미준수 토큰이나 승인 과정 오류는 특정 트랜잭션�
 {% code overflow="wrap" %}
 
 ```solidity
-// 토큰 화이트리스트 관리
+// Manage token whitelist
 address[] public whitelistedTokens;
 
 // ...
-// 인센티브 토큰 보상해야하는 로직에서 보상 대상 토큰이 화이트리스트에 포함되어있는지 제한자로 확인
+// In the logic for rewarding incentive tokens, use a modifier to check if the reward token is in the whitelist
 modifier onlyWhitelistedToken(address token) {
     if (incentives[token].minIncentiveRate == 0) TokenNotWhitelisted.selector.revertWith();
     _;
@@ -191,7 +191,7 @@ function addIncentive(
     onlyWhitelistedToken(token)
 {
     // ...
-    // 토큰 전송 처리를 안전하게 수행할 수 있는 SafeERC20 라이브러리 함수 사용
+    // Use SafeERC20 library functions to handle token transfers securely
     IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
     // ...
 }
@@ -201,23 +201,23 @@ function addIncentive(
 
 ---
 
-### 위협 4: 컨트랙트 초기화 시 잘못된 구성으로 인한 시스템 오류
+### Threat 4: System errors due to incorrect configuration during contract initialization
 
-컨트랙트 초기 배포 과정에서 필수 검증 절차와 필터링 기능 누락 시 잘못된 설정으로 인한 시스템 오류 발생 가능성이 존재한다
+During the initial contract deployment, missing essential verification procedures and filtering functions can lead to system errors from incorrect settings.
 
-#### 영향도
+#### Impact
 
 `Low`
 
-잘못된 컨트랙트의 주소가 설정되어 배포가 된다면 정상적인 기능을 작동하지 않을 수 있다. 자산의 탈취보다는 일시적인 기능의 정지 가능성 때문에 `Low`로 평가되지만, 업그레이드 가능한 컨트랙트의 경우 재초기화 방지가 중요하며, Parity Wallet과 같은 사례에서 보았듯이 심각한 결과를 초래할 수 있다.
+If a contract is deployed with an incorrect address, it may not function correctly. This is more likely to cause a temporary suspension of functionality rather than asset theft, so it is assessed as `Low`. However, preventing re-initialization is critical for upgradeable contracts, as cases like the Parity Wallet incident have shown that it can lead to severe consequences.
 
-#### 가이드라인
+#### Guideline
 
-> - **모든 컨트랙트 초기화 시 zero address 검증 및 필수 매개변수 검증**
-> - **초기 설정 매개변수들의 합리적 범위 검증**
-> - **초기 예치 루트 설정 등 초기 상태의 무결성 보장**
-> - **초기화 함수의 불변성 보장 및 재초기화 방지 메커니즘(\_\_disableInitializers() 사용)**
-> - **주요 파라미터 변경을 위한 롤백 메커니즘**
+> - **Verify all contract initializations for zero addresses and essential parameters**
+> - **Validate the rational range of initial configuration parameters**
+> - **Ensure the integrity of the initial state, such as initial deposit root settings**
+> - **Ensure the immutability of the initialization function and prevent re-initialization (use `__disableInitializers()`)**
+> - **Implement a rollback mechanism for major parameter changes**
 
 #### Best Practice
 
@@ -235,16 +235,16 @@ function initialize(
     external
     initializer
 {
-    // 초기화 과정에서 모든 주소 매개변수 설정 검증
-    // _governance 주소 설정
+    // Verify all address parameter settings during initialization
+    // Set _governance address
     __Ownable_init(_governance);
     __UUPSUpgradeable_init();
-    // _bgt 주소 설정
+    // Set _bgt address
     bgt = BGT(_bgt);
     emit SetDistributor(_distributor);
-    // _distributor 주소 설정
+    // Set _distributor address
     distributor = _distributor;
-    // _beaconDepositContract 주소 설정
+    // Set _beaconDepositContract address
     beaconDepositContract = IBeaconDeposit(_beaconDepositContract);
 }
 ```
@@ -264,23 +264,23 @@ function initialize(address _owner) external initializer {
 
 ---
 
-### 위협 5: 잘못된 접근 제어로 인한 권한 없는 보상 인출 또는 조작
+### Threat 5: Unauthorized reward withdrawal or manipulation due to incorrect access control
 
-컨트랙트 접근 제어를 정확하게 처리하지 못할 경우 의도하지 않은 악성 사용자의 접근으로 인한 보상 인출 또는 조작 발생 가능성이 존재한다.
+If contract access control is not handled correctly, it can lead to reward withdrawal or manipulation by unintended malicious users.
 
-#### 영향도
+#### Impact
 
 `Low`
 
-공격자가 다른 유저의 보상을 탈취하는 건 큰 위협이지만 **`onlyOperatorOrUser`** modifier로 예치자 혹은 대리인만 수령 가능해 발생 가능성이 낮아 `Low`로 평가한다.
+An attacker stealing another user's rewards is a significant threat, but the `onlyOperatorOrUser` modifier restricts withdrawals to the depositor or their delegate, making the likelihood of this occurring low. Thus, it is assessed as 'Low'.
 
-#### 가이드라인
+#### Guideline
 
-> - **관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅**
-> - **`onlyOwner`, `onlyDistributor`등 modifier를 명확히 사용**
-> - **각 주소, 역할 또는 컴포넌트에 최소 권한 원칙 준수**
+> - **Log all administrative activities (permission changes, critical function calls, etc.)**
+> - **Use modifiers like `onlyOwner` and `onlyDistributor` clearly**
+> - **Adhere to the principle of least privilege for each address, role, or component**
 
-<table><thead><tr><th width="135.546875" align="center">Role</th><th width="556.265625">Responsibilities &#x26; Permissions</th><th data-hidden>관련 함수 예시 (Example Functions)</th></tr></thead><tbody><tr><td align="center">Owner</td><td>- 컨트랙트의 전체 소유권 보유<br>- Admin 역할 임명 및 해임<br>- 컨트랙트의 가장 핵심적인 파라미터 설정 (예: 인센트브 토큰 추가, 일시 중지/재개 권한 위임 등)<br>- 컨트랙트 업그레이드 실행 (프록시 패턴 사용 시)</td><td>transferOwnership(address newOwner), addAdmin(address admin), removeAdmin(address admin), setProtocolFee(uint256 fee), pause(), unpause(), upgradeTo(address newImplementation)</td></tr><tr><td align="center">Operator</td><td>- 일상적인 시스템 운영 작업 수행 (Owner 보다 제한된, 특정 기능 실행 권한)<br>- 주기적인 프로세스 실행 (예: 보상 분배 로직 트리거, 오라클 가격 정보 업데이트)<br>- 시스템 상태 모니터링 및 관련 데이터 기록</td><td>triggerRewardDistribution(), updatePriceOracle(address asset, uint256 price), recordSystemMetrics()</td></tr><tr><td align="center">User</td><td>- 프로토콜의 핵심 기능 사용 (예: 자산 예치, 스왑, 대출, 상환)<br>- 자신의 계정 관련 정보 조회 및 관리 (예: 잔액 확인, 보상 청구)<br>- 거버넌스 참여 (토큰 홀더의 경우, 투표 등)</td><td>deposit(address asset, uint256 amount), withdraw(address asset, uint256 amount), claimRewards(), getBalance(address user, address asset), voteOnProposal(uint256 proposalId, bool support)</td></tr></tbody></table>
+<table><thead><tr><th width="135.546875" align="center">Role</th><th width="556.265625">Responsibilities &#x26; Permissions</th><th data-hidden>Example Functions</th></tr></thead><tbody><tr><td align="center">Owner</td><td>- Holds overall ownership of the contract<br>- Appoints and dismisses Admin roles<br>- Sets the most critical contract parameters (e.g., adding incentive tokens, delegating pause/resume authority)<br>- Executes contract upgrades (when using a proxy pattern)</td><td>transferOwnership(address newOwner), addAdmin(address admin), removeAdmin(address admin), setProtocolFee(uint256 fee), pause(), unpause(), upgradeTo(address newImplementation)</td></tr><tr><td align="center">Operator</td><td>- Performs routine system operation tasks (more limited than Owner, specific function execution rights)<br>- Executes periodic processes (e.g., triggering reward distribution logic, updating oracle price information)<br>- Monitors system status and records relevant data</td><td>triggerRewardDistribution(), updatePriceOracle(address asset, uint256 price), recordSystemMetrics()</td></tr><tr><td align="center">User</td><td>- Uses the core functions of the protocol (e.g., asset deposit, swap, loan, repayment)<br>- Views and manages their own account-related information (e.g., checking balance, claiming rewards)<br>- Participates in governance (for token holders, voting, etc.)</td><td>deposit(address asset, uint256 amount), withdraw(address asset, uint256 amount), claimRewards(), getBalance(address user, address asset), voteOnProposal(uint256 proposalId, bool support)</td></tr></tbody></table>
 
 #### Best Practice
 
@@ -297,7 +297,7 @@ function addIncentive(
     onlyWhitelistedToken(token)
 {
     // ...
-    // 보상 비율 변동은 manager 권한만 가능
+    // Only the manager can change the reward rate
     if (msg.sender != manager) NotIncentiveManager.selector.revertWith();
     // ...
 }
@@ -315,7 +315,7 @@ function getReward(
 )
     external
     nonReentrant
-    // 보상 수령은 운영자 혹은 운영자가 설정한 사용자만 실행 가능
+    // Only the operator or a user set by the operator can claim rewards
     onlyOperatorOrUser(account)
     returns (uint256)
 {
@@ -325,57 +325,57 @@ function getReward(
 
 ---
 
-### 위협 6: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
+### Threat 6: Cumulative loss of user rewards due to precision errors in division operations during reward calculation
 
-보상 분배 계산 중 나눗셈 [정밀도 오류](../../reference.md#undefined-2)로 인해, 일부 사용자의 보상이 소수점 이하로 계속 손실되어 누적된다
+During reward distribution calculations, division [precision errors](../../reference.md#undefined-2) can cause some users' rewards to be consistently lost below the decimal point, leading to accumulation of losses.
 
-#### 영향도
+#### Impact
 
 `Low`
 
-컨트랙트의 계산 정밀도 한계로 인해 사용자가 받아야 할 보상이 약속된 양보다 적게 지급될 수 있으나, 대부분의 금융 시스템에서의 허용(0.01%) 되는 미세한 차이고 의도적인 탈취가 아니기 때문에 `Low`로 평가한다.
+Due to the limited calculation precision of the contract, users may receive slightly less than the promised reward amount. However, this is a minute difference, often within the acceptable tolerance of financial systems (0.01%), and is not an intentional theft. Therefore, it is assessed as 'Low'.
 
-#### 가이드라인
+#### Guideline
 
-> - **보상 수령 금액의 정확성을 검증하는 로직 추가**
->   - **`_verifyRewardCalculation`** 함수를 통해 계산 결과를 역연산하여 보상 금액 검증
->   - [오차 범위 0.01%](../../reference.md#id-0.01)로 설정 (대부분 금융에서 사용하는 오차 범위)
-> - **FixedPointMathLib 사용 권장**
->   - `mulDiv`와 같이 정밀도를 최대한 보존하면서 안전하게 곱셈과 나눗셈을 수행
-> - **사용자 유리한 반올림 정책**
+> - **Add logic to verify the accuracy of the claimed reward amount**
+>   - Use the **`_verifyRewardCalculation`** function to reverse-calculate and verify the reward amount
+>   - Set an [error margin of 0.01%](../../reference.md#id-0.01) (a common tolerance in most financial systems)
+> - **Recommend using FixedPointMathLib**
+>   - Use functions like `mulDiv` to perform multiplication and division safely while preserving maximum precision
+> - **User-favorable rounding policy**
 >
->   - 보상 받을 금액이 존재하지만 나눗셈 절삭되어 0이 된다면 최소값(1 wei) 으로 보장
+>   - If a user is entitled to a reward but the amount is truncated to zero by division, guarantee a minimum value (1 wei)
 >
 >   ```solidity
 >   if (balance > 0 && earnedAmount == 0 && rewardPerTokenDelta > 0) {
->       earnedAmount = 1; // 최소 1 wei 보장
+>       earnedAmount = 1; // Guarantee at least 1 wei
 >   }
 >   ```
 
 #### Best Practice
 
-`커스텀 코드`
+`Custom Code`
 
 {% code overflow="wrap" %}
 
 ```solidity
-// 기존 RewardVault.sol의 _processIncentives 함수 개선
+// Improving the _processIncentives function in the existing RewardVault.sol
 contract RewardVault is ... {
-    // ... 기존 코드 ...
+    // ... existing code ...
 
-    // 가이드라인 2: 최소/최대 수량 설정
-    uint256 private constant MIN_INCENTIVE_AMOUNT = 1e6; // dust 방지
-    uint256 private constant MAX_INCENTIVE_RATE = 1e36; // 기존 코드에 이미 있음
+    // Guideline 2: Set min/max quantities
+    uint256 private constant MIN_INCENTIVE_AMOUNT = 1e6; // to prevent dust
+    uint256 private constant MAX_INCENTIVE_RATE = 1e36; // already in existing code
 
-    // 기존 _processIncentives 함수 개선
+    // Improving the existing _processIncentives function
     function _processIncentives(bytes calldata pubkey, uint256 bgtEmitted) internal {
-        // ... 기존 코드 ...
+        // ... existing code ...
 
         unchecked {
             for (uint256 i; i < whitelistedTokensCount; ++i) {
                 // ...
 
-                // FixedPointMathLib 사용 권장
+                // Recommend using FixedPointMathLib
                 uint256 amount = FixedPointMathLib.mulDiv(bgtEmitted, incentive.incentiveRate, PRECISION);
 
                 uint256 amountRemaining = incentive.amountRemaining;
@@ -385,18 +385,18 @@ contract RewardVault is ... {
                 if (amount > 0) {
                     validatorShare = beraChef.getValidatorIncentiveTokenShare(pubkey, amount);
 
-                    // 검증: validator share가 전체 amount를 초과하지 않는지 확인
+                    // Verification: check that the validator share does not exceed the total amount
                     require(validatorShare <= amount, "Invalid share calculation");
 
                     amount -= validatorShare;
                 }
             }
 
-            // ... 나머지 코드 ...
+            // ... rest of the code ...
         }
     }
 
-    // ... 기존 코드 ...
+    // ... existing code ...
 }
 ```
 
@@ -405,39 +405,39 @@ contract RewardVault is ... {
 {% code overflow="wrap" %}
 
 ```solidity
-// 기존 StakingRewards.sol의 earned 함수 개선
+// Improving the earned function in the existing StakingRewards.sol
 contract StakingRewards is ... {
-    // ... 기존 코드 ...
+    // ... existing code ...
 
-    // 가이드라인 3: 사용자 유리한 반올림
+    // Guideline 3: User-favorable rounding
     function earned(address account) public view virtual returns (uint256) {
         Info storage info = _accountInfo[account];
-        // ... 기존 코드 ...
+        // ... existing code ...
 
-        // 기존: return unclaimedReward + FixedPointMathLib.fullMulDiv(balance, rewardPerTokenDelta, PRECISION);
-        // 개선: 사용자에게 유리한 반올림 적용
+        // Before: return unclaimedReward + FixedPointMathLib.fullMulDiv(balance, rewardPerTokenDelta, PRECISION);
+        // After: Apply user-favorable rounding
         uint256 earnedAmount = FixedPointMathLib.fullMulDiv(balance, rewardPerTokenDelta, PRECISION);
 
-        // 잔액이 있지만 계산 결과가 0인 경우 최소값 보장
-        // 나눗셈 결과로 0이 되는 것을 방지하여 정밀도 관련 취약점(레퍼런스) 방어
+        // If balance > 0 but calculated amount is 0, guarantee minimum value
+        // Prevents division results from becoming 0, defending against precision-related vulnerabilities (reference)
         if (balance > 0 && earnedAmount == 0 && rewardPerTokenDelta > 0) {
-            earnedAmount = 1; // 최소 1 wei 보장
+            earnedAmount = 1; // Guarantee at least 1 wei
         }
 
         return unclaimedReward + earnedAmount;
     }
 
-    // 가이드라인 1: 보상 계산 검증 함수 추가
+    // Guideline 1: Add reward calculation verification function
     function _verifyRewardCalculation(uint256 reward, uint256 totalSupply) internal pure {
-        // 역계산으로 정확성 검증
+        // Verify accuracy with reverse calculation
         if (totalSupply > 0 && reward > 0) {
             uint256 reverseCalc = FixedPointMathLib.fullMulDiv(reward, PRECISION, totalSupply);
-            // 오차가 0.01% 이내인지 확인
+            // Check if the error is within 0.01%
             require((reverseCalc <= rewardRate * 10001) / (10000 && rewardRate * 10001 / 10000 <= reverseCalc), "Calculation error");
         }
     }
 
-    // ... 기존 코드 ...
+    // ... existing code ...
 }
 ```
 
@@ -445,54 +445,54 @@ contract StakingRewards is ... {
 
 ---
 
-### 위협 7: LP 토큰 전량 인출 및 notifyRewardAmount 호출로 인한 보상 중복 누적
+### Threat 7: Double accumulation of rewards by withdrawing all LP tokens and calling notifyRewardAmount
 
-`notifyRewardAmount` 호출 후 모든 LP 토큰을 인출해 잔고를 0으로 만들면 보상 잔액이 두 번 누적되어 보상 총액 기록이 비정상적으로 증가할 수 있다. 이후 스테이킹이 재개되면 APR이 급등하고 allowance가 부족할 경우 InsolventReward revert가 발생할 수 있다 .\
-반대로, LP 토큰 잔고가 0인 상태에서 `notifyRewardAmount`가 먼저 실행되면 보상 잔액이 다음으로 이월되지 않아 해당 보상이 증발할 수 있다.
+After calling `notifyRewardAmount`, withdrawing all LP tokens to make the balance zero can cause the reward balance to accumulate twice, leading to an abnormal increase in the total recorded rewards. If staking resumes, the APR could spike, and if the allowance is insufficient, an `InsolventReward` revert could occur.\
+Conversely, if `notifyRewardAmount` is called when the LP token balance is zero, the rewards for that period may not carry over and could be lost.
 
-#### 영향도
+#### Impact
 
 `Low`
 
-보상 분배 로직의 일시적인 계산 오류나 보상 증발/중복을 발생할 수 있으나 totalsupply가 0이 될 발생 가능성이 낮아 `Low`로 평가한다.
+This can cause a temporary calculation error in the reward distribution logic or cause rewards to be lost or duplicated, but the probability of `totalSupply` becoming zero is low, so it is assessed as 'Low'.
 
-#### 가이드라인
+#### Guideline
 
-> - **리워드 볼트 생성시 최소 LP 토큰 예치로 totalsupply가 0이 되는 것을 방지**
+> - **Prevent `totalSupply` from becoming zero by requiring a minimum LP token deposit when creating a reward vault.**
 
 #### Best Practice
 
-`커스텀 코드`
+`Custom Code`
 
 {% code overflow="wrap" %}
 
 ```solidity
-// 최소 LP 토큰 예치 요구사항 적용
+// Apply minimum LP token deposit requirement
 contract RewardVaultFactory {
-    // ... 기존 코드 ...
+    // ... existing code ...
 
-    // 최소 LP 토큰 예치량 설정
-    uint256 public constant MIN_INITIAL_LP_AMOUNT = 1e6; // 예: LP 토큰
+    // Set minimum initial LP token deposit amount
+    uint256 public constant MIN_INITIAL_LP_AMOUNT = 1e6; // e.g., LP token
 
-    // 초기 LP 예치 여부 추적
+    // Track whether initial LP has been deposited
     mapping(address => bool) public initialLPDeposited;
 
-    // 기존 createRewardVault 함수 수정
+    // Modify the existing createRewardVault function
     function createRewardVault(
         address stakingToken,
         uint256 initialLPAmount
     ) external returns (address) {
-        // ... 기존 검증 로직 ...
+        // ... existing validation logic ...
 
-        // 최소 LP 토큰 예치량 검증
+        // Validate minimum LP token deposit amount
         require(initialLPAmount >= MIN_INITIAL_LP_AMOUNT, "Initial LP too low");
 
-        // vault 생성
+        // Create vault
         address vault = LibClone.deployDeterministicERC1967BeaconProxy(beacon, salt);
 
-        // ... vault 초기화 ...
+        // ... initialize vault ...
 
-        // 초기 LP 토큰 예치
+        // Deposit initial LP tokens
         IERC20(stakingToken).safeTransferFrom(msg.sender, vault, initialLPAmount);
         RewardVault(vault).depositInitialLP(initialLPAmount);
 
@@ -502,7 +502,7 @@ contract RewardVaultFactory {
         return vault;
     }
 
-    // ... 기존 코드 ...
+    // ... existing code ...
 }
 ```
 
@@ -512,7 +512,7 @@ contract RewardVaultFactory {
 
 ```solidity
 contract RewardVault is RewardVault {
-    // ... 기존 코드 ...
+    // ... existing code ...
 
     bool public initialDeposited;
 
@@ -533,42 +533,42 @@ contract RewardVault is RewardVault {
 
 ---
 
-### 위협 8: 정상적인 인센티브 토큰 제거에 따른 보상 중단
+### Threat 8: Reward suspension due to normal removal of an incentive token
 
-정상적인 인센티브 토큰 제거 시 갑작스러운 사용자 보상 중단으로 인한 사용자 혼란이 발생할 수 있고 보상 구조의 변경으로 인한 문제 발생 가능성이 존재한다.
+When a valid incentive token is removed, it can cause sudden user confusion due to the suspension of rewards and potential issues arising from changes to the reward structure.
 
-#### 영향도
+#### Impact
 
 `Low`
 
-보상을 받을 사용자가 남아있는 상황에서 관리자가 인센티브 제거를 할 경우 사용자는 보상을 잃게 된다. 하지만 관리자는 거버넌스에 의해 정해지기에 발생 가능성이 낮기 때문에 `Low`로 평가한다.
+If an administrator removes an incentive while users are still eligible for rewards, those users will lose their rewards. However, since the administrator is determined by governance, the likelihood of this happening is low, so it is assessed as 'Low'.
 
-#### 가이드라인
+#### Guideline
 
-> - **인센티브 토큰 제거 또는 교체는 큐를 이용하여 딜레이(3 hours) 이후 반영**
+> - **Incentive token removal or replacement should be queued and applied after a delay (3 hours).**
 >
->   - BGTIncentiveDistributor에서 인센티브 보상 청구 대기시간의 최대치인 [MAX_REWARD_CLAIM_DELAY를 3시간](../../reference.md#undefined-3)으로 통일하기 위함
+>   - This is to align with the maximum reward claim delay of [3 hours (MAX_REWARD_CLAIM_DELAY)](../../reference.md#undefined-3) in the `BGTIncentiveDistributor`.
 >
 >     ```solidity
 >     // BGTIncentiveDistributor.sol
 >     uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
 >     ```
 >
->   - 큐에 넣기 위해서는 검증 로직 통과해야 함
->     - [인센티브 토큰 제거](../../reference.md#undefined-4)
->       - 현재 해당 인센티브 토큰의 잔액이 없어야 함
->       - FactoryVaultManager 여야 함
->       - 제거할 토큰이 화이트리스트에 등록되어있는 토큰이어야 함
->     - 인센티브 토큰 추가
->       - FactoryOwner만 추가가능
->   - 제거 큐에 들어가있는 토큰에는 addIncentive 불가
+>   - To be added to the queue, it must pass validation logic.
+>     - [Incentive Token Removal](../../reference.md#undefined-4)
+>       - The current balance of the incentive token must be zero.
+>       - Must be the `FactoryVaultManager`.
+>       - The token to be removed must be on the whitelist.
+>     - Adding an Incentive Token
+>       - Only `FactoryOwner` can add.
+>   - `addIncentive` cannot be called for a token in the removal queue.
 >
-> - **보상 금고의 보상 구조 변경(토큰 추가/제거)은 사용자에게 사전 고지 및 명확한 UI 표시**
->   - IncentiveTokenWhitelisted와 IncentiveTokenRemoved 이벤트를 읽어오는 봇을 만들어 변화가 생기면 프로토콜 사이트에 팝업 표시
+> - **Changes to the reward vault's structure (adding/removing tokens) must be clearly communicated to users in advance and displayed on the UI.**
+>   - Create a bot that listens for `IncentiveTokenWhitelisted` and `IncentiveTokenRemoved` events to display a popup on the protocol's website when a change occurs.
 
 #### Best Practice
 
-`커스텀 코드`
+`Custom Code`
 
 {% code overflow="wrap" %}
 
@@ -633,4 +633,4 @@ contract RewardVault {
 ---
 
 Footnotes
-[^1]: 보상 청구 핵심 함수로 onlyOperatorOrUser 접근 제어와 updateReward 수정자로 상태 동기화 보장
+[^1]: The core reward claim function, ensuring state synchronization with `onlyOperatorOrUser` access control and the `updateReward` modifier.
