@@ -25,7 +25,7 @@ icon: square-poll-vertical
 
 #### Best Practice
 
-[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
+[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -37,9 +37,11 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
 ```
 {% endcode %}
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
-<pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
+{% code overflow="wrap" %}
+```solidity
+// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
 contract ConcentrationWarning {
     event ConcentrationWarning(address indexed user, uint256 concentration);
     
@@ -69,10 +71,11 @@ contract ConcentrationWarning {
         return getConcentration(user) > 15e16;
     }
 }
-<strong>
-</strong>
 
-</code></pre>
+
+
+```
+{% endcode %}
 
 ***
 
@@ -102,7 +105,7 @@ contract ConcentrationWarning {
 
 #### Best Practice
 
-[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)&#x20;
+[`BerachainGovernance.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L84-L95)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -114,7 +117,7 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
 ```
 {% endcode %}
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 {% code overflow="wrap" %}
 ```solidity
@@ -141,32 +144,32 @@ contract ComponentValidator {
 
 ### 위협 3: 사익 충돌로 인한 거절 <a href="#id-3" id="id-3"></a>
 
-재단이나 가디언즈가 자신에게 불리한 제안을 거부하여 거버넌스가 공정하게 작동하지 않고 중앙화될 우려가 있다. \
+재단이나 가디언즈가 자신에게 불리한 제안을 거부하여 거버넌스가 공정하게 작동하지 않고 중앙화될 우려가 있다.\
 이는 커뮤니티의 정당한 의사결정을 방해하고 시스템의 탈중앙화를 훼손할 수 있다.
 
 #### 영향도
 
 `Low`
 
-재단입장에서 사익을 추구하게 되면 사용자의 손실로 이어질 가능성이 높지만, Berachain의 타임락(2일)과 가디언 개입(5-of-9 multisig)으로 인해 발생 확률 낮아 `Low`로 평가.&#x20;
+재단입장에서 사익을 추구하게 되면 사용자의 손실로 이어질 가능성이 높지만, Berachain의 타임락(2일)과 가디언의 멀티시그(5-of-9 multisig)로 인해 발생 확률이 낮아 `Low`로 평가.
 
 #### 가이드라인
 
 > * **모든 제안 거부 시 구체적이고 객관적인 사유를 공개하고 커뮤니티가 이에 대해 이의제기 메커니즘 제공**
 >   * **이의제기 메커니즘:** [**독립적인 중재 위원회**](../../reference.md#undefined-8)(리뷰어 선출 과정과 동일)를 구성하여 다음 권한 부여
->     * 재단이나 가디언즈의 결정에 대해 독립적으로 검토 및 교체 제안&#x20;
->     * 부결된 안건에 대한 재상정&#x20;
->     * 부당한 결정 및 권한행사에 대한 챌린지&#x20;
+>     * 재단이나 가디언즈의 결정에 대해 독립적으로 검토 및 교체 제안
+>     * 부결된 안건에 대한 재상정
+>     * 부당한 결정 및 권한행사에 대한 챌린지
 > * **거버넌스 참여자들의 이해관계를 투명하게 공개하고 직접적인 이해관계가 있는 제안에 대해서는 투표 참여 제한 또는 약화**
 >   * 프로토콜에 관한 투표의 경우 프로토콜 관련자 투표 참여 제한
->   * 코어에 관한 투표의 경우 재단 및 재단 물량 검증자의 참여가능 BGT 물량 30%로 제한
+>   * 코어에 관한 투표의 경우 재단 및 재단 물량 검증자의 참여가능 BGT 물량을 30%로 제한
 > * **재단 후원 검증자로 인한 중앙화 우려 해소**
->   * 재단으로부터 물량을 받은 검증자의 재단 물량 공개 및 재단 보유량 대쉬보드 제공
+>   * 재단으로부터 네이티브 토큰 물량을 받은 검증자의 재단 물량 공개 및 재단 보유량 대쉬보드 제공
 >   * 각 검증자의 운영 주체, 재단과의 관계 투명하게 공개
 
 #### Best Practice
 
-[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L56-L58)&#x20;
+[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L56-L58)
 
 ```solidity
 if (guardian != address(0)) {
@@ -174,7 +177,7 @@ if (guardian != address(0)) {
 }
 ```
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 {% code overflow="wrap" %}
 ```solidity
@@ -214,10 +217,10 @@ contract TransparentGovernance {
 
 > * **온체인 구현 전까지 포럼 투표에 대해 투명성과 검증 가능성 확보**
 >   * 포럼 투표에 대한 데이터를 모아 온체인 데이터로 올려 누구나 볼 수 있게 구현
->   * 투표과정에 대해서도 5분단위의 스냅샷을 활용하여 결과 발표까지 실시간으로 반영되게 구현
-> * **civil 공격 방지 메커니즘 도입**
->   * 최소한의 BGT 제한 도입(100 BGT)
->   * 동일 IP/디바이스 다중 계정 추적 및 차단
+>   * 투표과정에 대해서도 5분단위의 스냅샷을 활용하여 결과 투표 상황이 실시간으로 반영되게 구현
+> * **Civil 공격 방지 메커니즘 도입**
+>   * 투표에 필요한 최소한의 BGT 제한 도입(예시: 100 BGT 이상 보유한 사용자만 투표 가능)
+>   * 동일 IP/디바이스 다중 계정 추적 및 모니터링
 
 #### Best Practice
 
@@ -246,7 +249,7 @@ function _countVote(
 ```
 {% endcode %}
 
-&#x20;[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L61-L66)&#x20;
+[`GovDeployer.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/GovDeployer.sol#L61-L66)
 
 ```solidity
 InitialGovernorParameters memory params = InitialGovernorParameters({
@@ -257,7 +260,7 @@ InitialGovernorParameters memory params = InitialGovernorParameters({
 });
 ```
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 {% code overflow="wrap" %}
 ```solidity
@@ -293,7 +296,7 @@ contract ForumVoteTracker {
 
 거버넌스 제안이 통과되어 시스템 변경이 이루어질 때 사용자들에게 충분한 사전 고지가 부족하다면 Berachain의 현재 7일 공지 기간이 사용자 대응에 부족할 수 있다. 이는 사용자의 예상치 못한 손실이나 신뢰도 저하로 이어질 수 있다.
 
-특히 수수료 변경, 토큰 경제학 수정, 새로운 제약사항 도입 등은 사용자의 투자 전략과 자산 관리에 직접적인 영향을 미칠 수 있다.
+특히 수수료 변경, 토큰노믹스 수정, 신규 제약사항 도입 등은 사용자의 투자 전략과 자산 관리에 직접적인 영향을 미칠 수 있다.
 
 #### 영향도
 
@@ -303,14 +306,14 @@ contract ForumVoteTracker {
 
 #### 가이드라인
 
-> * **거버넌스 제안 통과 후 실제 적용까지** [**최소 14일의 공지 기간**](../../reference.md#defi-14)**을 두고** \
+> * **거버넌스 제안 통과 후 실제 적용까지** [**최소 14일의 공지 기간**](../../reference.md#defi-14)**을 두고**\
 >   **제안 통과 즉시, 적용 7일 전, 적용 1일 전 총 3차례에 걸쳐 다양한 채널을 통해 변경사항을 공지**
 > * **사용자 자산에 직접적인 영향을 미치는 변경사항(수수료, 이자율, 청산 임계값 등)에 대해서 더 긴 공지 기간(최대 30일)을 제공하여 사용자가 대응할 수 있는 충분한 시간 확보**
 > * **사용자가 변경사항이 자신의 포지션에 미칠 영향을 미리 확인할 수 있는 시뮬레이션 도구를 제공하여 사전 대응 지원**
 
 #### Best Practice
 
-&#x20;[**`BerachainGovernance.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L134-L151)
+[**`BerachainGovernance.sol`**](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/gov/BerachainGovernance.sol#L134-L151)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -324,7 +327,7 @@ function proposalNeedsQueuing(uint256 proposalId) public view override returns (
 ```
 {% endcode %}
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 {% code overflow="wrap" %}
 ```solidity
@@ -349,4 +352,3 @@ contract GovernanceNotificationSystem {
 }
 ```
 {% endcode %}
-
