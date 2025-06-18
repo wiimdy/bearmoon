@@ -1,6 +1,6 @@
 # Table of contents
 
-* [머릿말](README.md)
+* [Introduction](README.md)
 * [Berachain PoL 개요](berachain-pol.md)
 
 ## 위협모델링 <a href="#tm" id="tm"></a>
