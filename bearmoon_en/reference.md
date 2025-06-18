@@ -28,6 +28,30 @@ Currently unimplemented, increasing validator dependency; a queue system and 2-d
 
 Automatic ejection when validator count reaches the upper limit due to network stability priority policy, providing a fund recovery path for existing validators
 
+#### 7. OZ ReentrancyGuard spec
+
+OpenZeppelin standard re-entrancy prevention library, nonReentrant modifier blocks re-entrant calls during function execution
+
+#### 8. Berachain Rewardvault, whitelist
+
+Prevents spam token registration by limiting incentive tokens to a maximum of 3 and verifying minIncentiveRate > 0
+
+#### 9. Precision Vulnerability Case
+
+Cumulative micro-loss issue due to division truncation, recommends using fixed-point math libraries like FixedPointMathLib
+
+#### 10. Error Margin 0.01% (Financial System Standard)
+
+TradFi standard allowable error as Berachain reward calculation verification standard, ensuring a minimum value of 1 wei for user protection
+
+#### 11. Maximum Incentive Reward Claim Wait Time
+
+Standardized MAX\_REWARD\_CLAIM\_DELAY of 3 hours in BGTIncentiveDistributor to protect users from sudden token removal
+
+#### 12. Berachain Incentive Token Management Process - Governance Proposal (Direct Token Removal Not Supported)
+
+Checks and balances by separating FactoryVaultManager (remove) and FactoryOwner (add) permissions, policy prevents removal if balance exists
+
 #### &#x20;Operator Role - Regarding Reward Distribution, Commission Setting
 
 Phased authority grant for new operator reliability verification, automatic penalty for sudden fee increases (>20%)
@@ -36,37 +60,13 @@ Phased authority grant for new operator reliability verification, automatic pena
 
 Core reward claim function with onlyOperatorOrUser access control and updateReward modifier to ensure state synchronization
 
-#### OZ ReentrancyGuard spec
-
-OpenZeppelin standard re-entrancy prevention library, nonReentrant modifier blocks re-entrant calls during function execution
-
 #### OZ access control
 
 OpenZeppelin role-based access control system, checks and balances through separation of Factory Owner (add) and Vault Manager (remove) permissions
 
-#### Berachain Rewardvault, whitelist
-
-Prevents spam token registration by limiting incentive tokens to a maximum of 3 and verifying minIncentiveRate > 0
-
 #### OZ Initializable.sol - Upgrade Initialization Standard
 
 ERC-20 token standard compliance verification and use of SafeERC20 library for automatic rollback on transfer failure
-
-#### Precision Vulnerability Case
-
-Cumulative micro-loss issue due to division truncation, recommends using fixed-point math libraries like FixedPointMathLib
-
-#### Error Margin 0.01% (Financial System Standard)
-
-TradFi standard allowable error as Berachain reward calculation verification standard, ensuring a minimum value of 1 wei for user protection
-
-#### Maximum Incentive Reward Claim Wait Time
-
-Standardized MAX\_REWARD\_CLAIM\_DELAY of 3 hours in BGTIncentiveDistributor to protect users from sudden token removal
-
-#### Berachain Incentive Management Process - Governance Proposal (Direct Token Removal Not Supported)
-
-Checks and balances by separating FactoryVaultManager (remove) and FactoryOwner (add) permissions, policy prevents removal if balance exists
 
 #### 30-day Cooldown Standard
 
