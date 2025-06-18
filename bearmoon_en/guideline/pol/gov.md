@@ -276,7 +276,7 @@ The protocol also plans to implement on-chain governance, but since it is [**cur
 >   * Collect forum voting data and put it on-chain so that anyone can view it.
 >   * Use 5-minute snapshots of the voting process to reflect the results in real-time until the announcement.
 > * **Introduce a Sybil attack prevention mechanism.**
->   * Introduce a minimum BGT limit (100 BGT).
+>   * Introduce a minimum BGT requirement for voting (e.g. only users holding more than 100 BGT can vote).
 >   * Track and block multiple accounts from the same IP/device.
 
 #### Best Practice
