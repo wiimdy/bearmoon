@@ -217,7 +217,7 @@ If the foundation pursues self-interest, it is likely to lead to user losses, bu
 >     * Independently review and propose replacements for decisions made by the foundation or guardians.
 >     * Re-submit rejected proposals.
 >     * Challenge unfair decisions and exercises of authority.
-> * **Transparently disclose the interests of governance participants and restrict or weaken their voting participation in proposals where they have a direct interest.**
+> * **Transparently disclose the interests of governance participants and restricㅋㅋt or weaken their voting participation in proposals where they have a direct interest.**
 >   * Restrict the participation of protocol-related parties in votes concerning the protocol.
 >   * Limit the BGT held by the foundation and its sponsored validators to 30% for votes concerning the core.
 > * **Address concerns about centralization due to foundation-sponsored validators.**
