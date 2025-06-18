@@ -1,6 +1,8 @@
 ---
 description: >-
-  Complex DeFi strategies that combine the functions of multiple dApps in a chain offer high-yield opportunities. However, this dApp chaining can create new interaction risks that were not apparent when using individual dApps and can amplify existing risks.
+  Complex DeFi strategies that combine the functions of multiple dApps in a
+  chain offer high-yield opportunities. However, this dApp chaining can create
+  new interaction risks that were not apparent when
 icon: link
 layout:
   title:
@@ -17,9 +19,9 @@ layout:
 
 # dApp Security Guidelines: Chaining
 
-<table><thead><tr><th width="595">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#1 DEX Pool Imbalance-Induced ERC-4626 Inflation Attack</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm.sol">#2 Protocol Asset Drain via HONEY De-pegging and PermissionlessPSM.sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="chain.md#id-4-dex">#4 DEX</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="595">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#id-1-dex-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm-sol">#id-2-honey-permissionlesspsm-sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="chain.md#id-4-dex">#id-4-dex</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
-### <a href="#id-1-dex-erc-4626" id="id-1-dex-erc-4626"></a>Threat 1: ERC-4626 Inflation Attack due to DEX Pool Imbalance and Cascading Liquidations
+### Threat 1: ERC-4626 Inflation Attack due to DEX Pool Imbalance and Cascading Liquidations <a href="#id-1-dex-erc-4626" id="id-1-dex-erc-4626"></a>
 
 BeraBorrow is tightly integrated with Berachain's PoL mechanism and uses Infrared's iBGT, iBERA tokens, and DEX LP tokens from Kodiak, BEX, etc., as collateral. This complex interdependence can lead to severe systemic risks when combined with the ERC-4626 inflation attack vulnerability in the LSP.
 
@@ -33,7 +35,7 @@ BeraBorrow is tightly integrated with Berachain's PoL mechanism and uses Infrare
 
 **Systemic Risk**
 
-- This chain attack exploits the interdependence between Berachain's PoL mechanism and the Beraborrow multi-collateral lending system, escalating a single vulnerability into a system-wide risk. Since Infrared's iBGT and iBERA tokens are used as major collateral, a DEX pool imbalance can cause a domino effect across the Infrared staking platform, the Beraborrow lending system, and the LSP. Therefore, the ERC-4626 inflation attack vulnerability in the LSP should be assessed not just as a smart contract bug but as a systemic risk to the entire Berachain ecosystem.
+* This chain attack exploits the interdependence between Berachain's PoL mechanism and the Beraborrow multi-collateral lending system, escalating a single vulnerability into a system-wide risk. Since Infrared's iBGT and iBERA tokens are used as major collateral, a DEX pool imbalance can cause a domino effect across the Infrared staking platform, the Beraborrow lending system, and the LSP. Therefore, the ERC-4626 inflation attack vulnerability in the LSP should be assessed not just as a smart contract bug but as a systemic risk to the entire Berachain ecosystem.
 
 #### Impact
 
@@ -41,37 +43,36 @@ BeraBorrow is tightly integrated with Berachain's PoL mechanism and uses Infrare
 
 This attack is only feasible under the special condition where the LiquidStabilityPool's (LSP) total supply approaches zero. However, if successful, it can directly drain funds from LSP depositors, thus it is rated as **`Medium`**. The impact assessment is based on the following:
 
-1.  **Limited Attack Surface:** The attack scenario originates from a **specific DEX's LP token**, not all assets allowed as collateral in BeraBorrow. The attacker must target a pool with relatively low liquidity among the LP tokens used as collateral by BeraBorrow to facilitate price manipulation, making the preconditions for the attack limited. Furthermore, the inflation attack itself is confined to **specific vaults within BeraBorrow, like the LiquidStabilityPool, that lack virtual accounting defense logic**, not all vaults.
-2.  **Conditional Attack Feasibility (LSP Depletion):** The core of the attack is for the LSP's totalSupply to converge to almost zero. This is not a normal protocol state and can only occur under **extreme market stress conditions** like large-scale cascading liquidations and a mass exodus of depositors. Therefore, the attacker requires substantial capital to move the market in the desired direction, and the attack timing is very limited.
-3.  **Vulnerability Pattern Reference:** The method of monopolizing shares with a 1 wei deposit when the LSP's totalSupply is near zero, and then inflating the value of the shares through asset donation to steal subsequent depositors' funds, is a well-known **ERC-4626 inflation attack** vector. Numerous security audit reports, including from OpenZeppelin, warn of the risks of such attacks and recommend applying defense mechanisms. The theoretical applicability of this attack to BeraBorrow's LSP is a risk that cannot be ignored.
+1. **Limited Attack Surface:** The attack scenario originates from a **specific DEX's LP token**, not all assets allowed as collateral in BeraBorrow. The attacker must target a pool with relatively low liquidity among the LP tokens used as collateral by BeraBorrow to facilitate price manipulation, making the preconditions for the attack limited. Furthermore, the inflation attack itself is confined to **specific vaults within BeraBorrow, like the LiquidStabilityPool, that lack virtual accounting defense logic**, not all vaults.
+2. **Conditional Attack Feasibility (LSP Depletion):** The core of the attack is for the LSP's totalSupply to converge to almost zero. This is not a normal protocol state and can only occur under **extreme market stress conditions** like large-scale cascading liquidations and a mass exodus of depositors. Therefore, the attacker requires substantial capital to move the market in the desired direction, and the attack timing is very limited.
+3. **Vulnerability Pattern Reference:** The method of monopolizing shares with a 1 wei deposit when the LSP's totalSupply is near zero, and then inflating the value of the shares through asset donation to steal subsequent depositors' funds, is a well-known **ERC-4626 inflation attack** vector. Numerous security audit reports, including from OpenZeppelin, warn of the risks of such attacks and recommend applying defense mechanisms. The theoretical applicability of this attack to BeraBorrow's LSP is a risk that cannot be ignored.
 
 #### Guideline
 
-> - **Create a warning system for the Lending protocol that uses LP tokens as collateral when an imbalance occurs in the Dex pool.**
-> - **Implement a Virtual Accounting system.**
-> - **Introduce the same virtual accounting mechanism to the LiquidStabilityPool (LSP) contract as in the BaseCollateralVault to block donation attacks by separating internal balance tracking from the actual token balance.**
-> - **Set a minimum deposit threshold.**
->   - Add a minimum deposit requirement to the LSP deposit/mint function.
->   - Increase the attack cost by setting a higher minimum amount for the initial deposit.
-> - **Strengthen protection for the totalSupply=0 state.**
->   - Extend the ZeroTotalSupply check to all deposit functions, expanding the protection that currently exists only in the `linearVestingExtraAssets` function to the entire system.
-> - **Bootstrap period protection mechanism.**
->   - Apply deposit limits and additional verification procedures during the initial 24-48 hours.
->   - Block large deposits without admin approval during the bootstrap period.
-> - **Real-time liquidation monitoring between LSP-DenManager.**
->   - Activate a temporary withdrawal limit and warning system for the LSP when mass liquidations occur, to preemptively detect LSP depletion situations due to cascading liquidations.
-> - **Detect abnormal deposit/withdrawal patterns.**
->   - Monitor for patterns of depositing a tiny amount and then transferring a large amount of assets in a single transaction.
->   - Real-time detection of complex attack scenarios linked with flash loans.
-> - **Track liquidity correlation between LSP-DEX.**
->   - Real-time analysis of the impact of Berachain DEX pool imbalances on LSP stability.
+> * **Create a warning system for the Lending protocol that uses LP tokens as collateral when an imbalance occurs in the Dex pool.**
+> * **Implement a Virtual Accounting system.**
+> * **Introduce the same virtual accounting mechanism to the LiquidStabilityPool (LSP) contract as in the BaseCollateralVault to block donation attacks by separating internal balance tracking from the actual token balance.**
+> * **Set a minimum deposit threshold.**
+>   * Add a minimum deposit requirement to the LSP deposit/mint function.
+>   * Increase the attack cost by setting a higher minimum amount for the initial deposit.
+> * **Strengthen protection for the totalSupply=0 state.**
+>   * Extend the ZeroTotalSupply check to all deposit functions, expanding the protection that currently exists only in the `linearVestingExtraAssets` function to the entire system.
+> * **Bootstrap period protection mechanism.**
+>   * Apply deposit limits and additional verification procedures during the initial 24-48 hours.
+>   * Block large deposits without admin approval during the bootstrap period.
+> * **Real-time liquidation monitoring between LSP-DenManager.**
+>   * Activate a temporary withdrawal limit and warning system for the LSP when mass liquidations occur, to preemptively detect LSP depletion situations due to cascading liquidations.
+> * **Detect abnormal deposit/withdrawal patterns.**
+>   * Monitor for patterns of depositing a tiny amount and then transferring a large amount of assets in a single transaction.
+>   * Real-time detection of complex attack scenarios linked with flash loans.
+> * **Track liquidity correlation between LSP-DEX.**
+>   * Real-time analysis of the impact of Berachain DEX pool imbalances on LSP stability.
 
 #### Best Practice
 
 `Custom Code`
 
 {% code overflow="wrap" %}
-
 ```solidity
 // Function to check the health of an LP token
 function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwner {
@@ -84,11 +85,9 @@ function updateLpTokenRisk(address _lpToken, bool _isHighRisk) external onlyOwne
     }
 }
 ```
-
 {% endcode %}
 
 {% code overflow="wrap" %}
-
 ```solidity
 // 1. Add virtual accounting
 mapping(address => uint) internal virtualAssetBalance;
@@ -109,12 +108,11 @@ function _depositAndMint(/*...*/) private {
     // ... existing logic
 }
 ```
-
 {% endcode %}
 
----
+***
 
-### <a href="#id-2-honey-permissionlesspsm-sol" id="id-2-honey-permissionlesspsm-sol"></a>Threat 2: Protocol Asset Drain via HONEY De-pegging and PermissionlessPSM.sol
+### Threat 2: Protocol Asset Drain via HONEY De-pegging and PermissionlessPSM.sol <a href="#id-2-honey-permissionlesspsm-sol" id="id-2-honey-permissionlesspsm-sol"></a>
 
 If Beraborrow's `PermissionlessPSM.sol` mints NECT at a 1:1 ratio even when HONEY's market price has plummeted, an attacker can acquire a large amount of NECT with cheap HONEY. This NECT is then used to repay collateral at a fixed value in the lending protocol, draining the protocol's assets.
 
@@ -128,14 +126,14 @@ This means the protocol is **directly exposed to a potential risk of up to $15 m
 
 **Simulation: Loss Scale Analysis Based on Current mintCap (15M)**
 
-- **Scenario Assumption**: HONEY's market value plummets to **$0.50** due to external factors.
-- **Attack Execution**
-  - The attacker spends **$7,500,000** on the external market to acquire the full mintCap limit of 15,000,000 HONEY.
-  - The attacker calls the `deposit` function of PermissionlessPSM.sol, deposits 15,000,000 HONEY, and exploits the system's lack of a price oracle to mint approximately **15,000,000 NECT** (around 14,955,000 after fees).
-- **Protocol Loss Scale**
-  - The protocol's treasury receives assets (HONEY) with an actual value of **$7,500,000**.
-  - The protocol's debt increases by **$15,000,000**, as NECT is treated as $1 within the system.
-  - Consequently, if this attack succeeds, the protocol will **immediately lose approximately $7,500,000 in assets**.
+* **Scenario Assumption**: HONEY's market value plummets to **$0.50** due to external factors.
+* **Attack Execution**
+  * The attacker spends **$7,500,000** on the external market to acquire the full mintCap limit of 15,000,000 HONEY.
+  * The attacker calls the `deposit` function of PermissionlessPSM.sol, deposits 15,000,000 HONEY, and exploits the system's lack of a price oracle to mint approximately **15,000,000 NECT** (around 14,955,000 after fees).
+* **Protocol Loss Scale**
+  * The protocol's treasury receives assets (HONEY) with an actual value of **$7,500,000**.
+  * The protocol's debt increases by **$15,000,000**, as NECT is treated as $1 within the system.
+  * Consequently, if this attack succeeds, the protocol will **immediately lose approximately $7,500,000 in assets**.
 
 #### Impact
 
@@ -145,20 +143,19 @@ During a de-pegging event, an attacker can mint NECT with low-priced HONEY to re
 
 #### Guideline
 
-> - **Integrate a reliable price oracle.**
->   - The deposit and mint function logic must be modified to query the HONEY/USD price from an external price oracle when calculating the amount of NECT to be issued.
->   - A multi-oracle system should be introduced to counter price data manipulation or temporary outages.
-> - **Introduce dynamic fees and issuance limit mechanisms.**
->   - Add logic to dynamically increase the fee for deposits if the oracle price drops sharply in a short period. This will have the effect of reducing the incentive for arbitrage attacks in minor de-pegging situations.
-> - **Strengthen governance and emergency response protocols.**
->   - A function like `pauseDeposit` should be implemented in permissionlessPSM.sol, allowing a multi-sig entity to immediately halt new NECT issuance using HONEY.
+> * **Integrate a reliable price oracle.**
+>   * The deposit and mint function logic must be modified to query the HONEY/USD price from an external price oracle when calculating the amount of NECT to be issued.
+>   * A multi-oracle system should be introduced to counter price data manipulation or temporary outages.
+> * **Introduce dynamic fees and issuance limit mechanisms.**
+>   * Add logic to dynamically increase the fee for deposits if the oracle price drops sharply in a short period. This will have the effect of reducing the incentive for arbitrage attacks in minor de-pegging situations.
+> * **Strengthen governance and emergency response protocols.**
+>   * A function like `pauseDeposit` should be implemented in permissionlessPSM.sol, allowing a multi-sig entity to immediately halt new NECT issuance using HONEY.
 
 #### Best Practice
 
 `Custom Code`
 
 {% code overflow="wrap" %}
-
 ```solidity
 // Contract to apply Best Practice: PermissionlessPSM.sol
 
@@ -274,12 +271,11 @@ contract PermissionlessPSM {
     // ... deposit, mint, withdraw 등 다른 모든 함수는 그대로 유지 ...
 }
 ```
-
 {% endcode %}
 
----
+***
 
-### <a href="#id-3" id="id-3"></a>Threat 3: Chain Reaction from Individual Protocol Collapse Leading to a Chain Reverse Flywheel
+### Threat 3: Chain Reaction from Individual Protocol Collapse Leading to a Chain Reverse Flywheel <a href="#id-3" id="id-3"></a>
 
 Since Infrared is responsible for a significant portion of Berachain's core reward distribution and staking mechanisms, a collapse of the Infrared protocol would halt or cause errors in staking reward payments, leading to a sharp decline in the trust of validators and delegators.
 
@@ -289,16 +285,16 @@ The Infrared protocol essentially acts as the reward engine in Berachain's PoL e
 
 #### Attack Scenario
 
-1.  **LST Instant De-peg → Price Collapse**
-    If Infrared blocks withdrawals, whether due to a hack or a contract pause, iBGT and iBERA would no longer be tokens that can be exchanged for BGT or BERA at a 1:1 ratio at any time. The market would immediately price this in, causing the iBGT and iBERA premiums to fall. Such a sharp drop would throw LST-based LP pools like Kodiak's WETH:iBGT, WBERA:iBGT, and BEX's USDC:iBERA into imbalance. As liquidity providers withdraw their LP tokens to avoid losses, the pool's liquidity would shrink.
-2.  **Collateral Value Collapse → Beraborrow Cascading Liquidations**
-    Beraborrow's DenManager sources iBGT and iBERA prices from a dedicated Infrared TWAP oracle. A mere 30% drop in the market price would cause many Den positions to fall below the Minimum Collateral Ratio (MCR), triggering automatic liquidations. The large amount of NECT dumped onto the market during the liquidation process would add downward pressure on the native stablecoin's peg.
-3.  **LSP Depletion → Exposure of 4626 Inflation Vulnerability**
-    The NECT from the mass Den liquidations flows into the LSP. If this balance is quickly depleted, the LSP's totalSupply will drop to near zero. Since the LSP lacks `totalSupply == 0` guards and virtual accounting, it becomes vulnerable to the ERC-4626 inflation attack, where an attacker can take 100% of the shares with a 1 wei deposit followed by a donation. If an attacker drains the LSP, the liquidity meant to restore the NECT peg would completely evaporate.
-4.  **Validator & Delegator Trust Collapse → Weakened Network Security**
-    Infrared operates its own validator nodes and re-delegates the staked BGT to the network. Since over $1 billion of the total staked value is tied up in the Infrared Vault (based on TVL), a halt in the Vault would render that stake inactive. Consequently, the effective stake would plummet, and some validators from the set would be excluded from block proposals, increasing the block interval.
-5.  **PoL Incentive Halt → Ecosystem Reverse Flywheel**
-    If Infrared stops distributing rewards, the PoL rewards from BeraChef and RFRV Vaults also stop. Liquidity providers would leave unprofitable pools, and dApps with reduced TVL would in turn cut their incentives, starting a vicious cycle.
+1. **LST Instant De-peg → Price Collapse**\
+   If Infrared blocks withdrawals, whether due to a hack or a contract pause, iBGT and iBERA would no longer be tokens that can be exchanged for BGT or BERA at a 1:1 ratio at any time. The market would immediately price this in, causing the iBGT and iBERA premiums to fall. Such a sharp drop would throw LST-based LP pools like Kodiak's WETH:iBGT, WBERA:iBGT, and BEX's USDC:iBERA into imbalance. As liquidity providers withdraw their LP tokens to avoid losses, the pool's liquidity would shrink.
+2. **Collateral Value Collapse → Beraborrow Cascading Liquidations**\
+   Beraborrow's DenManager sources iBGT and iBERA prices from a dedicated Infrared TWAP oracle. A mere 30% drop in the market price would cause many Den positions to fall below the Minimum Collateral Ratio (MCR), triggering automatic liquidations. The large amount of NECT dumped onto the market during the liquidation process would add downward pressure on the native stablecoin's peg.
+3. **LSP Depletion → Exposure of 4626 Inflation Vulnerability**\
+   The NECT from the mass Den liquidations flows into the LSP. If this balance is quickly depleted, the LSP's totalSupply will drop to near zero. Since the LSP lacks `totalSupply == 0` guards and virtual accounting, it becomes vulnerable to the ERC-4626 inflation attack, where an attacker can take 100% of the shares with a 1 wei deposit followed by a donation. If an attacker drains the LSP, the liquidity meant to restore the NECT peg would completely evaporate.
+4. **Validator & Delegator Trust Collapse → Weakened Network Security**\
+   Infrared operates its own validator nodes and re-delegates the staked BGT to the network. Since over $1 billion of the total staked value is tied up in the Infrared Vault (based on TVL), a halt in the Vault would render that stake inactive. Consequently, the effective stake would plummet, and some validators from the set would be excluded from block proposals, increasing the block interval.
+5. **PoL Incentive Halt → Ecosystem Reverse Flywheel**\
+   If Infrared stops distributing rewards, the PoL rewards from BeraChef and RFRV Vaults also stop. Liquidity providers would leave unprofitable pools, and dApps with reduced TVL would in turn cut their incentives, starting a vicious cycle.
 
 #### Impact
 
@@ -308,20 +304,19 @@ Events like the collapse of a major external protocol can act as a system-wide r
 
 #### Guideline
 
-> - **Real-time integrated monitoring of all key metrics of linked protocols.**
-> - **Automatic execution of defense mechanisms without human intervention when a threat occurs. Automatically pause the system with a circuit breaker.**
->   - Pause if the latest oracle price is not updated for more than 30 minutes.
->     - The standard was set based on the shortest oracle heartbeat of 30 minutes configured in beraborrow. [https://berascan.com/tx/0xfe8efae89bc2b0491f0b06d43d8f75c312616888e8790452ef0e2d1f52e371b2](https://berascan.com/tx/0xfe8efae89bc2b0491f0b06d43d8f75c312616888e8790452ef0e2d1f52e371b2)
->   - Pause if TVL drops by more than 20%.
->     - 20% is set as an empirical threshold that is serious but potentially recoverable.
->   - An automated bot periodically calls the `checkAndTriggerPause` function to establish a 24-hour monitoring system, immediately pausing the system if conditions are met.
+> * **Real-time integrated monitoring of all key metrics of linked protocols.**
+> * **Automatic execution of defense mechanisms without human intervention when a threat occurs. Automatically pause the system with a circuit breaker.**
+>   * Pause if the latest oracle price is not updated for more than 30 minutes.
+>     * The standard was set based on the shortest oracle heartbeat of 30 minutes configured in beraborrow. [https://berascan.com/tx/0xfe8efae89bc2b0491f0b06d43d8f75c312616888e8790452ef0e2d1f52e371b2](https://berascan.com/tx/0xfe8efae89bc2b0491f0b06d43d8f75c312616888e8790452ef0e2d1f52e371b2)
+>   * Pause if TVL drops by more than 20%.
+>     * 20% is set as an empirical threshold that is serious but potentially recoverable.
+>   * An automated bot periodically calls the `checkAndTriggerPause` function to establish a 24-hour monitoring system, immediately pausing the system if conditions are met.
 
 #### Best Practice
 
 `Custom Code`
 
 {% code overflow="wrap" %}
-
 ```solidity
 constructor(
     address _multiSigAdmin,
@@ -410,12 +405,11 @@ function isCrisisCondition() public view returns (bool, string memory) {
     return (false, "");
 }
 ```
-
 {% endcode %}
 
----
+***
 
-### <a href="#id-4-dex" id="id-4-dex"></a>Threat 4: Collateral Overvaluation/Cascading Liquidation Attack via DEX Pool Imbalance
+### Threat 4: Collateral Overvaluation/Cascading Liquidation Attack via DEX Pool Imbalance <a href="#id-4-dex" id="id-4-dex"></a>
 
 Built on Berachain's PoL structure, Beraborrow accepts iBGT/iBERA (from Infrared) and Kodiak/BEX LP tokens as collateral, tightly intertwining liquidity pools with the lending system.
 
@@ -430,20 +424,17 @@ During the price inflation phase, they can deposit the same LP as collateral to 
     The attacker temporarily injects ≈ 50K WBERA (approx. $128K) into the iBGT/WBERA v3 pool (liquidity ≈ $6.3M) to raise the price by +10%.
 
     (iBGT/WBERA v3 liquidity source: [dexscreener.com](https://dexscreener.com/berachain/0x12bf773f18cec56f14e7cb91d82984ef5a3148ee))
-
 2.  **Over-borrowing Phase**
 
     Using the artificially inflated LP as collateral, they deposit collateral worth $1M to borrow $833K NECT based on Beraborrow's MCR of 120%.
 
     (Beraborrow MCR data source: [beraborrow.gitbook.io](https://beraborrow.gitbook.io/docs/borrowing/collateral-ratio-and-liquidation))
-
 3.  **Price Reversion & Liquidation Trigger**
 
     By withdrawing the attack funds, the pool price reverts to its original state (-10%), reducing the collateral value to $900K. This drops the ICR to 108%, which is below the 120% MCR, triggering immediate liquidation.
-
 4.  **Cascading Liquidation & Recovery Mode**
 
-    As mass liquidations consume the Stability Pool's NECT balance, the Redistribute path is triggered, shifting the debt to other Dens. The TCR falls below the CCR (=120%), and the system enters Recovery Mode.
+    As mass liquidations consume the Stability Pool's NECT balance, the Redistribute path is triggered, shifting the debt to other Dens. The TCR falls below the CCR (=120%), and the system enters Recovery Mode.\
     (Recovery Mode entry point source: [beraborrow.gitbook.io](https://beraborrow.gitbook.io/docs/borrowing/collateral-ratio-and-liquidation))
 
 > **1-Block Attack Cost $128K ↔︎ Potential Debt $883K (≈ 6.5x Leverage)**
@@ -454,37 +445,35 @@ During the price inflation phase, they can deposit the same LP as collateral to 
 
 The DEX pool imbalance → collateral overvaluation/undervaluation → cascading liquidation chaining attack is a systemic risk that can shake the Beraborrow, Infrared, and PoL incentive lines like a domino effect even with a single pool manipulation. While the risk is real if an attack occurs, it has been classified as `Informational` because Beraborrow, the current lending protocol on Berachain, is aware of this threat and has defended against it by not reflecting single-block oracle price feeds.
 
-- Simultaneously pressures NECT supply and Stability Pool solvency.
-- Can spread to Berachain's core liquidity as Infrared's iBGT, PoL rewards, and Kodiak's TVL are interconnected.
+* Simultaneously pressures NECT supply and Stability Pool solvency.
+* Can spread to Berachain's core liquidity as Infrared's iBGT, PoL rewards, and Kodiak's TVL are interconnected.
 
 #### Guideline
 
-> - **Oracle & Price Input**
->   - Automatically halt collateral deposits and borrowing if the deviation between Chainlink + RedStone (+30 min TWAP) > 1%.
->   - Trigger `priceDeviationCircuitBreaker()` if the price fluctuates by more than ±1% in a single block.
-> - **Borrowing Limits**
->   - Total debt limit for an LP with TVL ≤ $10M = TVL × 30%.
->   - NECT mint amount per collateral transaction ≤ Current supply × 0.5%.
-> - **Stability Pool**
->   - Maintain NECT deposits ≥ 40% of the risky LP's TVL.
->   - Issue sNECT and activate the Back-stop DAO if deficient.
-> - **Real-time Monitoring**
->   - Stream DEX price deviations and Stability Pool balance to a Dune/Superset dashboard.
->   - Implement a 1-block delay & warning on LSP withdrawals when a mass liquidation transaction occurs.
+> * **Oracle & Price Input**
+>   * Automatically halt collateral deposits and borrowing if the deviation between Chainlink + RedStone (+30 min TWAP) > 1%.
+>   * Trigger `priceDeviationCircuitBreaker()` if the price fluctuates by more than ±1% in a single block.
+> * **Borrowing Limits**
+>   * Total debt limit for an LP with TVL ≤ $10M = TVL × 30%.
+>   * NECT mint amount per collateral transaction ≤ Current supply × 0.5%.
+> * **Stability Pool**
+>   * Maintain NECT deposits ≥ 40% of the risky LP's TVL.
+>   * Issue sNECT and activate the Back-stop DAO if deficient.
+> * **Real-time Monitoring**
+>   * Stream DEX price deviations and Stability Pool balance to a Dune/Superset dashboard.
+>   * Implement a 1-block delay & warning on LSP withdrawals when a mass liquidation transaction occurs.
 >
-> #### Parameters & Formulas
+> **Parameters & Formulas**
 >
-> - **Required Capital**
+> *   **Required Capital**
 >
->   ΔWBERA ≈ _W_ (√1.10 – 1) → **50K WBERA ≈ $128K**
+>     ΔWBERA ≈ _W_ (√1.10 – 1) → **50K WBERA ≈ $128K**
+> *   **Borrowing Limit**
 >
-> - **Borrowing Limit**
+>     Borrowable = Collateral / MCR = $1M / 1.20 = **$833K**
+> *   **Liquidation Threshold**
 >
->   Borrowable = Collateral / MCR = $1M / 1.20 = **$833K**
->
-> - **Liquidation Threshold**
->
->   ICR < 120% ⇒ Liquidate → SP (or Redistribute)
+>     ICR < 120% ⇒ Liquidate → SP (or Redistribute)
 
 #### Best Practice
 

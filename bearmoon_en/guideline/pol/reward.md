@@ -2,9 +2,9 @@
 icon: sack-dollar
 ---
 
-# PoL Security Guideline: Reward Distribution
+# PoL Security Guidelines: Reward Distribution
 
-<table><thead><tr><th width="617.40625">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-3-erc20">#id-3-erc20</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7-lp-notifyrewardamount">#id-7-lp-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="617.40625">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#threat-1-double-claiming-rewards-through-re-entrancy-attacks">#threat-1-double-claiming-rewards-through-re-entrancy-attacks</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#threat-2-manipulation-and-use-of-incentive-tokens-by-unauthorized-users">#threat-2-manipulation-and-use-of-incentive-tokens-by-unauthorized-users</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-3-threats-from-unverified-erc20-compliance-of-incentive-tokens">#threat-3-threats-from-unverified-erc20-compliance-of-incentive-tokens</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-4-system-errors-due-to-incorrect-configuration-during-contract-initialization">#threat-4-system-errors-due-to-incorrect-configuration-during-contract-initialization</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-5-unauthorized-reward-withdrawal-or-manipulation-due-to-incorrect-access-control">#threat-5-unauthorized-reward-withdrawal-or-manipulation-due-to-incorrect-access-control</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-6-cumulative-loss-of-user-rewards-due-to-precision-errors-in-division-operations-during-rewar">#threat-6-cumulative-loss-of-user-rewards-due-to-precision-errors-in-division-operations-during-rewar</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-7-double-accumulation-of-rewards-by-withdrawing-all-lp-tokens-and-calling-notifyrewardamount">#threat-7-double-accumulation-of-rewards-by-withdrawing-all-lp-tokens-and-calling-notifyrewardamount</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#threat-8-reward-suspension-due-to-normal-removal-of-an-incentive-token">#threat-8-reward-suspension-due-to-normal-removal-of-an-incentive-token</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### Threat 1: Double-claiming rewards through re-entrancy attacks
 
@@ -18,8 +18,8 @@ A successful re-entrancy attack allows a user to withdraw more than their legiti
 
 #### Guideline
 
-> - **Adhere to the Checks-Effects-Interactions pattern**
-> - **Use [ReentrantGuard](../../reference.md#oz-reentrancyguard-spec)**
+> * **Adhere to the Checks-Effects-Interactions pattern**
+> * **Use** [**ReentrantGuard**](../../reference.md#oz-reentrancyguard-spec)
 
 #### Best Practice
 
@@ -55,7 +55,7 @@ function _getReward(address account, address recipient)
 }
 ```
 
----
+***
 
 ### Threat 2: Manipulation and use of incentive tokens by unauthorized users
 
@@ -69,40 +69,35 @@ If an attacker adds a malicious token to the incentive tokens, they could interc
 
 #### Guideline
 
-> - **[Limit incentive token count and prevent duplicate registration when managing the incentive token whitelist](../../reference.md#berachain-rewardvault-whitelist)**
->   - **Permission to add incentive tokens:** Factory Owner
->   - **Permission to remove incentive tokens:** Factory Vault Manager
->   - Currently, a maximum of 3 incentive tokens can be registered
-> - **Verify max/min range when setting reward rates and restrict manager permissions**
+> * [**Limit incentive token count and prevent duplicate registration when managing the incentive token whitelist**](../../reference.md#berachain-rewardvault-whitelist)
+>   * **Permission to add incentive tokens:** Factory Owner
+>   * **Permission to remove incentive tokens:** Factory Vault Manager
+>   * Currently, a maximum of 3 incentive tokens can be registered
+> * **Verify max/min range when setting reward rates and restrict manager permissions**
+>   *   When adding incentive tokens, verify `minIncentive > 0`
 >
->   - When adding incentive tokens, verify `minIncentive > 0`
->
->     ```solidity
->     // validate `minIncentiveRate` value
->     if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
->     if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
->     ```
->
->   - When changing the incentive rate, set it higher than the minimum rate
->   - ```solidity
+>       ```solidity
+>       // validate `minIncentiveRate` value
+>       if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
+>       if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
+>       ```
+>   * When changing the incentive rate, set it higher than the minimum rate
+>   * ```solidity
 >     // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
 >     if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
 >
 >     // The incentive rate should be greater than or equal to the `minIncentiveRate`.
 >     if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
 >     ```
->
->   - Current incentive manager permissions
->     - Can add incentive token supply with `addIncentive()`, `accountIncentives()`
->
-> - **When recovering ERC20 tokens, transfer excluding incentive and deposited tokens**
+>   * Current incentive manager permissions
+>     * Can add incentive token supply with `addIncentive()`, `accountIncentives()`
+> * **When recovering ERC20 tokens, transfer excluding incentive and deposited tokens**
 
 #### Best Practice
 
 [`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L164-L174)
 
 {% code overflow="wrap" %}
-
 ```solidity
 function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyFactoryOwner {
     // Check if the incentive token is currently active
@@ -137,10 +132,9 @@ function whitelistIncentiveToken(
     // ...
 }
 ```
-
 {% endcode %}
 
----
+***
 
 ### Threat 3: Threats from unverified ERC20 compliance of incentive tokens
 
@@ -154,22 +148,21 @@ Non-compliant ERC20 tokens or errors in the approval process can cause unintende
 
 **Guideline**
 
-> - **Secure token approval and transfer**
->   - Calculate and set the exact approval amount for each transaction
->   - Verify that the approved amount matches the actual usage
->   - Verify return values after all token transfers and roll back the entire transaction on failure
-> - **Token standard compatibility verification**
->   - Pre-verify ERC20 standard compliance
-> - **Token whitelist management**
->   - Pre-screening and approval process for supported tokens
->   - Operate a blacklist for malicious tokens with real-time updates
+> * **Secure token approval and transfer**
+>   * Calculate and set the exact approval amount for each transaction
+>   * Verify that the approved amount matches the actual usage
+>   * Verify return values after all token transfers and roll back the entire transaction on failure
+> * **Token standard compatibility verification**
+>   * Pre-verify ERC20 standard compliance
+> * **Token whitelist management**
+>   * Pre-screening and approval process for supported tokens
+>   * Operate a blacklist for malicious tokens with real-time updates
 
 #### Best Practice
 
 [`RewardVault.sol`](https://github.com/berachain/contracts/blob/a405d00920f5b328c69a73b4c2ed4ef3b13adc0d/src/pol/rewards/RewardVault.sol)
 
 {% code overflow="wrap" %}
-
 ```solidity
 // Manage token whitelist
 address[] public whitelistedTokens;
@@ -196,10 +189,9 @@ function addIncentive(
     // ...
 }
 ```
-
 {% endcode %}
 
----
+***
 
 ### Threat 4: System errors due to incorrect configuration during contract initialization
 
@@ -213,18 +205,17 @@ If a contract is deployed with an incorrect address, it may not function correct
 
 #### Guideline
 
-> - **Verify all contract initializations for zero addresses and essential parameters**
-> - **Validate the rational range of initial configuration parameters**
-> - **Ensure the integrity of the initial state, such as initial deposit root settings**
-> - **Ensure the immutability of the initialization function and prevent re-initialization (use `__disableInitializers()`)**
-> - **Implement a rollback mechanism for major parameter changes**
+> * **Verify all contract initializations for zero addresses and essential parameters**
+> * **Validate the rational range of initial configuration parameters**
+> * **Ensure the integrity of the initial state, such as initial deposit root settings**
+> * **Ensure the immutability of the initialization function and prevent re-initialization (use `__disableInitializers()`)**
+> * **Implement a rollback mechanism for major parameter changes**
 
 #### Best Practice
 
 [`BlockRewardController.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BlockRewardController.sol#L71-L88)
 
 {% code overflow="wrap" %}
-
 ```solidity
 function initialize(
     address _bgt,
@@ -248,7 +239,6 @@ function initialize(
     beaconDepositContract = IBeaconDeposit(_beaconDepositContract);
 }
 ```
-
 {% endcode %}
 
 [`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L117-L123)
@@ -262,7 +252,7 @@ function initialize(address _owner) external initializer {
 }
 ```
 
----
+***
 
 ### Threat 5: Unauthorized reward withdrawal or manipulation due to incorrect access control
 
@@ -276,9 +266,9 @@ An attacker stealing another user's rewards is a significant threat, but the `on
 
 #### Guideline
 
-> - **Log all administrative activities (permission changes, critical function calls, etc.)**
-> - **Use modifiers like `onlyOwner` and `onlyDistributor` clearly**
-> - **Adhere to the principle of least privilege for each address, role, or component**
+> * **Log all administrative activities (permission changes, critical function calls, etc.)**
+> * **Use modifiers like `onlyOwner` and `onlyDistributor` clearly**
+> * **Adhere to the principle of least privilege for each address, role, or component**
 
 <table><thead><tr><th width="135.546875" align="center">Role</th><th width="556.265625">Responsibilities &#x26; Permissions</th><th data-hidden>Example Functions</th></tr></thead><tbody><tr><td align="center">Owner</td><td>- Holds overall ownership of the contract<br>- Appoints and dismisses Admin roles<br>- Sets the most critical contract parameters (e.g., adding incentive tokens, delegating pause/resume authority)<br>- Executes contract upgrades (when using a proxy pattern)</td><td>transferOwnership(address newOwner), addAdmin(address admin), removeAdmin(address admin), setProtocolFee(uint256 fee), pause(), unpause(), upgradeTo(address newImplementation)</td></tr><tr><td align="center">Operator</td><td>- Performs routine system operation tasks (more limited than Owner, specific function execution rights)<br>- Executes periodic processes (e.g., triggering reward distribution logic, updating oracle price information)<br>- Monitors system status and records relevant data</td><td>triggerRewardDistribution(), updatePriceOracle(address asset, uint256 price), recordSystemMetrics()</td></tr><tr><td align="center">User</td><td>- Uses the core functions of the protocol (e.g., asset deposit, swap, loan, repayment)<br>- Views and manages their own account-related information (e.g., checking balance, claiming rewards)<br>- Participates in governance (for token holders, voting, etc.)</td><td>deposit(address asset, uint256 amount), withdraw(address asset, uint256 amount), claimRewards(), getBalance(address user, address asset), voteOnProposal(uint256 proposalId, bool support)</td></tr></tbody></table>
 
@@ -323,7 +313,7 @@ function getReward(
 }
 ```
 
----
+***
 
 ### Threat 6: Cumulative loss of user rewards due to precision errors in division operations during reward calculation
 
@@ -337,27 +327,26 @@ Due to the limited calculation precision of the contract, users may receive slig
 
 #### Guideline
 
-> - **Add logic to verify the accuracy of the claimed reward amount**
->   - Use the **`_verifyRewardCalculation`** function to reverse-calculate and verify the reward amount
->   - Set an [error margin of 0.01%](../../reference.md#id-0.01) (a common tolerance in most financial systems)
-> - **Recommend using FixedPointMathLib**
->   - Use functions like `mulDiv` to perform multiplication and division safely while preserving maximum precision
-> - **User-favorable rounding policy**
+> * **Add logic to verify the accuracy of the claimed reward amount**
+>   * Use the **`_verifyRewardCalculation`** function to reverse-calculate and verify the reward amount
+>   * Set an [error margin of 0.01%](../../reference.md#id-0.01) (a common tolerance in most financial systems)
+> * **Recommend using FixedPointMathLib**
+>   * Use functions like `mulDiv` to perform multiplication and division safely while preserving maximum precision
+> *   **User-favorable rounding policy**
 >
->   - If a user is entitled to a reward but the amount is truncated to zero by division, guarantee a minimum value (1 wei)
+>     * If a user is entitled to a reward but the amount is truncated to zero by division, guarantee a minimum value (1 wei)
 >
->   ```solidity
->   if (balance > 0 && earnedAmount == 0 && rewardPerTokenDelta > 0) {
->       earnedAmount = 1; // Guarantee at least 1 wei
->   }
->   ```
+>     ```solidity
+>     if (balance > 0 && earnedAmount == 0 && rewardPerTokenDelta > 0) {
+>         earnedAmount = 1; // Guarantee at least 1 wei
+>     }
+>     ```
 
 #### Best Practice
 
 `Custom Code`
 
 {% code overflow="wrap" %}
-
 ```solidity
 // Improving the _processIncentives function in the existing RewardVault.sol
 contract RewardVault is ... {
@@ -399,11 +388,9 @@ contract RewardVault is ... {
     // ... existing code ...
 }
 ```
-
 {% endcode %}
 
 {% code overflow="wrap" %}
-
 ```solidity
 // Improving the earned function in the existing StakingRewards.sol
 contract StakingRewards is ... {
@@ -440,10 +427,9 @@ contract StakingRewards is ... {
     // ... existing code ...
 }
 ```
-
 {% endcode %}
 
----
+***
 
 ### Threat 7: Double accumulation of rewards by withdrawing all LP tokens and calling notifyRewardAmount
 
@@ -458,14 +444,13 @@ This can cause a temporary calculation error in the reward distribution logic or
 
 #### Guideline
 
-> - **Prevent `totalSupply` from becoming zero by requiring a minimum LP token deposit when creating a reward vault.**
+> * **Prevent `totalSupply` from becoming zero by requiring a minimum LP token deposit when creating a reward vault.**
 
 #### Best Practice
 
 `Custom Code`
 
 {% code overflow="wrap" %}
-
 ```solidity
 // Apply minimum LP token deposit requirement
 contract RewardVaultFactory {
@@ -505,11 +490,9 @@ contract RewardVaultFactory {
     // ... existing code ...
 }
 ```
-
 {% endcode %}
 
 {% code overflow="wrap" %}
-
 ```solidity
 contract RewardVault is RewardVault {
     // ... existing code ...
@@ -528,10 +511,9 @@ contract RewardVault is RewardVault {
     // ...
 }
 ```
-
 {% endcode %}
 
----
+***
 
 ### Threat 8: Reward suspension due to normal removal of an incentive token
 
@@ -545,33 +527,29 @@ If an administrator removes an incentive while users are still eligible for rewa
 
 #### Guideline
 
-> - **Incentive token removal or replacement should be queued and applied after a delay (3 hours).**
+> * **Incentive token removal or replacement should be queued and applied after a delay (3 hours).**
+>   *   This is to align with the maximum reward claim delay of [3 hours (MAX\_REWARD\_CLAIM\_DELAY)](../../reference.md#undefined-3) in the `BGTIncentiveDistributor`.
 >
->   - This is to align with the maximum reward claim delay of [3 hours (MAX_REWARD_CLAIM_DELAY)](../../reference.md#undefined-3) in the `BGTIncentiveDistributor`.
->
->     ```solidity
->     // BGTIncentiveDistributor.sol
->     uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
->     ```
->
->   - To be added to the queue, it must pass validation logic.
->     - [Incentive Token Removal](../../reference.md#undefined-4)
->       - The current balance of the incentive token must be zero.
->       - Must be the `FactoryVaultManager`.
->       - The token to be removed must be on the whitelist.
->     - Adding an Incentive Token
->       - Only `FactoryOwner` can add.
->   - `addIncentive` cannot be called for a token in the removal queue.
->
-> - **Changes to the reward vault's structure (adding/removing tokens) must be clearly communicated to users in advance and displayed on the UI.**
->   - Create a bot that listens for `IncentiveTokenWhitelisted` and `IncentiveTokenRemoved` events to display a popup on the protocol's website when a change occurs.
+>       ```solidity
+>       // BGTIncentiveDistributor.sol
+>       uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
+>       ```
+>   * To be added to the queue, it must pass validation logic.
+>     * [Incentive Token Removal](../../reference.md#undefined-4)
+>       * The current balance of the incentive token must be zero.
+>       * Must be the `FactoryVaultManager`.
+>       * The token to be removed must be on the whitelist.
+>     * Adding an Incentive Token
+>       * Only `FactoryOwner` can add.
+>   * `addIncentive` cannot be called for a token in the removal queue.
+> * **Changes to the reward vault's structure (adding/removing tokens) must be clearly communicated to users in advance and displayed on the UI.**
+>   * Create a bot that listens for `IncentiveTokenWhitelisted` and `IncentiveTokenRemoved` events to display a popup on the protocol's website when a change occurs.
 
 #### Best Practice
 
 `Custom Code`
 
 {% code overflow="wrap" %}
-
 ```solidity
 // 1. Declare state variables and structs
 contract RewardVault {
@@ -625,12 +603,13 @@ contract RewardVault {
     }
 }
 ```
-
 {% endcode %}
 
-<br>
+\
 
----
+
+***
 
 Footnotes
+
 [^1]: The core reward claim function, ensuring state synchronization with `onlyOperatorOrUser` access control and the `updateReward` modifier.
