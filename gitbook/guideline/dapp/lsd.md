@@ -11,9 +11,9 @@ icon: d-and-d
 공격자가 iBERA/BERA 교환 비율을 대량 거래로 순간 조작하면 부당이득을 취하고 다른 사용자들은 손실을 보게 된다.\
 이는 결국 프로토콜의 자산을 감소시키고 사용자 신뢰를 저해하여 시스템 안정성을 해친다.
 
-#### 영향도&#x20;
+#### 영향도
 
-`Medium`&#x20;
+`Medium`
 
 프로토콜 자산 감소와 신뢰 저하로 시스템 안정성에 직접적 영향을 미칠 수 있기 때문에 **`Medium`**&#xC73C;로 평가한다.
 
@@ -54,12 +54,12 @@ function mint(address receiver) public payable returns (uint256 shares) {
 
 ### 위협 2: 수수료 변경 전/후 대량 수확을 통한 악성 행위자 이익 극대화
 
-악성 행위자가 프로토콜 수수료 변경 시점을 악용하여 변경 직전/직후에 보상을 대량으로 수확하면 정당한 보상 분배 시스템을 왜곡하여 자신은 부당 이익을 챙기고 다른 사용자나 프로토콜 재정에 손실을 입힐 수 있다. \
+악성 행위자가 프로토콜 수수료 변경 시점을 악용하여 변경 직전/직후에 보상을 대량으로 수확하면 정당한 보상 분배 시스템을 왜곡하여 자신은 부당 이익을 챙기고 다른 사용자나 프로토콜 재정에 손실을 입힐 수 있다.\
 이는 결국 시스템의 공정성과 신뢰도를 저해하는 결과를 낳는다.
 
-#### 영향도&#x20;
+#### 영향도
 
-`Low`&#x20;
+`Low`
 
 수수료 변경 시점을 악용해 대량 보상을 수확할 경우 일부 사용자가 부당이득을 얻고 다른 사용자나 프로토콜 재정에 손실이 발생할 수 있으나 시스템 전체의 안정성이나 보안에 미치는 영향이 제한적이기 때문에 `Low`로 평가한다.
 
@@ -104,10 +104,10 @@ function claimExternalVaultRewards(address _asset, address user)
 
 ### 위협 3: 악성행위 가능한 토큰을 통한 Bribe 시스템 오염
 
-악성행위 가능성이 있는 토큰을 Bribe 시스템에 보상토큰으로 사용할 경우 Bribe 시스템의 신뢰성과 공정성이 훼손된다. \
+악성행위 가능성이 있는 토큰을 Bribe 시스템에 보상토큰으로 사용할 경우 Bribe 시스템의 신뢰성과 공정성이 훼손된다.\
 이는 결국 정직한 프로토콜의 경쟁력을 약화시키고 생태계의 건전한 인센티브 흐름을 방해한다.
 
-#### 영향도&#x20;
+#### 영향도
 
 `Low`
 
@@ -117,7 +117,7 @@ function claimExternalVaultRewards(address _asset, address user)
 
 > * **Bribe 시스템에 사용하는 보상 토큰의 화이트리스트에 대해서** [**Lido 프로토콜의 사례와 유사하게 검증 프로세스를 포함**](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/upgrades/BribeCollectorV1_2.sol#L90-L92)**하여 시스템 오염 및 신뢰성 저해 방지**
 > * **공격자가 소액으로 여러 번의 Bribe를 시도하여 시스템을 교란하는 행위를 방지하기 위해** [**최소 Bribe 금액 한도를 설정**](../../reference.md#bribe)**하여 남용 방지**\
->   **\[출처:** [Blockchain Bribing Attacks and the Efficacy of Counterincentives](https://arxiv.org/pdf/2402.06352) **| page 11 \~ 12]**&#x20;
+>   &#xNAN;**\[출처:** [Blockchain Bribing Attacks and the Efficacy of Counterincentives](https://arxiv.org/pdf/2402.06352) **| page 11 \~ 12]**
 > *   **BribeCollector에 과도한 권한 부여 시 오남용 가능성이 있으므로 최소 권한 원칙을 적용하며, 해당 컨트랙트 사용에 대해** **Uniswap의 경우와 같이** [**타임락 기간을 2일로 적용**](https://docs.uniswap.org/concepts/governance/process#phase-3-governance-proposal)**함**
 >
 >     $$\scriptsize \text{Execute Time} = \text{Request Time} + \text{2 days} \text{ (UniswapV2 Example)}$$
@@ -162,9 +162,9 @@ function claimFees(
 소수의 검증자에게 자금이 과도하게 집중되면 이들이 대부분의 보상을 독점하여 다른 검증자들의 참여 의욕을 꺾고 신규 진입을 어렵게 만든다.\
 이는 결국 네트워크의 의사결정 권한마저 소수에게 편중시켜 탈중앙성을 해치고 시스템 전체의 안정성과 공정성을 저해하는 결과를 초래한다.
 
-#### 영향도&#x20;
+#### 영향도
 
-`Informational`&#x20;
+`Informational`
 
 소수의 검증자에게 대부분의 보상이 독점되고 네트워크의 의사결정 권한이 편중되어 탈중앙성과 시스템 공정성이 저해될 수 있으나 해당 문제는 구조적·운영상 문제로 직접적인 보안 위협보다는 네트워크 분산성과 참여 유인 저하에 영향을 미치기 때문에 `Informational`로 평가한다.
 
