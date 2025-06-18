@@ -41,19 +41,56 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
 
 {% code overflow="wrap" %}
 ```solidity
-// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
+// 로그함수 기반 연속적 투표권 시스템
 contract ConcentrationWarning {
     event ConcentrationWarning(address indexed user, uint256 concentration);
+    event VoteCast(uint256 indexed proposalId, address indexed voter, bool support, uint256 weight);
     
-    function calculateQuadraticWeight(uint256 bgtAmount) public pure returns (uint256) {
-        return sqrt(bgtAmount);
+    function calculateLogWeight(uint256 bgtAmount) public view returns (uint256) {
+        uint256 totalSupply = getTotalBGTSupply();
+        uint256 userPercentage = bgtAmount * 1e18 / totalSupply; // 18 decimals
+        
+        // 0%는 0 투표권
+        if (userPercentage == 0) return 0;
+        
+        // 로그 스케일링: percentage * log(percentage + 1) / log(101)
+        // +1은 log(0) 방지, 101은 최대값 정규화
+        uint256 logFactor = ln(userPercentage + 1e18) * 1e18 / ln(101e18);
+        
+        return bgtAmount * logFactor / 1e18;
     }
     
-    function castQuadraticVote(uint256 proposalId, bool support) external {
-        uint256 weight = calculateQuadraticWeight(getBGTBalance(msg.sender));
+    function calculateSqrtLogWeight(uint256 bgtAmount) public view returns (uint256) {
+        uint256 totalSupply = getTotalBGTSupply();
+        uint256 userPercentage = bgtAmount * 1e18 / totalSupply;
+        
+        if (userPercentage == 0) return 0;
+        
+        // 제곱근 + 로그 조합: sqrt(amount) * log_scaling
+        uint256 sqrtAmount = sqrt(bgtAmount);
+        uint256 logScale = ln(userPercentage + 1e18) * 1e18 / ln(101e18);
+        
+        return sqrtAmount * logScale / 1e18;
+    }
+    
+    function calculateAdvancedLogWeight(uint256 bgtAmount) public view returns (uint256) {
+        uint256 totalSupply = getTotalBGTSupply();
+        uint256 userPercentage = bgtAmount * 1e18 / totalSupply;
+        
+        if (userPercentage == 0) return 0;
+        
+        // 더 부드러운 곡선: amount * (log(percentage + 1) / log(101))^2
+        uint256 logFactor = ln(userPercentage + 1e18) * 1e18 / ln(101e18);
+        uint256 squaredLogFactor = logFactor * logFactor / 1e18;
+        
+        return bgtAmount * squaredLogFactor / 1e18;
+    }
+    
+    function castLogVote(uint256 proposalId, bool support) external {
+        uint256 weight = calculateLogWeight(getBGTBalance(msg.sender));
         uint256 concentration = getConcentration(msg.sender);
         
-        // 15% 이상: 경고 발생
+        // 15% 이상: 경고 발생 (모니터링용)
         if (concentration > 15e16) {
             emit ConcentrationWarning(msg.sender, concentration);
         }
@@ -61,19 +98,39 @@ contract ConcentrationWarning {
         emit VoteCast(proposalId, msg.sender, support, weight);
     }
     
-    function getConcentration(address user) public view returns (uint256) {
-        uint256 totalBGT = getTotalBGTSupply();
-        uint256 userBGT = getBGTBalance(user) + getDelegatedBGT(user);
-        return userBGT * 1e18 / totalBGT;
+    // 자연로그 근사 함수 (가스 효율적)
+    function ln(uint256 x) internal pure returns (uint256) {
+        require(x > 0, "ln: zero input");
+        
+        uint256 result = 0;
+        uint256 y = x;
+        
+        // 간단한 자연로그 근사
+        while (y >= 2e18) {
+            result += 693147180559945309; // ln(2) * 1e18
+            y = y / 2;
+        }
+        
+        // Taylor series approximation for ln(1+x) where x is small
+        if (y > 1e18) {
+            uint256 z = y - 1e18;
+            result += z - (z * z) / (2e18) + (z * z * z) / (3e36);
+        }
+        
+        return result;
     }
     
-    function isHighConcentration(address user) external view returns (bool) {
-        return getConcentration(user) > 15e16;
+    function sqrt(uint256 x) internal pure returns (uint256) {
+        if (x == 0) return 0;
+        uint256 z = (x + 1) / 2;
+        uint256 y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
+        return y;
     }
 }
-
-
-
 ```
 {% endcode %}
 
