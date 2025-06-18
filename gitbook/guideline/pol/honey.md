@@ -58,7 +58,8 @@ function isPegged(address asset) public view returns (bool) {
     if (!priceOracle.priceAvailable(asset)) return false;
     IPriceOracle.Data memory data = priceOracle.getPriceUnsafe(asset);
     if (data.publishTime < block.timestamp - priceFeedMaxDelay) return false;
-    return (1e18 - lowerPegOffsets[asset] <= data.price) && (data.price <= 1e18 + upperPegOffsets[asset]);
+    return (1e18 - lowerPegOffsets[asset] <= data.price) && (data.price <= 1e18 +
+    upperPegOffsets[asset]);                       
 }
 ```
 {% endcode %}
@@ -108,11 +109,14 @@ contract EnhancedMultiOracleSystem {
         // 1. 가격 수집
         for (uint256 i = 0; i < oracles.length; i++) {
             if (oracles[i].isActive && !oracles[i].isEmergencyPaused) {
-                try IPriceOracle(oracles[i].oracle).getPrice(asset) returns (uint256 price) {
+                try IPriceOracle(oracles[i].oracle).getPrice(asset) returns (uint256 
+                price) 
+                {
                     prices[validCount] = price;
                     weights[validCount] = oracles[i].weight;
                     validCount++;
-                } catch {}
+                } 
+                catch {}
             }
         }
         
@@ -200,7 +204,8 @@ contract StabilityRecovery {
     
     function checkAutoRecovery(address asset) external returns (bool) {
         require(
-            block.timestamp >= recoveryStates[asset].lastCheckTime + STABILITY_CHECK_INTERVAL,
+            block.timestamp >= recoveryStates[asset].lastCheckTime + 
+            STABILITY_CHECK_INTERVAL,
             "Too frequent checks"
         );
         
@@ -212,7 +217,8 @@ contract StabilityRecovery {
             } else {
                 recoveryStates[asset].stableCount++;
                 
-                if (block.timestamp >= recoveryStates[asset].recoveryStartTime + RECOVERY_CONFIRMATION_PERIOD) {
+                if (block.timestamp >= recoveryStates[asset].recoveryStartTime + 
+                    RECOVERY_CONFIRMATION_PERIOD) {
                     _resetToNormalMode(asset);
                     return true;
                 }
