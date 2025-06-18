@@ -76,23 +76,19 @@ function _getReward(address account, address recipient)
 > * **보상 비율 설정 시 최대/최소 범위 검증 및 매니저 권한 제한**
 >   *   인센티브 토큰 추가 시 `minIncentive > 0` 검증 진행
 >
->       {% code overflow="wrap" %}
 >       ```solidity
 >       // validate `minIncentiveRate` value
 >       if (minIncentiveRate == 0) MinIncentiveRateIsZero.selector.revertWith();
 >       if (minIncentiveRate > MAX_INCENTIVE_RATE) IncentiveRateTooHigh.selector.revertWith();
 >       ```
->       {% endcode %}
 >   * 인센티브 비율 변경시 최소 비율보다 높게 설정
->   * {% code overflow="wrap" %}
->     ```solidity
+>   * ```solidity
 >     // The incentive amount should be equal to or greater than the `minIncentiveRate` to avoid spamming.
 >     if (amount < minIncentiveRate) AmountLessThanMinIncentiveRate.selector.revertWith();
 >
 >     // The incentive rate should be greater than or equal to the `minIncentiveRate`.
 >     if (incentiveRate < minIncentiveRate) InvalidIncentiveRate.selector.revertWith();
 >     ```
->     {% endcode %}
 >   * 현재 incentive manager 권한
 >     * `addIncentive()`, `accountIncentives()` 으로 인센티브 토큰 물량 추가 가능
 > * **ERC20 토큰 회수 시 인센티브 토큰 및 예치 토큰을 제외하고 전송**
