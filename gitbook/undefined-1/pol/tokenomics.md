@@ -36,16 +36,16 @@ BGT 리딤 시 대상 컨트랙트가 현재 보유하고 있는 네이티브 �
 >       evm-inflation-per-block-deneb-one = 5_750_000_000
 >       ```
 >       {% endcode %}
-> * **초과 토큰 보유량 관리 및 적절한 버퍼 유지**
->   * BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
->     * BlockRewardController의 `computeReward` 함수에 boostPower로 100%를 입력하여 한 블록당 나올 수 있는 BGT 최대치를 계산
->     * EIP-4788에 맞게 HISTORY\_BUFFER\_LENGTH를 8191로 설정
->     * 위의 두 값으로 잠재적 BGT 발행량을 계산한 뒤, 현재 BGT 발행량에 더해 outstandingRequiredAmount를 계산
->     * 네이티브 토큰 잔액이 outstandingRequiredAmount값을 넘으면 burnExceedingReserves 함수를 통해 초과한 양 만큼 zero address로 소각
+>   * **초과 토큰 보유량 관리 및 적절한 버퍼 유지**
+>     * BGT 예상 발행량 계산 시 블록 버퍼 크기와 블록당 BGT 발행량 등 고려한 정확한 예상량 산출
+>       * BlockRewardController의 `computeReward` 함수에 boostPower로 100%를 입력하여 한 블록당 나올 수 있는 BGT 최대치를 계산
+>       * EIP-4788에 맞게 HISTORY\_BUFFER\_LENGTH를 8191로 설정
+>       * 위의 두 값으로 잠재적 BGT 발행량을 계산한 뒤, 현재 BGT 발행량에 더해 outstandingRequiredAmount를 계산
+>       * 네이티브 토큰 잔액이 outstandingRequiredAmount값을 넘으면 burnExceedingReserves 함수를 통해 초과한 양 만큼 zero address로 소각
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L369)
+[`BGT.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/BGT.sol#L369)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -175,8 +175,7 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 > * **하나의 보상 금고에 보상 집중할 수 없게 여러 보상 금고에게 나눠 주도록 강제**
 >   * Weight 구조체를 통해 생성되어 있는 모든 보상 금고 주소(receiver) 관리
 >   * 보상 금고 주소(receiver)로 보상을 받기 위해서는 [거버넌스를 통해 whitelist에 등록](../../reference.md#undefined-5)되어야함
->     * 단순 Weight 구조체로 생성되었다고 보상을 할당 받을 수 있는것이 아님\
->
+>     * 단순 Weight 구조체로 생성되었다고 보상을 할당 받을 수 있는것이 아님
 > *   **하나의 운영자가 여러 트랜잭션으로 하나의 금고에 보상을 할당해 보상을 집중 시키는 것을 방지**
 >
 >     {% code overflow="wrap" %}
@@ -214,9 +213,9 @@ function getMaxBGTPerBlock() public view returns (uint256 amount) {
 >   * 한도 미만이 되면 다시 할당 가능
 >   * 자세한 구현사항은 아래 [커스텀 코드](tokenomics.md#undefined-5) 참고
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L392-L394)
+[`BeraChef.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/BeraChef.sol#L392-L394)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -447,8 +446,6 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 ```
 {% endcode %}
 
-
-
 </details>
 
 <details>
@@ -546,8 +543,6 @@ function activateReadyQueuedRewardAllocation(bytes calldata valPubkey) external 
 ```
 {% endcode %}
 
-
-
 </details>
 
 ***
@@ -583,21 +578,21 @@ BGT 인플레이션과 보상 집중이 일부 소수에게 유리하게 작용�
 > * RewardAllocation 분산 강제
 >   * Weight 구조체를 통한 분산
 >     * 보상 분배 시 여러 금고(receiver)에 Weight로 비율을 명확히 할당
->     * 한 금고에 할당 가능한 최대 Weight(`maxWeightPerVault`) 제한
->     * RewardAllocation의 전체 합이 100%가 아니면 revert
->     *   코드 근거: 위협 2의 코드 \_validateWeights 확인
+>       * 한 금고에 할당 가능한 최대 Weight(`maxWeightPerVault`) 제한
+>       * RewardAllocation의 전체 합이 100%가 아니면 revert
+>       *   코드 근거: 위협 2의 코드 \_validateWeights 확인
 >
->         {% code overflow="wrap" %}
->         ```solidity
->         if (weight.percentageNumerator == 0 || weight.percentageNumerator > maxWeightPerVault) {
->             InvalidWeight.selector.revertWith();
->         }
->         if (totalWeight != ONE_HUNDRED_PERCENT) {
->             InvalidRewardAllocationWeights.selector.revertWith();
->         }
+>           {% code overflow="wrap" %}
+>           ```solidity
+>           if (weight.percentageNumerator == 0 || weight.percentageNumerator > maxWeightPerVault) {
+>               InvalidWeight.selector.revertWith();
+>           }
+>           if (totalWeight != ONE_HUNDRED_PERCENT) {
+>               InvalidRewardAllocationWeights.selector.revertWith();
+>           }
 >
->         ```
->         {% endcode %}
+>           ```
+>           {% endcode %}
 > * **보상 집중 한도 초과 시 자동 revert**
 >   * vault별 전체 할당 합계 추적
 >     * 모든 operator가 특정 vault에 할당한 전체 합계가 한도를 초과하면 해당 vault는 RewardAllocation에 포함 불가(큐잉 자체가 revert)
@@ -613,9 +608,9 @@ BGT 인플레이션과 보상 집중이 일부 소수에게 유리하게 작용�
 >   * BlockRewardController 파라미터, RewardAllocation 정책 등은 거버넌스/운영자만 변경 가능
 >     * BlockRewardController의 보상 파라미터 거버넌스 관리 참고
 
-#### Best Practice&#x20;
+#### Best Practice
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 <details>
 
@@ -671,13 +666,11 @@ function setRewardConvexity(uint256 _rewardConvexity) external onlyOwner {
 ```
 {% endcode %}
 
-
-
 </details>
 
 <details>
 
-<summary><strong>보상 분배 공식 예시</strong> </summary>
+<summary><strong>보상 분배 공식 예시</strong></summary>
 
 {% code overflow="wrap" %}
 ```solidity
@@ -720,8 +713,6 @@ function computeReward(
 ```
 {% endcode %}
 
-
-
 </details>
 
 <pre class="language-solidity" data-overflow="wrap"><code class="lang-solidity">// BGT 위임 시 순환 부스팅 방지
@@ -756,7 +747,7 @@ function checkInflationLimit() external view returns (bool) {
 
 ### 위협 4: 인센티브 토큰이 고갈된 뒤에 추가 공급을 하지 않으면 검증자의 부스트 보상 감소
 
-인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면 검증자의 부스트 보상이 급격히 감소한다. \
+인센티브 토큰이 고갈된 후 추가 공급이 이뤄지지 않으면 검증자의 부스트 보상이 급격히 감소한다.\
 보상금고의 인센티브 토큰 잔고를 실시간으로 확인할 수 없다면 검증자가 보상 감소를 사전에 인지하지 못한다.
 
 #### 영향도
@@ -768,7 +759,7 @@ function checkInflationLimit() external view returns (bool) {
 #### 가이드라인
 
 > * **보상 금고 내의 인센티브 토큰 최소 보유량을 제한**
->   * &#x20;[`minIncentiveBalance`](../../reference.md#minimumincentivethreshold) 상태 변수 추가
+>   * [`minIncentiveBalance`](../../reference.md#minimumincentivethreshold) 상태 변수 추가
 >   * setter로 변경 가능
 >   * 이벤트 로그 추가
 >   * 현재 보상금고의 인센티브 토큰 잔액을 알 수 있는 getCurrentIncentiveBalance() 함수 추가
@@ -779,9 +770,9 @@ function checkInflationLimit() external view returns (bool) {
 > * **minIncentiveBalance는 가장 최근 BGT 발행량에 각 인센티브 토큰의 incentiveRate, 보상할당 구간(guaranteeBlocks)을 곱해서 한 구간당 발행 BGT에대한 인센티브 양으로 계산**
 > * **getCurrentIncentiveBalance를 통해 보상 할당 시 모든 인센티브 토큰이 minIncentiveBalance 이상의 수량이 있는지 확인, 부족하면 할당 불가**
 
-#### Best Practice&#x20;
+#### Best Practice
 
-`커스텀 코드`&#x20;
+`커스텀 코드`
 
 {% code overflow="wrap" %}
 ```solidity
@@ -922,9 +913,9 @@ function _checkIfStillValid(Weight[] memory weights) internal view returns (bool
 > * **`onlyOwner`, `onlyRole` 등의 modifier를 명확히 사용**
 > * **관리자 활동(권한 변경, 중요 함수 호출 등)에 대한 이벤트 로깅**
 
-#### Best Practice&#x20;
+#### Best Practice
 
-&#x20;[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L373)
+[`RewardVault.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Core/src/pol/rewards/RewardVault.sol#L373)
 
 {% code overflow="wrap" %}
 ```solidity
@@ -960,7 +951,7 @@ function getReward(
 
 ***
 
-### 위협 6: claimFees 함수 프론트 러닝에 따른 사용자의 수수료 보상 왜곡&#x20;
+### 위협 6: claimFees 함수 프론트 러닝에 따른 사용자의 수수료 보상 왜곡
 
 `claimFees`함수를 호출하는 사용자 앞에서 프론트 러닝을 통한 트랜잭션 선점 시 수수료 보상을 수령하지 못했지만 HONEY를 지불해야해서 손해가 발생할 수 있다.
 
@@ -976,7 +967,7 @@ function getReward(
 >   * 기존에는 수령은 원하는 수수료 토큰의 주소 배열만 인자로 넘기는 식으로 수령
 >   * 추가적으로 각 수수료 토큰별 기대 수량을 함께 배열로 만들어 인자로 넘겨 현재 캰트랙트에 해당 수수료 토큰이 기대치에 못미치면 revert
 
-#### Best Practice&#x20;
+#### Best Practice
 
 `커스텀 코드`
 

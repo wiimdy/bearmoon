@@ -4,80 +4,15 @@ icon: rotate-reverse
 
 # dApp 보안 가이드라인: DEX
 
-<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="dex.md#id-2-lp">#id-2-lp</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-5">#id-5</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-7">#id-7</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="597.64453125">위협</th><th align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="dex.md#id-1-lp">#id-1-lp</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="dex.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-4">#id-4</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-5">#id-5</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="dex.md#id-6">#id-6</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
-### 위협 1: 토큰 가격 조작 및 플래시론 공격
-
-공격자가 플래시론을 이용해 단일 블록에서 대량의 자금을 빌려 풀 가격을 급격히 조작한 뒤 이익을 챙기고 바로 상환하여 일반 사용자가 왜곡된 가격에 거래하게 만든다.
-
-#### 영향도&#x20;
-
-`Medium`&#x20;
-
-플래시론을 이용해 단일 거래 내 대규모 자금으로 유동성 풀 가격을 인위적으로 조작할 수 있으며 일반 사용자의 거래에 직접적인 영향을 미칠 수 있기 때문에 `Medium`으로 평가한다.
-
-#### [가이드라인](../../reference.md#undefined-11)
-
-> * **플래시론 공격 방지**
->   * 프로토콜 수준에서 단일 거래가 유동성 풀 가격에 미칠 수 있는 최대 변동률을 하드캡으로 강제
->   * 트랜잭션 내 플래시론 제공 함수 호출 또는 대규모 차입-스왑-상환 패턴 감지 시 Uniswap, Balancer와 유사하게 기본 스왑 수수료 외 1%의 추가 수수료 부과하여 공격 성공시의 실익 감소 유도
->   * 동일 트랜잭션 내에서 플래시론 실행 함수 재진입을 통한 공격을 방지하기 위해 lock 제한자 적용
-> * **오라클 가격 검증**
->   * 최소 2개 이상의 독립적 오라클 가격 소스 활용하여 오라클 간 가격 편차가 1.5%를 초과할 경우 해당거래 거부 또는 추가 검증 실시
->     * Chainlink, Band Protocol 등의 오라클 네트워크에서 운용하는 임계값
->   * Compound, [Synthetix](../../reference.md#synthetix) 등의 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지\
->     $$\Delta P \approx \sigma \times \sqrt{t}  \\\space {\scriptsize (\text{Example: } \sigma = 0.5\%, t = 3 \text{min} \implies \Delta P \approx 0.5\% \times \sqrt{3} \approx 0.866\%) }$$&#x20;
->   * TWAP(Time-Weighted Average Price) 등 평균 가격을 사용해 단일 거래의 가격 조작 영향 최소화
-> * **최소 유동성 요구사항**
->   *   Balancer 기준 각 풀의 최근 N일 평균 거래량의 10% 또는 1만 달러 중 큰 값 이상을 최소 유동성으로 요구하며 이는 프로토콜 별 거버넌스에 따라 차이가 발생
->
->       $$\text{MinLiquidity} = \max\left( \text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha \right) \\ {\scriptsize ( \text{Example: } \text{MinLiquidity} = \max(10{,}000,\  150{,}000 \times 0.1 ) = 15{,}000)}$$
->   * Uniswap, KyberSwap 등의 AMM에서 슬리피지에 의한 시장 가격 왜곡을 방지하기 위해 단일 거래가 풀 잔고의 정해진 비율을 넘지 못하도록 제한\
->     (AMM 프로토콜의 리스크 모델에 따라 거래 규모 제한이 다를 수 있으며, 예시 코드 기준으로 30% 적용)\
->     $$\text{Price Impact} = 1 - \frac{x}{x + \Delta x} \space \scriptsize (x = \text{Pool Balance}, \Delta x = \text{Asset Increment}) \\ \scriptsize (\text{Example: } 1 - \frac{1}{1 + 0.4286} \approx 0.3 \approx 30\%)$$
-
-#### Best Practice
-
-[`KodiakIslandWithRouter.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol#L95-L107)
-
-{% code overflow="wrap" %}
-```solidity
-function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX96) {
-    // ... 중략 ...
-    //UniswapV3 Pool 내장 오라클 사용
-    (int56[] memory tickCumulatives,) = pool.observe(secondsAgo);
-    require(tickCumulatives.length == 2, "array len");
-    unchecked {
-        int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(uint56(interval)));
-        avgSqrtPriceX96 = avgTick.getSqrtRatioAtTick();
-    }
-}
-```
-{% endcode %}
-
-[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L37-L44)
-
-{% code overflow="wrap" %}
-```solidity
-// 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
-uint256 internal constant _MAX_IN_RATIO = 0.3e18;
-uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
-// ... 중략 ...
-_require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
-// ... 중략 ...
-_require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
-```
-{% endcode %}
-
-***
-
-### 위협 2: LP 토큰 가치 계산 및 발행 오류
+### 위협 1: LP 토큰 가치 계산 및 발행 오류
 
 풀에 유동성을 추가할 때 실제 풀 자산 가치와 발행되는 LP 토큰 가치가 일치하지 않아 신규 유동성 제공자가 과도한 이득이나 손실을 볼 수 있다.
 
-#### 영향도&#x20;
+#### 영향도
 
-`Low`&#x20;
+`Low`
 
 LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자가 실제 풀 자산 가치와 불일치하는 LP 토큰을 받을 경우 일부 사용자가 제한적으로 손실이나 이득을 볼 수 있기 때문에 `Low`로 평가한다.
 
@@ -96,7 +31,7 @@ LP 토큰 가치 계산 및 발행 오류로 인해 신규 유동성 제공자�
 > * **실시간 검증:**
 >   *   아래 수식의 일치 여부를 통해 계산된 LP 토큰의 가치와 실제 풀 자산 가치 비교
 >
->       $$\text{LP Total Supply} \times \text{Current LP Token Value}  \approx \text{LP Pool TVL}$$
+>       $$\text{LP Total Supply} \times \text{Current LP Token Value} \approx \text{LP Pool TVL}$$
 >   * 유동성 추가 트랜잭션 실행 직후 계산된 발행 예정량과 실제 발행 LP 토큰 수량이 일치하는지 확인
 
 #### Best Practice
@@ -116,11 +51,11 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 
 ***
 
-### 위협 3: 유동성 제거 타이밍 공격 및 최소 유동성 우회
+### 위협 2: 유동성 제거 타이밍 공격 및 최소 유동성 우회
 
 공격자가 가격이 급등락하는 순간을 노려 유동성을 제거해 풀 내 잔여 유동성이 기준치 이하로 떨어지거나 최소 보유 기간을 우회해 빠르게 이익을 실현할 수 있다.
 
-#### 영향도&#x20;
+#### 영향도
 
 `Low`
 
@@ -149,7 +84,7 @@ require(_polFeeCollectorPercentage <= FixedPoint.ONE, "MAX_PERCENTAGE_EXCEEDED")
 
 #### Best Practice
 
-[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)&#x20;
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L41-L44)
 
 불변량 비율 제한은 프로토콜 리스크 모델에 따라 달라질 수 있으며, 아래의 코드는 Balancer의 가중치 불변량 공식에 따른 최대/최소 불변량 제한을 명시한 코드임
 
@@ -161,11 +96,11 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 
 ***
 
-### 위협 4: 유동성 풀 불균형
+### 위협 3: 유동성 풀 불균형
 
-특정 토큰에만 대량 입출금이 반복되면서 풀 내 토큰 비율이 심하게 무너지고 이로 인해 가격이 왜곡되거나 일부 토큰의 유동성이 고갈될 수 있다.
+특정 토큰에만 대량 입출금이 반복되면서 풀 내 토큰 비율이 심하게 무너지고 이로 인해 가격이 왜곡되거나 일부 토큰의 유동성이 고갈될 수 있다. 공격자는 플래시론을 이용해 단일 블록에서 대량의 자금을 빌려 풀 가격을 급격히 조작한 뒤 이익을 챙기고 바로 상환하여 일반 사용자가 왜곡된 가격에 거래하도록 유도한다.
 
-#### 영향도&#x20;
+#### 영향도
 
 `Informational`
 
@@ -173,10 +108,20 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 
 #### 가이드라인
 
+> * **플래시론 공격 방지**
+>   * 프로토콜 수준에서 단일 거래가 유동성 풀 가격에 미칠 수 있는 최대 변동률을 하드캡으로 강제
+>   * 트랜잭션 내 플래시론 제공 함수 호출 또는 대규모 차입-스왑-상환 패턴 감지 시 Uniswap, Balancer와 유사하게 기본 스왑 수수료 외 1%의 추가 수수료 부과하여 공격 성공시의 실익 감소 유도
+>   * 동일 트랜잭션 내에서 플래시론 실행 함수 재진입을 통한 공격을 방지하기 위해 lock 제한자 적용
+> * **오라클 가격 검증**
+>   * 최소 2개 이상의 독립적 오라클 가격 소스 활용하여 오라클 간 가격 편차가 1.5%를 초과할 경우 해당거래 거부 또는 추가 검증 실시
+>     * Chainlink, Band Protocol 등의 오라클 네트워크에서 운용하는 임계값
+>   * Compound, [Synthetix](../../reference.md#synthetix) 등의 DeFi 프로토콜은 1% 이내의 오라클 괴리를 허용 한계로 지정하고 괴리 누적에 의한 유동성 공급자 손실 방지를 위해 3분 이상 갱신되지 않으면 거래 일시 정지\
+>     $$\Delta P \approx \sigma \times \sqrt{t} \\\space {\scriptsize (\text{Example: } \sigma = 0.5\%, t = 3 \text{min} \implies \Delta P \approx 0.5\% \times \sqrt{3} \approx 0.866\%) }$$
+>   * TWAP(Time-Weighted Average Price) 등 평균 가격을 사용해 단일 거래의 가격 조작 영향 최소화
 > * **자동 리밸런싱 메커니즘**
 >   *   Uniswap, Curve 등의 AMM 서비스와 같이 유동성 풀 내 자산 가치 비율 유지를 위한 목표 비율 대비 편차 [임계값 설정](../../reference.md#undefined)하여 초과 시 리밸런싱을 트리거 하도록 실시
 >
->       $$\text{Example: } \text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A+\text{Value}_B}, \quad \text{Threshold} \approx \frac{C_{gas} + C_{swap}}{\text{Value}_A + Value_B} \\ \scriptsize (|\text{Ratio}_A-\text{Target Ratio}_A| > \text{Threshold} \Rightarrow \text{Rebalance Trigger}) \\ \scriptsize C_{gas}\text{: 리밸런싱 트랜잭션을 실행하는 데 필요한 네트워크 가스 비용} \\ \scriptsize C_{swap}\text{: 유동성 풀에 지불하는 스왑 수수료} \\  \scriptsize \text{Value}_A + \text{Value}_B\text{: 풀에 예치된 자산 A와 B의 총 시장가치}$$
+>       $$\text{Example: } \text{Ratio}_A = \frac{\text{Value}_A}{\text{Value}_A+\text{Value}_B}, \quad \text{Threshold} \approx \frac{C_{gas} + C_{swap}}{\text{Value}_A + Value_B} \\ \scriptsize (|\text{Ratio}_A-\text{Target Ratio}_A| > \text{Threshold} \Rightarrow \text{Rebalance Trigger}) \\ \scriptsize C_{gas}\text{: 리밸런싱 트랜잭션을 실행하는 데 필요한 네트워크 가스 비용} \\ \scriptsize C_{swap}\text{: 유동성 풀에 지불하는 스왑 수수료} \\ \scriptsize \text{Value}_A + \text{Value}_B\text{: 풀에 예치된 자산 A와 B의 총 시장가치}$$
 >   * Uniswap의 [x\*y=k ](../../reference.md#curve-stableswap)곡선과 같이 편차 발생 시 스마트 컨트랙트에서 시 자동 리밸런싱하는 트리거를 제공하여 가격 균형 회복 유도
 > * **불균형 모니터링**
 >   * 기존 DEX 서비스와 유사하게 풀내 자산 비율, TVL 등의 주요 지표를 실시간 대시보드에서 추적 및 계산하는 기능 제공 필요
@@ -185,8 +130,13 @@ uint256 internal constant _MIN_INVARIANT_RATIO = 0.7e18;
 >   *   Curve, Balancer 등과 같이 단일 토큰으로 유동성 공급 시 자동으로 풀의 비율에 맞게 스왑 후 유동성 공급하여 풀 불균형, 가격 왜곡, 유동성 고갈을 방지하며 Balancer v1 기준 공식은 아래와 같음
 >
 >       $$V = \Pi^{n}_{i=1}B_i^{W_i} \\ \scriptsize \text{Example: } V = (B_A^{W_A}) \times (B_A^{W_A}) \times (B_C^{W_C}) \quad (n = 3) \\ (B_{A, B, C} : \text{Token}_{A,B,C}\space\text{ Balances}) \\ (W_{A, B, C}: \text{Token}_{A,B,C}\space\text{Weights})$$
+> * **최소 유동성 요구사항**
+>   *   Balancer 기준 각 풀의 최근 N일 평균 거래량의 10% 또는 1만 달러 중 큰 값 이상을 최소 유동성으로 요구하며 이는 프로토콜 별 거버넌스에 따라 차이가 발생
 >
->
+>       $$\text{MinLiquidity} = \max\left( \text{BaseAmount},\ \text{AvgVolume}_{N\text{Days}} \times \alpha \right) \\ {\scriptsize ( \text{Example: } \text{MinLiquidity} = \max(10{,}000,\ 150{,}000 \times 0.1 ) = 15{,}000)}$$
+>   * Uniswap, KyberSwap 등의 AMM에서 슬리피지에 의한 시장 가격 왜곡을 방지하기 위해 단일 거래가 풀 잔고의 정해진 비율을 넘지 못하도록 제한\
+>     (AMM 프로토콜의 리스크 모델에 따라 거래 규모 제한이 다를 수 있으며, 예시 코드 기준으로 30% 적용)\
+>     $$\text{Price Impact} = 1 - \frac{x}{x + \Delta x} \space \scriptsize (x = \text{Pool Balance}, \Delta x = \text{Asset Increment}) \\ \scriptsize (\text{Example: } 1 - \frac{1}{1 + 0.4286} \approx 0.3 \approx 30\%)$$
 
 #### Best Practice
 
@@ -229,15 +179,46 @@ function addLiquiditySingle(
 ```
 {% endcode %}
 
+[`KodiakIslandWithRouter.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Kodiak/KodiakIslandWithRouter/src/vaults/KodiakIslandWithRouter.sol#L95-L107)
+
+{% code overflow="wrap" %}
+```solidity
+function getAvgPrice(uint32 interval) public view returns (uint160 avgSqrtPriceX96) {
+    // ... 중략 ...
+    //UniswapV3 Pool 내장 오라클 사용
+    (int56[] memory tickCumulatives,) = pool.observe(secondsAgo);
+    require(tickCumulatives.length == 2, "array len");
+    unchecked {
+        int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(uint56(interval)));
+        avgSqrtPriceX96 = avgTick.getSqrtRatioAtTick();
+    }
+}
+```
+{% endcode %}
+
+[`WeightedMath.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Bex/contracts/WeightedMath.sol#L37-L44)
+
+{% code overflow="wrap" %}
+```solidity
+// 스왑 한도: 스왑 금액은 총 잔액의 해당 비율보다 클 수 없음 (30%)
+uint256 internal constant _MAX_IN_RATIO = 0.3e18;
+uint256 internal constant _MAX_OUT_RATIO = 0.3e18;
+// ... 중략 ...
+_require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
+// ... 중략 ...
+_require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
+```
+{% endcode %}
+
 ***
 
-### 위협 5: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
+### 위협 4: 토큰 스왑 슬리피지 극대화 및 최소 아웃풋 계산 오류
 
 대량 거래로 인해 실제 체결 가격이 불리하게 변동되어 예상보다 훨씬 적은 토큰을 받게 된다. 또는 최소 아웃풋 계산에 오류가 있어 사용자가 입력한 최소 수량보다 적은 토큰이 지급되어 손실이 발생할 수 있다.
 
-#### 영향도&#x20;
+#### 영향도
 
-`Informational`&#x20;
+`Informational`
 
 대량 거래로 인해 슬리피지가 급격히 커지거나 최소 아웃풋 계산 오류로 사용자가 입력한 최소 수량보다 적은 토큰을 받을 수 있으나, 이는 주로 개별 거래자의 불리한 체결로 이어지고 시스템 전체의 보안에는 직접적인 영향을 미치지 않기 때문에 `Informational`로 평가한다.
 
@@ -251,7 +232,7 @@ function addLiquiditySingle(
 >       $${\scriptsize (\text{Example: }\text{Minimum Output} = \text{Input Amount} \times (1 - \text{Slippage Tolerance}))}$$
 >   * 주요 DEX와 동일하게 슬리피지 한도 초과 감지 시 거래 자동 취소 처리
 > * **대량 거래 시 분할 처리:**
->   * [1inch](../../reference.md#undefined-15) 네트워크 등의 DEX와 동일하게 여러 DEX / 유동성 풀에 대형 거래를 분할하여 슬리피지를 최소화하고 각  거래별 슬리피지 검증 실시
+>   * [1inch](../../reference.md#undefined-15) 네트워크 등의 DEX와 동일하게 여러 DEX / 유동성 풀에 대형 거래를 분할하여 슬리피지를 최소화하고 각 거래별 슬리피지 검증 실시
 >   *   플래시론/MEV 공격 방지, 시장 안정성 확보를 위해 각 분할 거래를 서로 다른 블록에 실행하도록 제한하기 위해 분할 거래 간 최소 블록 간격 설정
 >
 >       (UniswapV3 기준으로 N값을 시간에 따라 유동적으로 지정하며 일반적으로 [30분 \~ 1시간](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Pool.sol#L246C17-L246C28) 사이를 지정함)
@@ -326,13 +307,13 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 
 ***
 
-### 위협 6: 수수료 관리 및 변경 취약점
+### 위협 5: 수수료 관리 및 변경 취약점
 
 관리자가 수수료 비율을 갑자기 크게 변경하거나 대량의 수수료를 즉시 인출해 유동성 제공자들이 예기치 못한 손실을 입을 수 있다.
 
-#### 영향도&#x20;
+#### 영향도
 
-`Informational`&#x20;
+`Informational`
 
 관리자가 수수료 비율을 갑자기 변경하거나 대량의 수수료를 인출할 경우 유동성 제공자에게 예기치 않은 손실이 발생할 수 있으나 시스템 전체의 보안에 직접적인 영향을 미치지 않는 운영상의 문제이기 때문에 `Informational`로 평가한다.
 
@@ -341,13 +322,11 @@ function executiveRebalanceWithRouter(int24 newLowerTick, int24 newUpperTick, Sw
 > * **자동화된 수수료 관리:**
 >   *   Uniswap, Balancer 등의 DEX와 같이 일정 이상의 수수료 누적 임계값 도달 시 [자동 수집 트리거](../../reference.md#undefined-16)되도록 프로토콜 레벨에서 처리
 >
->       $$\left( \text{balance0} \times 1000 - \text{amount0In} \times 3 \right) \times\left( \text{balance1} \times 1000 - \text{amount1In} \times 3 \right)\geq\text{reserve0} \times \text{reserve1} \times 1000^2 \\  \scriptsize \text{- balance0, balance1: swap 이후 풀에 남은 토큰0, 1의 잔액}\\ \text{- amount0In, amount1In: swap에 사용된 입력 토큰 0, 1의 양}\\ \text{- reserve0, reserve1: swap 이전의 토큰 0,1의 잔액}$$
->   *   Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지\
->       $$\scriptsize (\text{Example: Current Time} - \text{Last Collection Time} \geq \text{Collection Interval})$$
->
->
+>       $$\left( \text{balance0} \times 1000 - \text{amount0In} \times 3 \right) \times\left( \text{balance1} \times 1000 - \text{amount1In} \times 3 \right)\geq\text{reserve0} \times \text{reserve1} \times 1000^2 \\ \scriptsize \text{- balance0, balance1: swap 이후 풀에 남은 토큰0, 1의 잔액}\\ \text{- amount0In, amount1In: swap에 사용된 입력 토큰 0, 1의 양}\\ \text{- reserve0, reserve1: swap 이전의 토큰 0,1의 잔액}$$
+>   * Curve, SushiSwap 등과 같이 수수료 분배/인출을 정기적으로 실행하는 수집 주기를 설정하여 예측 불가능한 대량 인출 방지\
+>     $$\scriptsize (\text{Example: Current Time} - \text{Last Collection Time} \geq \text{Collection Interval})$$
 > * **권한 및 변경 관리:**
->   *   대량 인출 또는 민감한 관리자 함수 실행 시  [타임락 적용](../../reference.md#undefined-18)을 아래 수식과 같이 적용
+>   *   대량 인출 또는 민감한 관리자 함수 실행 시 [타임락 적용](../../reference.md#undefined-18)을 아래 수식과 같이 적용
 >
 >       $$\scriptsize \text{Execute Time} = \text{Request Time} + \text{2 days} \text{ (UniswapV2 Example)}$$
 
@@ -379,13 +358,13 @@ function distributeAndWithdrawCollectedFees(IERC20[] calldata tokens) external o
 
 ***
 
-### 위협 7: 풀 상태 업데이트시 불일치
+### 위협 6: 풀 상태 업데이트시 불일치
 
 풀 리밸런싱 도중 일부 토큰의 상태만 변경되고 중간에 트랜잭션이 실패하여 풀의 불변량이나 총 공급량이 맞지 않는 불일치 상태가 발생할 수 있다.
 
-#### 영향도&#x20;
+#### 영향도
 
-`Informational`&#x20;
+`Informational`
 
 풀 리밸런싱 과정에서 일부 토큰 상태만 변경되고 트랜잭션이 실패할 경우 풀의 불변량이나 총 공급량 불일치가 발생할 수 있으나 이는 주로 운영상 오류로 시스템 전체 보안에는 직접적인 영향을 미치지 않기 때문에 `Informational`로 평가한다.
 
@@ -427,7 +406,5 @@ function _calculateInvariant(uint256[] memory normalizedWeights, uint256[] memor
 {% endcode %}
 
 [^1]: [https://www.chainsecurity.com/blog/curve-lp-oracle-manipulation-post-mortem](https://www.chainsecurity.com/blog/curve-lp-oracle-manipulation-post-mortem)
-
-
 
 [^2]: [https://curve.fi/files/stableswap-paper.pdf](https://curve.fi/files/stableswap-paper.pdf)
