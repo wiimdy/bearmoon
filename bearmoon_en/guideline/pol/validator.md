@@ -4,7 +4,7 @@ icon: user-check
 
 # PoL Security Guidelines: Validator
 
-<table><thead><tr><th width="609.89453125">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#threat-1-duplicate-or-missed-validator-rewards-during-block-reward-distribution">#threat-1-duplicate-or-missed-validator-rewards-during-block-reward-distribution</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#threat-2-exploitation-of-the-operator-change-process">#threat-2-exploitation-of-the-operator-change-process</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#threat-3-funds-frozen-until-validator-exits-cap-due-to-non-existent-withdrawal-logic">#threat-3-funds-frozen-until-validator-exits-cap-due-to-non-existent-withdrawal-logic</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
+<table><thead><tr><th width="609.89453125">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="validator.md#id-1">#id-1</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="validator.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### Threat 1: Duplicate or Missed Validator Rewards During Block Reward Distribution <a href="#id-1" id="id-1"></a>
 
