@@ -20,11 +20,11 @@ Duplicate or missed validator rewards can cause losses for validators, but the p
 #### Guideline
 
 > * **Implement a mechanism to prevent duplicate processing of the same timestamp**
->   * Insert the timestamp into `_processedTimestampsBuffer` by performing a modulo operation with eip-4788's [history\_buf\_length](../../reference.md#history_buf_length).
->   * According to EIP-4788's ring buffer mechanism, it is overwritten after 8191 slots ([approximately 4.55 hours, based on a 2-second interval](../../reference.md#id-4.55-8191-2)), which matches the reward cycle.
+>   * Insert the timestamp into `_processedTimestampsBuffer` by performing a modulo operation with EIP-4788's [history\_buf\_length](../../reference.md#history_buf_length)<sub>1</sub>.
+>   * According to EIP-4788's ring buffer mechanism, it is overwritten after 8191 slots ([approximately 4.55 hours, based on a 2-second interval](../../reference.md#id-4.55-8191-2)<sub>2</sub>), which matches the reward cycle.
 > *   **Cryptographic verification of the Beacon block root and proposer index/pubkey**
 >
->     * Use the [`SSZ.verifyProof`](../../reference.md#ssz.verifyproof) function to verify the proposer's reward eligibility based on the beacon root of a specific timestamp.
+>     * Use the [`SSZ.verifyProof`](../../reference.md#ssz.verifyproof)<sub>3</sub> function to verify the proposer's reward eligibility based on the beacon root of a specific timestamp.
 >     * A revert occurs if verification fails.
 >
 >     ```solidity
@@ -39,7 +39,7 @@ Duplicate or missed validator rewards can cause losses for validators, but the p
 
 {% code overflow="wrap" fullWidth="false" %}
 ```solidity
-// 검증자 보상 수령시 timestamp 기록, beacon block과 index 일치 비교
+// Record reward timestamp; verify with beacon block and index.
 function distributeFor( ...
     // Process the timestamp in the history buffer, reverting if already processed.
     bytes32 beaconBlockRoot = _processTimestampInBuffer(nextTimestamp);
@@ -52,7 +52,7 @@ function distributeFor( ...
 ...
 }
 
-// _processedTimestampsBuffer를 사용하여 timestamp에 해당하는 보상 수령 체크
+// Check reward receipt using `_processedTimestampsBuffer` for the corresponding timestamp.
 function _processTimestampInBuffer(uint64 timestamp) internal returns (bytes32 parentBeaconBlockRoot) {
   // First enforce the timestamp is in the Beacon Roots history buffer, reverting if not found.
   parentBeaconBlockRoot = timestamp.getParentBlockRootAt();
@@ -66,7 +66,7 @@ function _processTimestampInBuffer(uint64 timestamp) internal returns (bytes32 p
   emit TimestampProcessed(timestamp);
 }
 
-// merkle tree를 이용해서 보상자 검증
+// Verify reward recipient using Merkle tree.
 function _verifyProposerIndexInBeaconBlock(
   bytes32 beaconBlockRoot,
   bytes32[] calldata proposerIndexProof,
@@ -95,13 +95,13 @@ The damage from a malicious operator is limited to reputational damage and reduc
 
 #### Guideline
 
-> * **Prevent abrupt changes during operator changes through a** [**queue mechanism and time delay**](../../reference.md#beacondeposit)
+> * **Prevent abrupt changes during operator changes through a** [**queue mechanism and time delay**](../../reference.md#beacondeposit)<sub>**4**</sub>
 >   * Insert an operator change request into a queue by setting key = pubkey, value = new operator.
 >   * An operator change is only possible after a 1-day delay (currently implemented in the contract code).
 > * **Mechanism for forced operator change/cancellation through governance or a trusted third party**
 >   * Verify that `msg.sender` of `cancelOperatorChange` is the operator or governance.
 >   * Impose penalties for actions like intentional and sudden increases or decreases in commission by the operator.
-> * **During an operator change, establish a** [**lock-up period and gradual transfer of authority**](../../reference.md#beacondeposit) **for existing deposits**
+> * **During an operator change, establish a** [**lock-up period and gradual transfer of authority**](../../reference.md#beacondeposit)<sub>**4**</sub> **for existing deposits** &#x20;
 >   * Initially, grant only reward distribution rights to allow boosters to evaluate the operator → After providing time to unboost (unboost delay = 2000 blocks), grant the authority to change the commission.
 > * **Prevent the operator address from being set to the zero address**
 
@@ -111,7 +111,7 @@ The damage from a malicious operator is limited to reputational damage and reduc
 
 {% code overflow="wrap" %}
 ```solidity
-// 첫 deposit시 operator가 zero address인지 검증
+// Check if operator is zero address on first deposit.
 function deposit( ...
 if (_operatorByPubKey[pubkey] == address(0)) {
     if (operator == address(0)) {
@@ -120,7 +120,7 @@ if (_operatorByPubKey[pubkey] == address(0)) {
     ...
 }
 
-// operator 변경시 타임락 적용
+// Apply timelock when changing operator
 function acceptOperatorChange(bytes calldata pubkey) external {
     ...
 
@@ -146,7 +146,7 @@ Currently, Berachain does not have a logic for validators to voluntarily withdra
 
 `Low`
 
-Funds are frozen due to the [absence of a voluntary withdrawal logic](../../reference.md#undefined-1), but they can be recovered upon forced exit according to Berachain's [ValidatorSetCap](../../reference.md#validatorsetcap). This has a potential impact on network stability rather than asset loss, so it is rated as `Low`.
+Funds are frozen due to the [absence of a voluntary withdrawal logic](../../reference.md#undefined-1)<sub>5</sub>, but they can be recovered upon forced exit according to Berachain's [ValidatorSetCap](../../reference.md#validatorsetcap)<sub>6</sub>. This has a potential impact on network stability rather than asset loss, so it is rated as `Low`.
 
 #### Guideline
 

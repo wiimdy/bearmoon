@@ -4,33 +4,33 @@ description: 📚 Reference Footnote List
 
 # References
 
-#### history_buf_length
+#### 1. history\_buf\_length
 
 EIP-4788 standard's 8191 slot circular buffer, Berachain uses 2-second intervals instead of 12 seconds for faster proof processing
 
-#### SSZ.verifyProof
-
-Simple Serialize based Merkle proof verification, transaction automatically fails if an incorrect proposer index is submitted
-
-#### Minimum 4.55 hours (8191 \* 2 seconds)
+#### 2. Minimum 4.55 hours (8191 \* 2 seconds)
 
 Minimum waiting time to prevent buffer overwriting, 8 times faster processing cycle than Ethereum standard
 
-#### BeaconDeposit Contract Operator Change Process (Queue/Timelock)
+#### 3. SSZ.verifyProof
+
+Simple Serialize based Merkle proof verification, transaction automatically fails if an incorrect proposer index is submitted
+
+#### 4. BeaconDeposit Contract Operator Change Process (Queue/Timelock)
 
 24-hour delayed execution to prevent governance attacks, securing time for community intervention in case of malicious changes
 
-#### Operator Role - Regarding Reward Distribution, Commission Setting
+#### 5. Voluntary Withdrawal Not Supported
 
-Phased authority grant for new operator reliability verification, automatic penalty for sudden fee increases (>20%)
+Currently unimplemented, increasing validator dependency; a queue system and 2-day timelock are planned for future introduction
 
-#### ValidatorSetCap, Forced Ejection Mechanism
+#### 6. ValidatorSetCap, Forced Ejection Mechanism
 
 Automatic ejection when validator count reaches the upper limit due to network stability priority policy, providing a fund recovery path for existing validators
 
-#### Voluntary Withdrawal Not Supported
+#### &#x20;Operator Role - Regarding Reward Distribution, Commission Setting
 
-Currently unimplemented, increasing validator dependency; a queue system and 2-day timelock are planned for future introduction
+Phased authority grant for new operator reliability verification, automatic penalty for sudden fee increases (>20%)
 
 #### RewardVault Contract getReward()
 
@@ -62,7 +62,7 @@ TradFi standard allowable error as Berachain reward calculation verification sta
 
 #### Maximum Incentive Reward Claim Wait Time
 
-Standardized MAX_REWARD_CLAIM_DELAY of 3 hours in BGTIncentiveDistributor to protect users from sudden token removal
+Standardized MAX\_REWARD\_CLAIM\_DELAY of 3 hours in BGTIncentiveDistributor to protect users from sudden token removal
 
 #### Berachain Incentive Management Process - Governance Proposal (Direct Token Removal Not Supported)
 
@@ -90,7 +90,7 @@ Mechanism to block reward allocation to depleted vaults by setting a minimum inc
 
 #### **De-pegging Thresholds (0.1%, 0.2%, 0.5%) Rationale**
 
-0.1% = Minimum arbitrage profit margin vs. gas fees, 0.2% = Honey system DEFAULT_PEG_OFFSET value, 0.5% = Chainlink oracle deviation tolerance upper limit
+0.1% = Minimum arbitrage profit margin vs. gas fees, 0.2% = Honey system DEFAULT\_PEG\_OFFSET value, 0.5% = Chainlink oracle deviation tolerance upper limit
 
 #### **Market Volatility Data**
 
@@ -147,9 +147,9 @@ Minimum 14-day notice period from governance proposal approval to actual impleme
 
 **Liquity Stress Test Case (2021.05.19)**
 
-- Over 300 Troves were liquidated during a 47% ETH price drop ($3,400 → $1,800)
-- The Stability Pool fully absorbed 93.5M LUSD of debt, maintaining system solvency
-- Demonstrated prevention of cascading liquidations by quickly entering and recovering from Recovery Mode
+* Over 300 Troves were liquidated during a 47% ETH price drop ($3,400 → $1,800)
+* The Stability Pool fully absorbed 93.5M LUSD of debt, maintaining system solvency
+* Demonstrated prevention of cascading liquidations by quickly entering and recovering from Recovery Mode
 
 #### ERC-4626 Inflation Attack Prevention
 
@@ -197,7 +197,7 @@ Prevents drastic liquidity pool fluctuations by limiting increases to a maximum 
 
 #### TWAP Calculation N-Block Average
 
-Settlement based on an N-block average price to prevent temporary price manipulation, considering block number differences between protocols
+Settlement based on an N-block average price to prevent temporary price manipulation, considering block number differences between protocols\
 (Based on Uniswap V3, the N value is dynamically set according to time, typically specified between [30 minutes to 1 hour](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Pool.sol#L246))
 
 #### Curve LP Oracle Manipulation Prevention Case
@@ -250,16 +250,16 @@ Uniswap V3-style block-by-block updates and pre-reflection of compound() to sett
 
 #### Preventing Fee Change Timing Exploitation
 
-[Blocks simultaneous fee changes and reward harvesting](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Factory.sol#L61-L72) by pre-reflecting outstanding rewards during updateFee() execution and restricting KEEPER_ROLE permissions
+[Blocks simultaneous fee changes and reward harvesting](https://github.com/Uniswap/v3-core/blob/d8b1c635c275d2a9450bd6a78f3fa2484fef73eb/contracts/UniswapV3Factory.sol#L61-L72) by pre-reflecting outstanding rewards during updateFee() execution and restricting KEEPER\_ROLE permissions
 
 #### Bribe System Token Verification
 
-Prevents system contamination through whitelist operation, setting a minimum Bribe amount limit, and applying the principle of least privilege and timelocks to the BribeCollector
+Prevents system contamination through whitelist operation, setting a minimum Bribe amount limit, and applying the principle of least privilege and timelocks to the BribeCollector\
 (Example of applying a [4% Bribe rate](https://github.com/oo-00/Votium/blob/3993b7cb0d98cfc7a97d7a7ad8828ab6ce363ad1/contracts/Votium.sol#L25) from Votium, a Curve Finance-derived LSD platform)
 
 #### Validator Staking Limit Restriction
 
-Mitigates centralization by limiting individual validator's maximum stake with MAX_EFFECTIVE_BALANCE, preventing fund concentration and ensuring reward distribution
+Mitigates centralization by limiting individual validator's maximum stake with MAX\_EFFECTIVE\_BALANCE, preventing fund concentration and ensuring reward distribution
 
 #### Automated Delegated Fund Distribution
 
