@@ -4,13 +4,15 @@ icon: plane-arrival
 
 # dApp 보안 가이드라인: Lending
 
+
+
 <table><thead><tr><th width="495.3115234375">위협</th><th width="215.7291259765625" align="center">영향도</th></tr></thead><tbody><tr><td><a data-mention href="lending.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="lending.md#id-2-erc-4626">#id-2-erc-4626</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-3-recovery-mode">#id-3-recovery-mode</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="lending.md#id-4-owner">#id-4-owner</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
 ### 위협 1: 대량 청산이 담보 가격 하락을 유발하여 추가 청산을 촉발하는 악순환
 
-대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들의 담보 자산 손실 및 프로토콜의 부실 채권을 생성한다.
+대규모 청산이 담보 자산의 급격한 가격 하락을 유발하고, 이는 다시 더 많은 포지션의 청산을 촉발하는 연쇄 반응을 일으킨다. 이 악순환은 사용자들의 담보 자산 손실 및 프로토콜의 부실 채권을 생성한다.&#x20;
 
-#### 영향도
+#### 영향도&#x20;
 
 `Medium`
 
@@ -18,30 +20,30 @@ icon: plane-arrival
 
 #### 가이드라인
 
-> * [**연쇄반응**](../../reference.md#undefined-10) **방지 메커니즘**
->   *   Recovery Mode에서 담보 상환 제한
+> *   [**연쇄반응**](../../reference.md#undefined-10) **방지 메커니즘**
 >
->       {% code overflow="wrap" %}
->       ```solidity
->       function _requireValidAdjustmentInCurrentMode(...) {...
->            // recoveryMode에서 담보 상환 불가
->            if (_isRecoveryMode) {
->               require(_collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode");
->               if (_isDebtIncrease) {
->                   _requireICRisAboveCCR(newICR);
->                   _requireNewICRisAboveOldICR(newICR, oldICR);
->               }
->               ...
->       }
->                   
->       // recoveryMode에서 대출 포지션 닫기 불가            
->       function closeDen(...) {
->       ...
->       require(!isRecoveryMode, "BorrowerOps: Operation not permitted during Recovery Mode");
->       }
->       ```
->       {% endcode %}
+>     *   Recovery Mode에서 담보 상환 제한
 >
+>         {% code overflow="wrap" %}
+>         ```solidity
+>         function _requireValidAdjustmentInCurrentMode(...) {...
+>              // recoveryMode에서 담보 상환 불가
+>              if (_isRecoveryMode) {
+>                 require(_collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode");
+>                 if (_isDebtIncrease) {
+>                     _requireICRisAboveCCR(newICR);
+>                     _requireNewICRisAboveOldICR(newICR, oldICR);
+>                 }
+>                 ...
+>         }
+>                     
+>         // recoveryMode에서 대출 포지션 닫기 불가            
+>         function closeDen(...) {
+>         ...
+>         require(!isRecoveryMode, "BorrowerOps: Operation not permitted during Recovery Mode");
+>         }
+>         ```
+>         {% endcode %}
 >
 >
 > * **Dynamic Risk Parameters**
@@ -98,7 +100,7 @@ icon: plane-arrival
 
 공격자는 ERC-4626 볼트의 총 공급량이 거의 없을 때 아주 적은 지분을 예치한 후, 자산을 볼트에 직접 전송하여 자신의 지분 가치를 부풀린다. 이후 예치하는 사용자들은 부풀려진 지분 가격 때문에 훨씬 적은 지분을 받게 되어, 사실상 공격자에게 자신의 자산을 빼앗기는 손해를 입게 된다. 유사한 [과거 사례](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)도 존재한다.
 
-#### 영향도
+#### 영향도&#x20;
 
 `Low`
 
@@ -109,14 +111,14 @@ icon: plane-arrival
 > * **Virtual Shares 메커니즘 구현**
 >   * 초기 배포 시 가상 지분 및 자산 설정
 >   * [OpenZeppelin의 decimal offset 9자리 적용](https://github.com/OpenZeppelin/openzeppelin-contracts/pull/3979)
->   * 최소 예치금 임계값으로 $NECT 처럼 69개 이상 share 받도록 강제 설정([오픈제플린 권장사항](https://docs.openzeppelin.com/contracts/5.x/erc4626): 최소 100개 이상의 share)
+>   * 최소 예치금 임계값으로 $NECT 처럼 69개 이상 share 받도록 강제 설정([오픈제플린 권장사항](https://docs.openzeppelin.com/contracts/5.x/erc4626): 최소 100개 이상의 share)&#x20;
 > * **부트스트랩 기간 보호 강화**
 >   * `deposit()`,`mint()`함수에도 `whenNotBootstrapPeriod` 적용
 >   * `totalSupply ≈ 0` 상태 감지 및 자동 보호 모드 활성화
 
 #### Best Practice
 
-[`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Beraborrow/src/core/LiquidStabilityPool.sol#L131-L134)
+[`LiquidStabilityPool.sol`](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Beraborrow/src/core/LiquidStabilityPool.sol#L131-L134)&#x20;
 
 ```solidity
 modifier whenNotBootstrapPeriod() {
@@ -185,11 +187,11 @@ Recovery Mode 진입 판단이나 전환 로직의 오류는 시스템이 실제
 
 공격자가 담보 비율(ICR/TCR) 검증 로직을 우회하여 시스템이 [Recovery Mode](../../reference.md#recovery-mode-1)임에도 과도하게 대출을 하면, 해당 대출은 부실화될 위험이 매우 커진다.
 
-#### 영향도
+#### 영향도&#x20;
 
 `Low`
 
-Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토콜에 잠재적 손실을 끼칠 수 있다. 실제 MakerDAO의 MCD 시스템에서도 Recovery Mode 진입 시 [오류 발생 사례](https://medium.com/linum-labs/black-thursday-makerdaos-multi-collateral-dai-exploitation-and-the-plan-to-recover-c083c0b81875)가 존재한다. 하지만 담보 인출 금지 및 다중 담보 비율(ICR/TCR) 검증과 같은 강력한 보호 장치들이 이미 중첩되어 있으므로 실제 공격이 성공할 확률이 낮아`Low`로 평가한다.
+Recovery Mode 전환 로직의 실패는 부실 대출을 유발하여 프로토콜에 잠재적 손실을 끼칠 수 있다. 실제 MakerDAO의 MCD 시스템에서도 Recovery Mode 진입 시 [오류 발생 사례](https://medium.com/linum-labs/black-thursday-makerdaos-multi-collateral-dai-exploitation-and-the-plan-to-recover-c083c0b81875)가 존재한다. 하지만 담보 인출 금지 및 다중 담보 비율(ICR/TCR) 검증과 같은 강력한 보호 장치들이 이미 중첩되어 있으므로 실제 공격이 성공할 확률이 낮아`Low`로 평가한다.&#x20;
 
 #### 가이드라인
 
@@ -250,7 +252,7 @@ if (_isRecoveryMode) {
 
 Owner가 권한을 남용하여 프로토콜의 중요 파라미터를 악의적으로 변경하면, 사용자들은 예기치 않은 과도한 수수료 지불 및 자산 청산 위험 증가 등 직접적인 경제적 손실을 입게 된다.
 
-#### 영향도
+#### 영향도&#x20;
 
 `Low`
 
@@ -265,7 +267,7 @@ Owner의 악의적인 파라미터 변경은 사용자에게 직접적인 자금
 > * **파라미터 변경 제한**
 >   * MCR, CCR 변경 시 증감 최대치 제한
 >   * 수수료 변경 시 월 변경 횟수 제한
->   * 시스템 주소 변경 시 커뮤니티 투표 필수
+>   * 시스템 주소 변경 시 커뮤니티 투표 필수&#x20;
 > * **이자율 거버넌스 보호**
 >   * 이자율 변경 시 7일 타임락 적용
 >   * 이자율 변경폭 제한
