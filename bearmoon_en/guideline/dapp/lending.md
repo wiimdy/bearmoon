@@ -187,7 +187,7 @@ A failure in the Recovery Mode transition logic can lead to bad loans, causing p
 #### Guideline
 
 > * **Simultaneous verification of individual ICR (Individual Collateral Ratio) and system TCR (Total Collateral Ratio) for all position changes.**
-> * [**Mode Transition Stability**](../../reference.md#recovery-mode)
+> * [**Mode Transition Stability**](../../reference.md#id-35.-recovery-mode-transition-stability-guarantee)<sub>35</sub>
 >   * Ensure the latest prices and interest are reflected when calculating TCR.
 >   * Bulk update all position states during a mode transition.
 
