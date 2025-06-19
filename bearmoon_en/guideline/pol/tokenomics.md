@@ -572,7 +572,7 @@ Although BGT inflation and reward concentration may favor a small number of enti
 >     * [Adjust parameters](../../reference.md#id-20.-dynamic-reward-calculation-parameters)<sub>20</sub> like convexity, boostMultiplier in the reward distribution formula so that additional reward efficiency decreases rapidly as concentration increases
 >     * computeReward() formula design
 >
->     <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+>     <figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 >
 >     Source - [https://docs.berachain.com/learn/pol/blockrewards](https://docs.berachain.com/learn/pol/blockrewards)
 > * **Forced distribution in RewardAllocation**

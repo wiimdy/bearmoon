@@ -14,11 +14,11 @@ While PoS is based on the assumption that 'asset ownership = contribution,' PoL 
 
 In other words, the core of PoL is the ability to directly participate in the ecosystem while contributing to network security.
 
-|        Feature        |          PoS          |               PoL                |
+|        Feature        |          PoS          |                PoL               |
 | :-------------------: | :-------------------: | :------------------------------: |
-| Network Participation |    Simple Staking     | Liquidity Provision + LP Staking |
-|    Economic Model     |   Dual Token Model    |         Tri-Token Model          |
-|  Network Activation   | Indirect Contribution |       Direct Contribution        |
+| Network Participation |     Simple Staking    | Liquidity Provision + LP Staking |
+|     Economic Model    |    Dual Token Model   |          Tri-Token Model         |
+|   Network Activation  | Indirect Contribution |        Direct Contribution       |
 
 Berachain's PoL is designed with the following **tri-token model**.
 
@@ -30,13 +30,13 @@ Through this tri-token structure, Berachain enables an economic flywheel structu
 
 _\*BYUSD: A token created by bridging and transferring PayPal USD (PYUSD) to Berachain._
 
----
+***
 
 ### Berachain Flywheel <a href="#id-2.2" id="id-2.2"></a>
 
 Berachain has designed a **flywheel** based on PoL to connect the rewards among network participants (protocols, validators, liquidity providers) into a single structure, aiming for long-term health.
 
-In this structure, competition for boosts among validators, profit optimization strategies among liquidity providers, and competition for liquidity among dApp protocols are induced, leading to a virtuous cycle where the entire ecosystem's liquidity and security grow together.
+In this structure, competition for boosts among validators, profit optimization strategies among liquidity providers, and competition for liquidity among dApp protocols are induced, leading to a virtuous cycle where the entire ecosystem's liquidity and security grow together.\
 In other words, in the PoL structure, it operates not just as a simple reward distribution system but as a system that creates the driving force for ecosystem growth through strategic competition among network participants.
 
 The specific flywheel operates as follows for each participant:
@@ -53,7 +53,7 @@ As a result, when the flywheel operates normally, it forms the following virtuou
 
 This ultimately promotes the **growth and stability** of the entire Berachain network.
 
----
+***
 
 Berachain's PoL is a structure that satisfies both network security and liquidity, inducing participation based on actual use to activate the ecosystem. Additionally, the governance token, BGT, is distributed only to actual ecosystem participants, allowing them to become governance participants.
 
@@ -61,7 +61,7 @@ However, PoL is not perfect.
 
 If the flywheel operates normally, it leads to a structure that benefits everyone, but as it is a liquidity-based consensus algorithm, a decrease in liquidity could cause a **reverse flywheel**, destabilizing the entire ecosystem.
 
-<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 Furthermore, PoL also has issues such as liquidity concentration, BGT monopoly, and centralization risks.
 
