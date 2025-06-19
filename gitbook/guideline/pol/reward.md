@@ -19,7 +19,7 @@ icon: sack-dollar
 #### 가이드라인
 
 > * **체크-효과-상호작용(Checks-Effects-Interactions) 패턴을 준수**
-> * [**ReentrantGuard**](../../reference.md#oz-reentrancyguard-spec) **사용**
+> * [**ReentrantGuard**](../../reference.md#id-7)<sub>7</sub> **사용**
 
 #### Best Practice
 
@@ -69,7 +69,7 @@ function _getReward(address account, address recipient)
 
 #### 가이드라인
 
-> * [**인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**](../../reference.md#berachain-rewardvault-whitelist)
+> * [**인센티브 토큰 화이트리스트 관리 시 인센티브 토큰 개수 제한 및 중복 등록 방지**](../../reference.md#id-8.-rewardvault-getreward)<sub>8</sub>
 >   * **인센티브 토큰 추가 권한:** Factory Owner
 >   * **인센티브 토큰 제거 권한:** Factory Vault Manager
 >   * 현재 인센티브 토큰 최대 3개 등록 가능
@@ -317,7 +317,7 @@ function getReward(
 
 ### 위협 6: 보상 분배 계산 과정 중 나눗셈 연산 정밀도 오류 발생 시 사용자 보상 미세 손실 누적 가능
 
-보상 분배 계산 중 나눗셈 [정밀도 오류](../../reference.md#undefined-2)로 인해, 일부 사용자의 보상이 소수점 이하로 계속 손실되어 누적된다
+보상 분배 계산 중 나눗셈 [정밀도 오류](../../reference.md#id-13)<sub>13</sub>로 인해, 일부 사용자의 보상이 소수점 이하로 계속 손실되어 누적된다
 
 #### 영향도
 
@@ -329,7 +329,7 @@ function getReward(
 
 > * **보상 수령 금액의 정확성을 검증하는 로직 추가**
 >   * **`_verifyRewardCalculation`** 함수를 통해 계산 결과를 역연산하여 보상 금액 검증
->   * [오차 범위 0.01%](../../reference.md#id-0.01)로 설정 (대부분 금융에서 사용하는 오차 범위)
+>   * [오차 범위 0.01%](../../reference.md#id-14.-0.01)<sub>14</sub>로 설정 (대부분 금융에서 사용하는 오차 범위)
 > * **FixedPointMathLib 사용 권장**
 >   * `mulDiv`와 같이 정밀도를 최대한 보존하면서 안전하게 곱셈과 나눗셈을 수행
 > *   **사용자 유리한 반올림 정책**
@@ -569,14 +569,14 @@ contract RewardVault is RewardVault {
 #### 가이드라인
 
 > * **인센티브 토큰 제거 또는 교체는 큐를 이용하여 딜레이(3 hours) 이후 반영**
->   *   BGTIncentiveDistributor에서 인센티브 보상 청구 대기시간의 최대치인 [MAX\_REWARD\_CLAIM\_DELAY를 3시간](../../reference.md#undefined-3)으로 통일하기 위함
+>   *   BGTIncentiveDistributor에서 인센티브 보상 청구 대기시간의 최대치인 [MAX\_REWARD\_CLAIM\_DELAY를 3시간](../../reference.md#id-15)<sub>15</sub>으로 통일하기 위함
 >
 >       ```solidity
 >       // BGTIncentiveDistributor.sol
 >       uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
 >       ```
 >   * 큐에 넣기 위해서는 검증 로직 통과해야 함
->     * [인센티브 토큰 제거](../../reference.md#undefined-4)
+>     * [인센티브 토큰 제거](../../reference.md#id-16)<sub>16</sub>
 >       * 현재 해당 인센티브 토큰의 잔액이 없어야 함
 >       * FactoryVaultManager 여야 함
 >       * 제거할 토큰이 화이트리스트에 등록되어있는 토큰이어야 함
