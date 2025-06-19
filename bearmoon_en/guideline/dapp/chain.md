@@ -249,18 +249,18 @@ contract PermissionlessPSM {
     /**
      * @notice (Implementation of existing idea) Pause/resume deposits by setting the price instability of a specific stablecoin
      * @dev onlyOwner: Can only be called by governance or a trusted entity
-     * @param stable 불안정성이 감지된 스테이블코인 주소 (예: HONEY)
-     * @param isUnstable true로 설정 시 해당 토큰의 입금(deposit)이 중단됨
+     * @param stable The address of the stablecoin where instability was detected (e.g., HONEY)
+     * @param isUnstable If set to true, deposits for the corresponding token will be paused
      */
     function setTokenPriceInstability(address stable, bool isUnstable) external onlyOwner {
-        if (stables[stable] == 0) revert NotListedToken(stable); // 등록된 토큰인지 확인
+        if (stables[stable] == 0) revert NotListedToken(stable); // Check if the token is listed
 
         depositPausedFor[stable] = isUnstable;
         emit DepositForTokenPauseSet(stable, isUnstable);
     }
 
     /**
-     * @notice 가격 피드 컨트랙트 주소 설정
+     * @notice Sets the price feed contract address
      */
     function setPriceFeed(address _newPriceFeed) external onlyOwner {
         if (_newPriceFeed == address(0)) revert AddressZero();
@@ -268,7 +268,7 @@ contract PermissionlessPSM {
         emit PriceFeedSet(_newPriceFeed);
     }
 
-    // ... deposit, mint, withdraw 등 다른 모든 함수는 그대로 유지 ...
+    // ...all other functions like deposit, mint, withdraw, etc., remain the same...
 }
 ```
 {% endcode %}

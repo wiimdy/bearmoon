@@ -208,12 +208,12 @@ Funds are frozen due to the [absence of a voluntary withdrawal logic](../../refe
 
 {% code overflow="wrap" %}
 ```solidity
-// 출금 로직 추가 및 lock time, emergency 구현
+// Add withdrawal logic and implement lock time, emergency withdrawal
 function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentrant {
 
-    // 기본 페널티 계수 (BPS 단위, 예: 5%는 500)
+    // Base penalty factor in BPS (e.g., 5% is 500)
     uint256 public basePenaltyBps = 500;
-    // 추가 페널티 계수 (BPS 단위, 예: 10%는 1000)
+    // Additional penalty factor in BPS (e.g., 10% is 1000)
     uint256 public additionalPenaltyBps = 1000;
 
     uint256 public constant WITHDRAWAL_LOCK_PERIOD = 2 days;
@@ -235,25 +235,25 @@ function requestWithdrawal(uint256 amount, bool _isEmergency) external nonReentr
         processed: false
     }));
 
-    // 페널티 로직으로 출금에서 삭감
+    // Deduct penalty from the withdrawal amount
     ...
 if (request.isEmergency) {
 
     uint256 currentTime = block.timestamp;
 
-    // 긴급 인출은 잠금 기간 내에서만 유효해야 합니다.
+    // Emergency withdrawal must be requested within the lock period.
     require(currentTime < request.unlockTimestamp, "Emergency withdrawal only valid during lock period");
 
-    // 잠금 기간 중 남은 시간을 계산합니다.
+    // Calculate the remaining time in the lock period.
     uint256 timeRemaining = request.unlockTimestamp - currentTime;
 
-    // 남은 시간에 비례하는 변동 페널티 비율을 계산합니다.
-    // Penalty_Rate의 변동 부분 = (Time_Remaining_In_Lock / Total_Lock_Period) * Additional_Penalty_Factor
-    // 정수 연산에서 정밀도 손실을 막기 위해 곱셈을 먼저 수행합니다.
-    // 가정: additionalPenaltyBps와 WITHDRAWAL_LOCK_PERIOD 변수가 컨트랙트에 정의되어 있습니다.
+    // Calculate a variable penalty rate proportional to the remaining time.
+    // Variable Penalty Rate = (Time_Remaining_In_Lock / Total_Lock_Period) * Additional_Penalty_Factor
+    // To prevent precision loss in integer arithmetic, multiplication is performed first.
+    // Assuming additionalPenaltyBps and WITHDRAWAL_LOCK_PERIOD variables are defined in the contract.
     uint256 variablePenaltyBps = (timeRemaining * additionalPenaltyBps) / WITHDRAWAL_LOCK_PERIOD;
 
-    // 가정: basePenaltyBps 변수가 컨트랙트에 정의되어 있습니다.
+    // Assuming basePenaltyBps variable is defined in the contract.
     uint256 totalPenaltyBps = basePenaltyBps + variablePenaltyBps;
 
     penaltyAmount = (amountToWithdraw * totalPenaltyBps) / 10000;
