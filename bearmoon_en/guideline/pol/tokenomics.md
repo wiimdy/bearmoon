@@ -569,15 +569,15 @@ Although BGT inflation and reward concentration may favor a small number of enti
 > *   **Automatic detection and limitation when rewards become overly concentrated**
 >
 >     * When rewards become excessively concentrated in one validator/vault/address
->     * Adjust parameters like convexity, boostMultiplier in the reward distribution formula so that additional reward efficiency decreases rapidly as concentration increases
+>     * [Adjust parameters](../../reference.md#id-20.-dynamic-reward-calculation-parameters)<sub>20</sub> like convexity, boostMultiplier in the reward distribution formula so that additional reward efficiency decreases rapidly as concentration increases
 >     * computeReward() formula design
 >
 >     <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 >
->     Source - https://docs.berachain.com/learn/pol/blockrewards
+>     Source - [https://docs.berachain.com/learn/pol/blockrewards](https://docs.berachain.com/learn/pol/blockrewards)
 > * **Forced distribution in RewardAllocation**
 >   * Distribution through Weight struct: When distributing rewards, clearly allocate ratios to multiple vaults (receivers) with Weight
->   * Limit maximum Weight per vault: Limit maximum Weight (maxWeightPerVault) allocatable to one vault
+>   * Limit maximum Weight per vault: Limit maximum Weight (`maxWeightPerVault`) allocatable to one vault
 >   * Revert if RewardAllocation total is not 100%
 >   *   Code reference: Check \_validateWeights code in Threat 2
 >
@@ -750,7 +750,7 @@ When incentive tokens are depleted, validator rewards may temporarily decrease, 
 #### Guideline
 
 > * **Limit minimum incentive token holdings in reward vaults**
->   * Add `minIncentiveBalance` state variable
+>   * Add [`minIncentiveBalance`](../../reference.md#id-21.-minimumincentivethreshold-state-variable-spec) state variable
 >   * Changeable via setter
 >   * Add event logging
 >   * Add `getCurrentIncentiveBalance()` function to check current incentive token balance in reward vaults

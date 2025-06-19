@@ -160,12 +160,12 @@ If the minting and redeeming logic's basket modes operate separately, it can cau
 
 #### Guideline
 
-> * **Sensitivity Adjustment Criteria:** Instead of having separate basket modes for minting and redeeming, apply different stages of basket mode based on the [price fluctuation rate](../../reference.md#undefined-7).
+> * **Sensitivity Adjustment Criteria:** Instead of having separate basket modes for minting and redeeming, apply different stages of basket mode based on the [price fluctuation rate](../../reference.md#id-23.-market-volatility-data)<sub>23</sub>.
 >   * Warning Stage (0.1%): User notification if it persists for 1 minute.
 >   * (Temporary De-pegging) Restriction Stage (0.2%): Restrict minting of the asset and adjust the exchange ratio if it persists for 1 minute.
 >   * (De-pegging) Basket Stage (0.5%): Immediately activate Basket Mode if it persists for 1 minute.
 > * **Basket Mode activation should be considered a last resort for maintaining stability and should be automatically deactivated when the pegged asset's stability is restored.**
->   * **Stability Restoration:** Automatically return to normal mode after [1 hour of continuous stability (less than 0.2%)](../../reference.md#id-0.1-0.2-0.5).
+>   * **Stability Restoration:** Automatically return to normal mode after [1 hour of continuous stability (less than 0.2%)](../../reference.md#id-24.-ispegged-implementation)<sub>24</sub>.
 
 #### Best Practice
 
@@ -242,11 +242,11 @@ This is a threat in terms of user convenience, so it is rated `Informational`.
 
 #### Guideline
 
-> * **When redeeming while Basket Mode is active, the value of the de-pegged asset is assessed by referencing** [**at least 3 oracles**](../../reference.md#chainlink) \
+> * **When redeeming while Basket Mode is active, the value of the de-pegged asset is assessed by referencing** [**at least 3 oracles**](../../reference.md#id-25.-oracles-used-by-berachain-chainlink-etc)<sub>25</sub> \
 >   **(**&#x43;urrently, Berachain references reliable Chainlink oracles along with Pyth and spot oracles.**).**
 >   * In this process, only active oracles are referenced (deactivated, emergency-halted oracles are prohibited).
 > * **A clear and simple procedure is needed to notify users that de-pegged assets may be included in the redemption, the valuation criteria for de-pegged assets, and the potential for loss.**
->   * A [formula-based explanation](../../reference.md#calculateloss) of how to calculate the estimated loss from de-pegged assets.
+>   * A [formula-based explanation](../../reference.md#id-26.-calculateloss-formula-reference)<sub>26</sub> of how to calculate the estimated loss from de-pegged assets.
 > * **If necessary, consider operating an internal reserve fund at the protocol level to partially mitigate the risk of sudden losses from de-pegged assets.**
 >   * The reserve fund is composed of a portion of the fees generated during the redemption process and is operated as an internal reserve.
 >   * The reserve fund is activated only when basket mode is active and is used to minimize user losses.
