@@ -21,7 +21,7 @@ A single protocol could cause manipulation, making governance meaningless. Due t
 > * **Introduce a warning mechanism when a single entity or protocol holds more than a certain percentage (15%) of the total BGT.**
 >   * The 15% threshold is set at 3/4 of the 20% required to submit a proposal.
 > * **Reduce the influence of large holders by diminishing the power of BGT held above a certain ratio, instead of linear voting power.**
->   * Apply the square root-based [**Quadratic Voting**](../../reference.md#quadratic-voting) method to reduce the influence of large holders.
+>   * Apply the square root-based [**Quadratic Voting**](../../reference.md#id-27.-quadratic-voting)<sub>27</sub> method to reduce the influence of large holders.
 
 #### Best Practice
 
@@ -157,8 +157,8 @@ Whitelisting a vulnerable token or vault in governance could threaten the protoc
 >   * **Improved and Innovative Template:** In addition to the basic review procedure, expand the audit and review procedures.
 > * **Deploy new components by starting on a limited scale and gradually expanding to minimize potential damage.**
 >   * A phased verification process through TVL limits and participant count restrictions for whitelisted tokens and vaults.
->   * Register as an official token and vault after a [**minimum period (2-3 weeks, based on the average feedback time in DeFi)**](../../reference.md#defi-2-3) to gather opinions from ecosystem participants.
-> * **Passed proposals require a** [**timelock period**](../../reference.md#berachain-2-guardian-5-of-9-multisig) **for verification by the Guardians.**
+>   * Register as an official token and vault after a [**minimum period (2-3 weeks, based on the average feedback time in DeFi)**](../../reference.md#id-29.-average-defi-feedback-time-2-3-weeks)<sub>29</sub> to gather opinions from ecosystem participants.
+> * **Passed proposals require a** [**timelock period**](../../reference.md#id-28.-berachain-timelock-2-days-guardian-intervention-5-of-9-multisig)<sub>28</sub> **for verification by the Guardians.**
 
 #### Best Practice
 
@@ -213,7 +213,7 @@ If the foundation pursues self-interest, it is likely to lead to user losses, bu
 #### Guideline
 
 > * **When rejecting any proposal, disclose specific and objective reasons and provide a mechanism for the community to appeal.**
->   * **Appeal Mechanism:** Form an [**independent arbitration committee**](../../reference.md#undefined-8) (same process as reviewer selection) and grant it the following powers:
+>   * **Appeal Mechanism:** Form an [**independent arbitration committee**](../../reference.md#id-30.-independent-arbitration-committee-protocol-case)<sub>30</sub> (same process as reviewer selection) and grant it the following powers:
 >     * Independently review and propose replacements for decisions made by the foundation or guardians.
 >     * Re-submit rejected proposals.
 >     * Challenge unfair decisions and exercises of authority.
@@ -268,7 +268,7 @@ Governance is not yet implemented on-chain and operates through forum-based voti
 
 `Informational`
 
-The protocol also plans to implement on-chain governance, but since it is [**currently not implemented**](../../reference.md#undefined-9), it is rated as `Informational`.
+The protocol also plans to implement on-chain governance, but since it is [**currently not implemented**](../../reference.md#id-31.-regarding-full-governance-implementation)<sub>31</sub>, it is rated as `Informational`.
 
 #### Guideline
 
@@ -363,7 +363,7 @@ It can affect user trust and investment direction, but it is not a direct vulner
 
 #### Guideline
 
-> * **Allow a** [**minimum notice period of 14 days**](../../reference.md#defi-14) **from the time a governance proposal passes until it is actually implemented.** > **Announce the changes through various channels a total of three times: immediately after the proposal passes, 7 days before implementation, and 1 day before implementation.**
+> * **Allow a** [**minimum notice period of 14 days**](../../reference.md#id-32.-average-defi-notice-period-14-days)<sub>32</sub> **from the time a governance proposal passes until it is actually implemented.** > **Announce the changes through various channels a total of three times: immediately after the proposal passes, 7 days before implementation, and 1 day before implementation.**
 > * **Provide a longer notice period (up to 30 days) for changes that directly affect user assets (such as fees, interest rates, liquidation thresholds) to ensure users have enough time to respond.**
 > * **Provide a simulation tool that allows users to check the impact of changes on their positions in advance to support proactive responses.**
 
