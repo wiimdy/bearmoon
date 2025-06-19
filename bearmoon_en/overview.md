@@ -45,7 +45,7 @@ The specific flywheel operates as follows for each participant:
 2. **Validator** → Stakes BERA → Creates Blocks (Block Creation Reward) → Distributes Rewards to Reward Vault → Receives Incentive Token Rewards
 3. **Protocol (dApp)** → Receives Liquidity → Provides Incentive Tokens
 
-<figure><img src=".gitbook/assets/unnamed.png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 As a result, when the flywheel operates normally, it forms the following virtuous cycle.
 
