@@ -172,7 +172,7 @@ If liquidity is concentrated in some vaults, it can lead to market distortion an
 
 > * **Force rewards to be distributed to multiple reward vaults to prevent concentration in a single vault.**
 >   * Manage all created reward vault addresses (receivers) through the `Weight` struct.
->   * To receive rewards, a reward vault address (receiver) must be [registered in the whitelist through governance](../../reference.md#undefined-5)<sub>19</sub>.
+>   * To receive rewards, a reward vault address (receiver) must be [registered in the whitelist through governance](../../reference.md#id-19.-whitelist-governance-proposal-management)<sub>19</sub>.
 >     * Simply being created in the `Weight` struct does not mean it can be allocated rewards.
 > *   **Prevent an operator from concentrating rewards in a single vault through multiple transactions.**
 >
@@ -196,13 +196,13 @@ If liquidity is concentrated in some vaults, it can lead to market distortion an
 >   * **`activateReadyQueuedRewardAllocation`**: Reflect the actual allocation and update the cumulative value.
 >   * **`lastActiveWeights`**: Track the last activated `RewardAllocation` for each validator.
 >   * **`operatorVaultAllocations`**: Track the total allocation ratio for each vault by operator.
->   * For detailed implementation, refer to the [Custom Code](tokenomics.md#undefined-4) below.
-> * [**Prevent a situation where multiple operators collude to concentrate rewards in a specific vault**](../../reference.md#weight)<sub>**18**</sub>**.**
+>   * For detailed implementation, refer to the [Custom Code](tokenomics.md#governance-management-of-blockrewardcontroller-reward-parameters) below.
+> * [**Prevent a situation where multiple operators collude to concentrate rewards in a specific vault**](../../reference.md#id-18.-weight-structure-reward-vault-address-management)<sub>**18**</sub>**.**
 >   * If the total allocation of all operators to a specific vault exceeds a certain limit, introduce a function to temporarily suspend reward allocation to that vault (= the vault cannot be selected in `RewardAllocation`).
 >   * Track the total allocation sum for each vault.
 >   * If the limit is exceeded, the vault cannot be included in `RewardAllocation` (queuing itself will revert).
 >   * Allocation can be resumed once it falls below the limit.
->   * For detailed implementation, refer to the [Custom Code](tokenomics.md#undefined-5) below.
+>   * For detailed implementation, refer to the [Custom Code](tokenomics.md#reward-distribution-formula-example) below.
 
 #### Best Practice
 
@@ -750,7 +750,7 @@ When incentive tokens are depleted, validator rewards may temporarily decrease, 
 #### Guideline
 
 > * **Limit minimum incentive token holdings in reward vaults**
->   * Add [`minIncentiveBalance`](../../reference.md#id-21.-minimumincentivethreshold-state-variable-spec) state variable
+>   * Add [`minIncentiveBalance`](../../reference.md#id-21.-minimumincentivethreshold-state-variable-spec)<sub>21</sub> state variable
 >   * Changeable via setter
 >   * Add event logging
 >   * Add `getCurrentIncentiveBalance()` function to check current incentive token balance in reward vaults

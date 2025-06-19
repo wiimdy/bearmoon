@@ -317,7 +317,7 @@ function getReward(
 
 ### Threat 6: Cumulative loss of user rewards due to precision errors in division operations during reward calculation <a href="#id-6" id="id-6"></a>
 
-During reward distribution calculations, division [precision errors](../../reference.md#undefined-2)<sub>9</sub> can cause some users' rewards to be consistently lost below the decimal point, leading to accumulation of losses.
+During reward distribution calculations, division [precision errors](../../reference.md#id-9.-precision-vulnerability-case)<sub>9</sub> can cause some users' rewards to be consistently lost below the decimal point, leading to accumulation of losses.
 
 #### Impact
 
@@ -329,7 +329,7 @@ Due to the limited calculation precision of the contract, users may receive slig
 
 > * **Add logic to verify the accuracy of the claimed reward amount**
 >   * Use the **`_verifyRewardCalculation`** function to reverse-calculate and verify the reward amount
->   * Set an [error margin of 0.01%](../../reference.md#id-0.01)<sub>10</sub> (a common tolerance in most financial systems)
+>   * Set an [error margin of 0.01%](../../reference.md#id-10.-error-margin-0.01-financial-system-standard)<sub>10</sub> (a common tolerance in most financial systems)
 > * **Recommend using FixedPointMathLib**
 >   * Use functions like `mulDiv` to perform multiplication and division safely while preserving maximum precision
 > *   **User-favorable rounding policy**
@@ -528,14 +528,14 @@ If an administrator removes an incentive while users are still eligible for rewa
 #### Guideline
 
 > * **Incentive token removal or replacement should be queued and applied after a delay (3 hours).**
->   *   This is to align with the maximum reward claim delay of [3 hours (MAX\_REWARD\_CLAIM\_DELAY)](../../reference.md#undefined-3)<sub>11</sub> in the `BGTIncentiveDistributor`.
+>   *   This is to align with the maximum reward claim delay of [3 hours (MAX\_REWARD\_CLAIM\_DELAY)](../../reference.md#id-11.-maximum-incentive-reward-claim-wait-time)<sub>11</sub> in the `BGTIncentiveDistributor`.
 >
 >       ```solidity
 >       // BGTIncentiveDistributor.sol
 >       uint64 public constant MAX_REWARD_CLAIM_DELAY = 3 hours;
 >       ```
 >   * To be added to the queue, it must pass validation logic.
->     * [Incentive Token Removal](../../reference.md#undefined-4)<sub>12</sub>
+>     * [Incentive Token Removal](../../reference.md#id-12.-berachain-incentive-token-management-process-governance-proposal-direct-token-removal-not-suppor)<sub>12</sub>
 >       * The current balance of the incentive token must be zero.
 >       * Must be the `FactoryVaultManager`.
 >       * The token to be removed must be on the whitelist.
