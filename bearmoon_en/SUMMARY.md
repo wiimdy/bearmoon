@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Foreword](README.md)
+* [Introduction](README.md)
 * [Berachain PoL Overview](overview.md)
 
 ## Threat Modeling <a href="#tm" id="tm"></a>
