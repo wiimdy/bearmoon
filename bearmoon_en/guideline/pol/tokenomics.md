@@ -172,7 +172,7 @@ If liquidity is concentrated in some vaults, it can lead to market distortion an
 
 > * **Force rewards to be distributed to multiple reward vaults to prevent concentration in a single vault.**
 >   * Manage all created reward vault addresses (receivers) through the `Weight` struct.
->   * To receive rewards, a reward vault address (receiver) must be [registered in the whitelist through governance](../../reference.md#undefined-5).
+>   * To receive rewards, a reward vault address (receiver) must be [registered in the whitelist through governance](../../reference.md#undefined-5)<sub>19</sub>.
 >     * Simply being created in the `Weight` struct does not mean it can be allocated rewards.
 > *   **Prevent an operator from concentrating rewards in a single vault through multiple transactions.**
 >
@@ -197,7 +197,7 @@ If liquidity is concentrated in some vaults, it can lead to market distortion an
 >   * **`lastActiveWeights`**: Track the last activated `RewardAllocation` for each validator.
 >   * **`operatorVaultAllocations`**: Track the total allocation ratio for each vault by operator.
 >   * For detailed implementation, refer to the [Custom Code](tokenomics.md#undefined-4) below.
-> * [**Prevent a situation where multiple operators collude to concentrate rewards in a specific vault.**](../../reference.md#weight)
+> * [**Prevent a situation where multiple operators collude to concentrate rewards in a specific vault**](../../reference.md#weight)<sub>**18**</sub>**.**
 >   * If the total allocation of all operators to a specific vault exceeds a certain limit, introduce a function to temporarily suspend reward allocation to that vault (= the vault cannot be selected in `RewardAllocation`).
 >   * Track the total allocation sum for each vault.
 >   * If the limit is exceeded, the vault cannot be included in `RewardAllocation` (queuing itself will revert).
