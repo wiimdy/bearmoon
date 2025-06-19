@@ -20,8 +20,8 @@ icon: d-and-d
 #### 가이드라인
 
 > * **교환 비율 계산 시 복리 효과 선적용으로 미반영된 수익이 정산되는 현상이 발생하지 않도록 누적 보상을 선반영하는 절차를 Lido 프로토콜과 유사하게** [**입/출금 트랜잭션 처리 전 compound() 함수 호출**](https://github.com/wiimdy/bearmoon/blob/1e6bc4449420c44903d5bb7a0977f78d5e1d4dff/Infrared/src/core/libraries/RewardsLib.sol#L80)**하여 처리**
-> * **외부에서 직접 컨트랙트로 자금이 유입되거나 내부 회계가** [**실시간 동기화**](../../reference.md#id-57)**되지 않으면 교환 비율이 왜곡되는 현상을 방지하기 위해,** [**Uniswap V2 컨트랙트 코드**](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L185)**와 같이 내부 회계 상 실시간 반영되도록 적용**
-> * **최초 유동성이 없는 상태에서 극소량의 예치금을 통한 교환 비율 왜곡 현상을 방지하기 위해 컨트랙트 배포 단계에서 최소 지분을 예치하여** [**zero totalsupply, zero division 현상 방지**](../../reference.md#id-56)
+> * **외부에서 직접 컨트랙트로 자금이 유입되거나 내부 회계가** [**실시간 동기화**](../../reference.md#id-57)<sub>57</sub>**되지 않으면 교환 비율이 왜곡되는 현상을 방지하기 위해,** [**Uniswap V2 컨트랙트 코드**](https://github.com/Uniswap/v2-core/blob/ee547b17853e71ed4e0101ccfd52e70d5acded58/contracts/UniswapV2Pair.sol#L185)**와 같이 내부 회계 상 실시간 반영되도록 적용**
+> * **최초 유동성이 없는 상태에서 극소량의 예치금을 통한 교환 비율 왜곡 현상을 방지하기 위해 컨트랙트 배포 단계에서 최소 지분을 예치하여** [**zero totalsupply, zero division 현상 방지**](../../reference.md#id-56)<sub>56</sub>
 
 #### Best Practice
 
