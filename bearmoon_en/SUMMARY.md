@@ -27,7 +27,7 @@
 ## Appendix
 
 * [Glossary](appendix/glossary.md)
-* [References and External Resources](appendix/ref.md)
+* [External Resources](appendix/ref.md)
 
 ***
 
