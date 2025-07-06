@@ -6,6 +6,10 @@ icon: coins
 
 <table><thead><tr><th width="595.53515625">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="tokenomics.md#id-1-bgt">#id-1-bgt</a></td><td align="center"><code>High</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-2-bgt">#id-2-bgt</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-3-lsd-boost-bgt">#id-3-lsd-boost-bgt</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-5-apr">#id-5-apr</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="tokenomics.md#id-6-claimfees">#id-6-claimfees</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
+Berachain Tokenomics
+
+<div><figure><img src="../../.gitbook/assets/Untitled-2025-07-07-0114.svg" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/Untitled-2025-07-07-01141.svg" alt=""><figcaption></figcaption></figure></div>
+
 ### Threat 1: Liquidity crisis due to native token shortage during BGT redemption <a href="#id-1-bgt" id="id-1-bgt"></a>
 
 If the target contract has an insufficient amount of native tokens during BGT redemption, some users will not be able to receive their rewards, and their reward claim transactions will be reverted, leading to a liquidity crisis.

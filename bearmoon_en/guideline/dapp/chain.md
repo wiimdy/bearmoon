@@ -8,7 +8,7 @@ icon: link
 
 # dApp Security Guidelines: Chaining
 
-<table><thead><tr><th width="595">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm-sol">#id-2-honey-permissionlesspsm-sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="chain.md#id-4-dex">#id-4-dex</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="595">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#id-1-dex-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm-sol">#id-2-honey-permissionlesspsm-sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="chain.md#id-4-dex">#id-4-dex</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### Threat 1: ERC-4626 Inflation Attack due to DEX Pool Imbalance and Cascading Liquidations <a href="#id-1-dex-erc-4626" id="id-1-dex-erc-4626"></a>
 

@@ -101,7 +101,7 @@ The damage from a malicious operator is limited to reputational damage and reduc
 > * **Mechanism for forced operator change/cancellation through governance or a trusted third party**
 >   * Verify that `msg.sender` of `cancelOperatorChange` is the operator or governance.
 >   * Impose penalties for actions like intentional and sudden increases or decreases in commission by the operator.
-> * **During an operator change, establish a** [**lock-up period and gradual transfer of authority**](../../reference.md#beacondeposit)<sub>**4**</sub> **for existing deposits** &#x20;
+> * **During an operator change, establish a** [**lock-up period and gradual transfer of authority**](../../reference.md#beacondeposit)<sub>**4**</sub> **for existing deposits**
 >   * Initially, grant only reward distribution rights to allow boosters to evaluate the operator → After providing time to unboost (unboost delay = 2000 blocks), grant the authority to change the commission.
 > * **Prevent the operator address from being set to the zero address**
 
@@ -141,6 +141,10 @@ function acceptOperatorChange(bytes calldata pubkey) external {
 ### Threat 3: Funds Frozen Until Validator Exits Cap Due to Non-existent Withdrawal Logic <a href="#id-3" id="id-3"></a>
 
 Currently, Berachain does not have a logic for validators to voluntarily withdraw their deposited funds. Therefore, it is impossible to withdraw funds deposited on the chain in case of emergency or need.
+
+Before Bectra, Berachain withdraw logic
+
+<figure><img src="../../.gitbook/assets/withdraw2.svg" alt=""><figcaption></figcaption></figure>
 
 #### Impact
 
