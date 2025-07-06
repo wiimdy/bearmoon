@@ -21,7 +21,7 @@ icon: square-poll-vertical
 > * **단일 엔티티나 프로토콜이 전체 BGT의 일정 비율(15%) 이상을 보유할 때 경고 메커니즘 도입**
 >   * 15% 기준은 제안이 올라가는 기준인 20%의 3/4로 설정
 > * **특정 비율을 넘어간 BGT에 대해서 선형적인 투표권 대신 영향력이 감소하는 방식으로 대량 보유자의 영향력을 축소**
->   * 제곱근 기반 [**Quadratic Voting**](../../reference.md#id-27.-quadratic-voting)<sub>27</sub> 방식 적용하여 대량 보유자의 영향력 축소
+>   * 제곱근 기반 [**Quadratic Voting**](../../reference.md#quadratic-voting) 방식 적용하여 대량 보유자의 영향력 축소
 
 #### Best Practice
 
@@ -41,56 +41,19 @@ function _voteSucceeded(uint256 proposalId) internal view virtual override retur
 
 {% code overflow="wrap" %}
 ```solidity
-// 로그함수 기반 연속적 투표권 시스템
+// BGT 보유량의 제곱근으로 투표권을 계산하여 대량 보유자에 페널티를 적용하여 영향력을 제한하는 투표 시스템
 contract ConcentrationWarning {
     event ConcentrationWarning(address indexed user, uint256 concentration);
-    event VoteCast(uint256 indexed proposalId, address indexed voter, bool support, uint256 weight);
     
-    function calculateLogWeight(uint256 bgtAmount) public view returns (uint256) {
-        uint256 totalSupply = getTotalBGTSupply();
-        uint256 userPercentage = bgtAmount * 1e18 / totalSupply; // 18 decimals
-        
-        // 0%는 0 투표권
-        if (userPercentage == 0) return 0;
-        
-        // 로그 스케일링: percentage * log(percentage + 1) / log(101)
-        // +1은 log(0) 방지, 101은 최대값 정규화
-        uint256 logFactor = ln(userPercentage + 1e18) * 1e18 / ln(101e18);
-        
-        return bgtAmount * logFactor / 1e18;
+    function calculateQuadraticWeight(uint256 bgtAmount) public pure returns (uint256) {
+        return sqrt(bgtAmount);
     }
     
-    function calculateSqrtLogWeight(uint256 bgtAmount) public view returns (uint256) {
-        uint256 totalSupply = getTotalBGTSupply();
-        uint256 userPercentage = bgtAmount * 1e18 / totalSupply;
-        
-        if (userPercentage == 0) return 0;
-        
-        // 제곱근 + 로그 조합: sqrt(amount) * log_scaling
-        uint256 sqrtAmount = sqrt(bgtAmount);
-        uint256 logScale = ln(userPercentage + 1e18) * 1e18 / ln(101e18);
-        
-        return sqrtAmount * logScale / 1e18;
-    }
-    
-    function calculateAdvancedLogWeight(uint256 bgtAmount) public view returns (uint256) {
-        uint256 totalSupply = getTotalBGTSupply();
-        uint256 userPercentage = bgtAmount * 1e18 / totalSupply;
-        
-        if (userPercentage == 0) return 0;
-        
-        // 더 부드러운 곡선: amount * (log(percentage + 1) / log(101))^2
-        uint256 logFactor = ln(userPercentage + 1e18) * 1e18 / ln(101e18);
-        uint256 squaredLogFactor = logFactor * logFactor / 1e18;
-        
-        return bgtAmount * squaredLogFactor / 1e18;
-    }
-    
-    function castLogVote(uint256 proposalId, bool support) external {
-        uint256 weight = calculateLogWeight(getBGTBalance(msg.sender));
+    function castQuadraticVote(uint256 proposalId, bool support) external {
+        uint256 weight = calculateQuadraticWeight(getBGTBalance(msg.sender));
         uint256 concentration = getConcentration(msg.sender);
         
-        // 15% 이상: 경고 발생 (모니터링용)
+        // 15% 이상: 경고 발생
         if (concentration > 15e16) {
             emit ConcentrationWarning(msg.sender, concentration);
         }
@@ -98,39 +61,19 @@ contract ConcentrationWarning {
         emit VoteCast(proposalId, msg.sender, support, weight);
     }
     
-    // 자연로그 근사 함수 (가스 효율적)
-    function ln(uint256 x) internal pure returns (uint256) {
-        require(x > 0, "ln: zero input");
-        
-        uint256 result = 0;
-        uint256 y = x;
-        
-        // 간단한 자연로그 근사
-        while (y >= 2e18) {
-            result += 693147180559945309; // ln(2) * 1e18
-            y = y / 2;
-        }
-        
-        // Taylor series approximation for ln(1+x) where x is small
-        if (y > 1e18) {
-            uint256 z = y - 1e18;
-            result += z - (z * z) / (2e18) + (z * z * z) / (3e36);
-        }
-        
-        return result;
+    function getConcentration(address user) public view returns (uint256) {
+        uint256 totalBGT = getTotalBGTSupply();
+        uint256 userBGT = getBGTBalance(user) + getDelegatedBGT(user);
+        return userBGT * 1e18 / totalBGT;
     }
     
-    function sqrt(uint256 x) internal pure returns (uint256) {
-        if (x == 0) return 0;
-        uint256 z = (x + 1) / 2;
-        uint256 y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
-        }
-        return y;
+    function isHighConcentration(address user) external view returns (bool) {
+        return getConcentration(user) > 15e16;
     }
 }
+
+
+
 ```
 {% endcode %}
 
@@ -157,8 +100,8 @@ contract ConcentrationWarning {
 >   * **개선 및 혁신형 템플릿:** 기본 검토 절차에 더해 오딧 절차 및 리뷰 절차 확대
 > * **새로운 컴포넌트는 제한된 규모로 시작하여 점진적으로 확장하는 방식으로 배포하여 잠재적 피해를 최소화**
 >   * 제한은 화이트 리스팅 된 토큰 및 금고에 대해 TVL 한도, 참여자 수 제한을 통한 단계적 검증 절차
->   * 생태계 참여자들의 의견을 수렴할 수 있는 [**최소한의 기한(2\~3주, DeFi 평균 피드백 소요 시간 기준)**](../../reference.md#id-29.-defi-2-3)<sub>29</sub>를 거쳐 정식 토큰 및 금고로 등록
-> * **통과된 제안은 가디언즈의 검증을 거칠** [**타임락 기간**](../../reference.md#id-28.-berachain-2-guardian-5-of-9-multisig)<sub>28</sub> **필요**
+>   * 생태계 참여자들의 의견을 수렴할 수 있는 [**최소한의 기한(2\~3주, DeFi 평균 피드백 소요 시간 기준)**](../../reference.md#defi-2-3)를 거쳐 정식 토큰 및 금고로 등록
+> * **통과된 제안은 가디언즈의 검증을 거칠** [**타임락 기간**](../../reference.md#berachain-2-guardian-5-of-9-multisig) **필요**
 
 #### Best Practice
 
@@ -213,7 +156,7 @@ contract ComponentValidator {
 #### 가이드라인
 
 > * **모든 제안 거부 시 구체적이고 객관적인 사유를 공개하고 커뮤니티가 이에 대해 이의제기 메커니즘 제공**
->   * **이의제기 메커니즘:** [**독립적인 중재 위원회**](../../reference.md#id-30)<sub>30</sub>(리뷰어 선출 과정과 동일)를 구성하여 다음 권한 부여
+>   * **이의제기 메커니즘:** [**독립적인 중재 위원회**](../../reference.md#undefined-8)(리뷰어 선출 과정과 동일)를 구성하여 다음 권한 부여
 >     * 재단이나 가디언즈의 결정에 대해 독립적으로 검토 및 교체 제안
 >     * 부결된 안건에 대한 재상정
 >     * 부당한 결정 및 권한행사에 대한 챌린지
@@ -264,20 +207,30 @@ contract TransparentGovernance {
 
 거버넌스가 아직 온체인에 구현되지 않아 포럼 기반 투표로 운영되며, 이로 인해 투표율(20%) 충족이 어렵고 의사결정 과정이 비효율적이거나 조작 가능성이 있다.
 
+현재 오프체인 거버넌스의 핵심 한계:
+
+* **수동 실행 위험**: 포럼 결정과 구현 사이의 인간 개입 필요로 지연 및 오류 발생 가능성
+* **시빌 공격 취약성**: 포럼 기반 투표에서 IP/기기 추적 및 최소 BGT 요구사항 부재
+* **데이터 무결성 문제**: 투표 결과가 오프체인에 저장되어 불변 검증 메커니즘 부재
+
 #### 영향도
 
 `Informational`
 
-프로토콜 역시 온체인 거버넌스를 구현할 계획을 가지고 있지만 현재 [**구현이 안된 상태**](../../reference.md#id-31)<sub>31</sub>이기에 `Informational` 평가
+프로토콜 역시 온체인 거버넌스를 구현할 계획을 가지고 있지만 현재 [**구현이 안된 상태**](../../reference.md#undefined-9)이기에 `Informational` 평가
 
 #### 가이드라인
 
 > * **온체인 구현 전까지 포럼 투표에 대해 투명성과 검증 가능성 확보**
 >   * 포럼 투표에 대한 데이터를 모아 온체인 데이터로 올려 누구나 볼 수 있게 구현
 >   * 투표과정에 대해서도 5분단위의 스냅샷을 활용하여 결과 투표 상황이 실시간으로 반영되게 구현
-> * **Sybil Attack 방지 메커니즘 도입**
+> * **Civil 공격 방지 메커니즘 도입**
 >   * 투표에 필요한 최소한의 BGT 제한 도입(예시: 100 BGT 이상 보유한 사용자만 투표 가능)
 >   * 동일 IP/디바이스 다중 계정 추적 및 모니터링
+> * **온체인 구현 시 핵심 고려사항**
+>   * BGT 잔액 통합: 투표 시점 조작 방지를 위한 실시간 BGT 잔액 검증 및 스냅샷 메커니즘 구현
+>   * 하이브리드 전환 기간: 3-6개월간 포럼과 온체인 투표 병행 운영 및 교차 검증 요구사항 적용
+>   * 긴급 대체 메커니즘: 온체인 거버넌스 시스템 장애 시 포럼 투표로 되돌아가고, 가디언이 포럼 결과를 직접 실행할 수 있는 백업 시스템 유지
 
 #### Best Practice
 
@@ -363,7 +316,7 @@ contract ForumVoteTracker {
 
 #### 가이드라인
 
-> * **거버넌스 제안 통과 후 실제 적용까지** [**최소 14일의 공지 기간**](../../reference.md#id-32.-defi-14)<sub>32</sub>**을 두고**\
+> * **거버넌스 제안 통과 후 실제 적용까지** [**최소 14일의 공지 기간**](../../reference.md#defi-14)**을 두고**\
 >   **제안 통과 즉시, 적용 7일 전, 적용 1일 전 총 3차례에 걸쳐 다양한 채널을 통해 변경사항을 공지**
 > * **사용자 자산에 직접적인 영향을 미치는 변경사항(수수료, 이자율, 청산 임계값 등)에 대해서 더 긴 공지 기간(최대 30일)을 제공하여 사용자가 대응할 수 있는 충분한 시간 확보**
 > * **사용자가 변경사항이 자신의 포지션에 미칠 영향을 미리 확인할 수 있는 시뮬레이션 도구를 제공하여 사전 대응 지원**

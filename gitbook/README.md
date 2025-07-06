@@ -1,16 +1,5 @@
 ---
 icon: hand-wave
-layout:
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
 # 머릿말
@@ -24,4 +13,3 @@ layout:
 또한, 베라체인의 안전한 운영과 생태계의 지속 가능한 성장을 위해 체인 운영자, dApp 빌더, 유동성 공급자, 커뮤니티 구성원 모두가 참고할 수 있도록 작성되었습니다.
 
 저희 Bearmoon 팀은 프로토콜에 대한 코드 분석과 PoL 구조에 대한 심층 리서치를 통해 보안 가이드라인 문서를 작성했습니다. 이 문서를 통해 베라체인의 코어 컨트랙트와 주요한 dApp 프로토콜에 실질적이고 적용 가능한 보안 지침을 제공하여 베라체인이 더욱 안전하고 신뢰받는 네트워크로 발전하는 데 기여하고자 합니다.
-

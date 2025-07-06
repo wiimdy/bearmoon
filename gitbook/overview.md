@@ -45,7 +45,7 @@ _\*BYUSD: 페이팔 USD(PYUSD)를 베라체인으로 브릿지해서 전송한 �
 2. **검증자** → BERA 스테이킹 → 블록생성(블록 생성 보상) → 보상 금고에 보상 분배 → 인센티브 토큰 보상
 3. **프로토콜(dApp)** → 유동성 제공 받음 → 인센티브 토큰 제공
 
-<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/unnamed.png" alt=""><figcaption></figcaption></figure>
 
 결과적으로 플라이휠이 정상적으로 동작할 때 다음과 같은 선순환 구조를 형성합니다.
 

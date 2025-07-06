@@ -3,17 +3,6 @@ description: >-
   여러 dApp의 기능을 연쇄적으로 조합하여 사용하는 복합 DeFi 전략은 고수익 기회를 제공한다.  하지만 이러한 dApp 체이닝은 개별
   dApp 사용 시에는 드러나지 않았던 새로운 상호작용 위험을 발생시키고 기존 위험을 증폭시킬 수 있다.
 icon: link
-layout:
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
 # dApp 보안 가이드라인: 체이닝
@@ -26,7 +15,7 @@ BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있�
 
 **공격 시나리오**
 
-1. 공격자가 베라체인 DEX에서 대량 거래를 통해, Beraborrow에서 담보로 사용되는 LP를 발행하는 유동성 풀(예: kodiak의 HONEY-BERA)의 불균형을 유발한다.&#x20;
+1. 공격자가 베라체인 DEX에서 대량 거래를 통해, Beraborrow에서 담보로 사용되는 LP를 발행하는 유동성 풀(예: kodiak의 HONEY-BERA)의 불균형을 유발한다.
 2. LP 토큰 가치 하락으로 담보비율(ICR)이 최소담보비율(MCR) 이하로 떨어지면서 대량 청산이 시작된다. 청산 규모가 LSP의 NECT 잔액을 초과하면서 LSP 예치자들의 대량 인출 러시가 발생한다.
 3. 연쇄 청산과 인출 러시로 LiquidStabilityPool(LSP)의 totalSupply가 거의 0에 가까운 상태에 도달한다. Beraborrow LSP는 BaseCollateralVault와 달리 virtual accounting 메커니즘을 구현하지 않았으며, deposit/mint 함수에서 totalSupply=0 보호장치가 없다.
 4. 공격자가 1 wei의 NECT를 예치하여 100% 지분을 획득한 후, NECT 토큰을 LSP 컨트랙트로 직접 대량 전송한다. DebtToken의 \_requireValidRecipient 함수는 LSP 주소를 차단하지 않으며, LSP의 totalAssets() 함수는 도네이션된 NECT를 자산 계산에 포함하지 않는다.
@@ -38,21 +27,21 @@ BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있�
 
 #### 영향도
 
-`Medium`&#x20;
+`Medium`
 
 이 공격은 LiquidStabilityPool(LSP)의 총 공급량(totalSupply)이 0에 가까워지는 특수한 조건 하에서만 실행 가능하다. 하지만 성공할 경우 LSP 예치자의 자금을 직접적으로 탈취할 수 있으므로 **`Medium`**&#xC73C;로 평가한다. 영향도 평가는 다음 근거에 기반한다.
 
-1. **제한된 공격 표면:** 이 공격 시나리오는 BeraBorrow에서 담보로 허용된 모든 자산이 아닌, **특정 DEX의 LP 토큰**에서 시작된다. 공격자는 BeraBorrow가 담보로 사용하는 LP 토큰 중에서도 상대적으로 유동성이 낮아 가격 조작이 용이한 풀을 타겟으로 해야 하므로 공격의 전제 조건이 제한적이다. 또한, 인플레이션 공격 자체도 BeraBorrow 내의 **모든 볼트가 아닌  LiquidStabilityPool과 같이 virtual accounting 방어 로직이 부족한 특정 볼트**에 한정된다.
+1. **제한된 공격 표면:** 이 공격 시나리오는 BeraBorrow에서 담보로 허용된 모든 자산이 아닌, **특정 DEX의 LP 토큰**에서 시작된다. 공격자는 BeraBorrow가 담보로 사용하는 LP 토큰 중에서도 상대적으로 유동성이 낮아 가격 조작이 용이한 풀을 타겟으로 해야 하므로 공격의 전제 조건이 제한적이다. 또한, 인플레이션 공격 자체도 BeraBorrow 내의 **모든 볼트가 아닌 LiquidStabilityPool과 같이 virtual accounting 방어 로직이 부족한 특정 볼트**에 한정된다.
 2. **조건부 공격 가능성 (LSP 고갈 상황):** 공격의 핵심 단계는 LSP의 totalSupply가 거의 0으로 수렴하는 것이다. 이는 정상적인 프로토콜 상태가 아니며, 대규모 연쇄 청산과 예치자들의 대량 인출이라는 **극단적인 시장 스트레스 상황**에서만 발생할 수 있다. 따라서 공격자는 시장을 원하는 방향으로 움직일 막대한 자본이 필요하며, 공격 시점이 매우 제한적이다.
 3. [취약점 패턴 레퍼런스](https://docs.openzeppelin.com/contracts/5.x/erc4626)**:** LSP의 totalSupply가 0에 가까워졌을 때 1 wei 예치를 통해 지분을 독점하고, 이후 자산 기부로 share의 가치를 부풀려 후속 예치자의 자금을 탈취하는 방식은 잘 알려진 **ERC-4626 인플레이션 공격** 벡터다. OpenZeppelin 등 다수의 보안 감사 보고서에서는 이러한 공격의 위험성을 경고하고 방어 기법 적용을 권장하고 있어, 이 공격이 BeraBorrow의 LSP에 이론적으로 적용 가능하다는 점은 무시할 수 없는 위험이다.
 
 #### 가이드라인
 
-> * **Dex 풀의 불균형 발생 시 LP 토큰을 담보로 하는  Lending 프로토콜에 경고 시스템 제작**
+> * **Dex 풀의 불균형 발생 시 LP 토큰을 담보로 하는 Lending 프로토콜에 경고 시스템 제작**
 > * **Virtual Accounting 시스템 구현**
 > * **LiquidStabilityPool(LSP) 컨트랙트에 BaseCollateralVault와 동일한 virtual accounting 메커니즘 도입내부 balance 추적과 실제 토큰 잔액 분리를 통한 도네이션 공격 차단**
 > * **최소 예치금 임계값 설정**
->   * LSP deposit/mint 함수에 최소 예치금 요구사항 추가&#x20;
+>   * LSP deposit/mint 함수에 최소 예치금 요구사항 추가
 >   * 초기 예치 시 더 높은 최소 금액 설정으로 공격 비용 증가
 > * **totalSupply=0 상태 보호 강화**
 >   * 모든 예치 함수에 ZeroTotalSupply 체크 확장 적용 linearVestingExtraAssets 함수에만 존재하는 보호를 전체 시스템으로 확산
@@ -67,7 +56,7 @@ BeraBorrow는 베라체인의 PoL 메커니즘과 긴밀하게 통합되어 있�
 > * **LSP-DEX 간 유동성 상관관계 추적**
 >   * 베라체인 DEX 풀 불균형이 LSP 안정성에 미치는 영향 실시간 분석
 
-#### Best Practice&#x20;
+#### Best Practice
 
 `커스텀 코드`
 
@@ -113,7 +102,7 @@ function _depositAndMint(/*...*/) private {
 
 ### 위협 2: HONEY 디페깅과 PermissionlessPSM.sol을 이용한 프로토콜 자산 탈취
 
-HONEY의 시장 가격이 폭락했음에도  Beraborrow의`PermissionlessPSM.sol`이  1:1로 NECT를 민팅할 경우, 공격자는 저렴해진 HONEY로 대량의 NECT를 확보한다.  이후 이 NECT를 대출 프로토콜에서 고정된 가치로 담보 상환에 악용하여 프로토콜의 자산을 고갈시킨다.
+HONEY의 시장 가격이 폭락했음에도 Beraborrow의`PermissionlessPSM.sol`이 1:1로 NECT를 민팅할 경우, 공격자는 저렴해진 HONEY로 대량의 NECT를 확보한다. 이후 이 NECT를 대출 프로토콜에서 고정된 가치로 담보 상환에 악용하여 프로토콜의 자산을 고갈시킨다.
 
 **핵심 취약점**
 
@@ -293,7 +282,7 @@ Infrared 프로토콜은 베라체인의 PoL 경제에서 사실상 보상 엔�
 4. **검증자·위임자 신뢰 붕괴 → 네트워크 보안 약화**\
    Infrared는 자체적으로 검증자 노드를 운영하면서 스테이킹된 BGT를 다시 네트워크에 위임해 둔다. TVL 기준으로 전체 스테이킹 지분의 10 억 달러 이상이 Infrared Vault에 묶여 있으므로, Vault가 중단되면 해당 지분이 불능 상태가 된다. 결과적으로 유효 스테이크가 급감하고 검증자 세트 중 일부가 블록 제안에서 제외되면서 블록 인터벌이 늘어난다.
 5. **PoL 인센티브 중단 → 생태계 역플라이휠**\
-   Infrared가 보상 분배를 멈추면 BeraChef·RFRV Vault로부터 나오는 PoL 보상도 같이 멈춘다. 유동성 공급자는 돈이 안 되는 풀을 떠나고, TVL이 줄어든 dApp들은 다시 인센티브를 삭감하며 악순환이 시작된다.&#x20;
+   Infrared가 보상 분배를 멈추면 BeraChef·RFRV Vault로부터 나오는 PoL 보상도 같이 멈춘다. 유동성 공급자는 돈이 안 되는 풀을 떠나고, TVL이 줄어든 dApp들은 다시 인센티브를 삭감하며 악순환이 시작된다.
 
 #### 영향도
 
@@ -307,7 +296,7 @@ Infrared 프로토콜은 베라체인의 PoL 경제에서 사실상 보상 엔�
 > * **위협 발생 시 사람의 개입 없이 자동으로 방어 메커니즘 실행. 서킷 브레이커로 자동으로 시스템 일시 정지**
 >   * 오라클 최신 가격이 30분 이상 업데이트 되지 않을 시 정지
 >     * beraborrow에서 설정한 oracle 가장 짧은 heartbeat가 30분이어서 기준을 설정 [https://berascan.com/tx/0xfe8efae89bc2b0491f0b06d43d8f75c312616888e8790452ef0e2d1f52e371b2](https://berascan.com/tx/0xfe8efae89bc2b0491f0b06d43d8f75c312616888e8790452ef0e2d1f52e371b2)
->   * &#x20;TVL이 20% 이상 급락시 정지&#x20;
+>   * TVL이 20% 이상 급락시 정지
 >     * 심각하지만 아직은 회복 가능할 수 있는 경험적인 임계치로 20%설정
 >   * 자동화 봇이 `checkAndTriggerPause` 함수를 주기적으로 호출하여 24시간 감시 체계를 구축, 조건 충족 시 즉시 시스템 정지
 
@@ -456,9 +445,7 @@ DEX 풀 불균형 → 담보 과대평가·과소평가 → 연쇄 청산 체이
 >
 >     * DEX 가격 편차·Stability Pool 잔액을 Dune/Superset 대시보드로 스트리밍 • 대량 청산 트랜잭션 발생 시 LSP 인출 1-블록 지연 & 경고
 >
->
->
->     #### 파라미터·공식
+>     **파라미터·공식**
 >
 >     *   **필요 자본**
 >
