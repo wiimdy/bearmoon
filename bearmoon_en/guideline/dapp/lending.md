@@ -91,6 +91,8 @@ It forces excessive collateral losses on users and, in severe cases, can leave t
 
 When the total supply of an ERC-4626 vault is nearly zero, an attacker deposits a very small amount of shares and then directly transfers assets to the vault to inflate the value of their shares. Subsequent users who deposit will receive far fewer shares due to the inflated share price, effectively having their assets stolen by the attacker. Similar [past cases](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks) exist.
 
+[https://docs.openzeppelin.com/contracts/5.x/erc4626#defending\_with\_a\_virtual\_offset](https://docs.openzeppelin.com/contracts/5.x/erc4626#defending_with_a_virtual_offset)
+
 #### Impact
 
 `Low`

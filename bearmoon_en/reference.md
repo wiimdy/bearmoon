@@ -264,3 +264,7 @@ Mitigates centralization by limiting individual validator's maximum stake with M
 #### 61. Automated Delegated Fund Distribution
 
 Enhances decentralization by automatically distributing restaking and new delegations across multiple validators, preventing centralization and ensuring participation incentives ([Lido example](https://docs.terra.lido.fi/introduction/stake-distribution/))
+
+#### 62. Cascading Liquidations
+
+[Cascading liquidation refers to an event where liquidations pile on top of each other, resulting in a sudden price change.](https://coinmarketcap.com/academy/glossary/cascading-liquidations)

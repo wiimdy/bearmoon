@@ -264,6 +264,12 @@ contract TransparentGovernance {
 
 Governance is not yet implemented on-chain and operates through forum-based voting, which makes it difficult to meet the voter turnout threshold (20%) and makes the decision-making process inefficient or susceptible to manipulation.
 
+Current Off-chain Governance Limitations:
+
+* **Manual Execution Risk**: Human intervention required between forum decision and implementation creates delay and error potential
+* **Sybil Attack Vulnerability**: Forum-based voting lacks IP/device tracking and minimum BGT requirements
+* **Data Integrity Issues**: Vote results stored off-chain without immutable verification mechanism
+
 #### Impact
 
 `Informational`
@@ -278,6 +284,10 @@ The protocol also plans to implement on-chain governance, but since it is [**cur
 > * **Introduce a Sybil attack prevention mechanism.**
 >   * Introduce a minimum BGT requirement for voting (e.g. only users holding more than 100 BGT can vote).
 >   * Track and block multiple accounts from the same IP/device.
+> * **On-chain Implementation Critical Considerations**
+>   * BGT Balance Integration: Implement real-time BGT balance verification with snapshot mechanisms to prevent vote-time manipulation
+>   * Hybrid Transition Period: Run parallel forum and on-chain voting for 3-6 months with cross-verification requirements
+>   * Emergency Fallback: Maintain forum voting as backup system when on-chain governance fails, allowing guardians to directly execute forum-based decisions during technical emergencies
 
 #### Best Practice
 

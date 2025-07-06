@@ -4,22 +4,11 @@ description: >-
   chain offer high-yield opportunities. However, this dApp chaining can create
   new interaction risks that were not apparent when
 icon: link
-layout:
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
 # dApp Security Guidelines: Chaining
 
-<table><thead><tr><th width="595">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="chain.md#id-1-dex-erc-4626">#id-1-dex-erc-4626</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm-sol">#id-2-honey-permissionlesspsm-sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="chain.md#id-4-dex">#id-4-dex</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
+<table><thead><tr><th width="595">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="chain.md#id-2-honey-permissionlesspsm-sol">#id-2-honey-permissionlesspsm-sol</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="chain.md#id-3">#id-3</a></td><td align="center"><code>Informational</code></td></tr><tr><td><a data-mention href="chain.md#id-4-dex">#id-4-dex</a></td><td align="center"><code>Informational</code></td></tr></tbody></table>
 
 ### Threat 1: ERC-4626 Inflation Attack due to DEX Pool Imbalance and Cascading Liquidations <a href="#id-1-dex-erc-4626" id="id-1-dex-erc-4626"></a>
 
@@ -29,7 +18,7 @@ BeraBorrow is tightly integrated with Berachain's PoL mechanism and uses Infrare
 
 1. The attacker causes an imbalance in a liquidity pool (e.g., kodiak's HONEY-BERA) that issues LP tokens used as collateral in Beraborrow, through large trades on a Berachain DEX.
 2. The drop in LP token value causes the collateral ratio (ICR) to fall below the minimum collateral ratio (MCR), triggering mass liquidations. The scale of liquidations exceeds the NECT balance of the LSP, causing a mass withdrawal rush from LSP depositors.
-3. The cascading liquidations and withdrawal rush cause the totalSupply of the LiquidStabilityPool (LSP) to approach near zero. Unlike the BaseCollateralVault, the Beraborrow LSP does not implement a virtual accounting mechanism and lacks a `totalSupply=0` safeguard in its deposit/mint functions.
+3. The cascading liquidations[<sub>62</sub>](../../reference.md#id-62.-cascading-liquidations) and withdrawal rush cause the totalSupply of the LiquidStabilityPool (LSP) to approach near zero. Unlike the BaseCollateralVault, the Beraborrow LSP does not implement a virtual accounting mechanism and lacks a `totalSupply=0` safeguard in its deposit/mint functions.
 4. The attacker deposits 1 wei of NECT to acquire 100% of the shares, then transfers a large amount of NECT tokens directly to the LSP contract. The `_requireValidRecipient` function of the DebtToken does not block the LSP address, and the LSP's `totalAssets()` function does not include the donated NECT in its asset calculation.
 5. When a subsequent depositor deposits NECT, they receive 0 shares due to Solidity rounding in the ERC-4626 `convertToShares` calculation, and the attacker withdraws the entire balance to realize a profit.
 

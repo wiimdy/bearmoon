@@ -1,6 +1,6 @@
 # 💸 dApp Security Guidelines
 
-Developers building dApps in a PoL ecosystem like Berachain must consider interactions with various protocols.
+Developers building dApps in a PoL ecosystem like Berachain must consider interactions with various protocols.\
 The following are security guidelines for major dApp types.
 
 The **Bearmoon** team has analyzed Berachain's main dApps—Beraborrow, Kodiak, BEX, and Infrared—to derive the following guidelines.

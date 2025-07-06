@@ -44,6 +44,8 @@ Relying on a single oracle or failing to clearly inform users during a de-peggin
 > * **Mitigate the impact of real-time oracle manipulation attacks by determining prices based on a TWAP over a certain period.**
 > * **To prevent economic attacks that exploit severe de-pegging of the HONEY token, consider introducing a mechanism that requires a trading delay or additional verification when an abnormal surge in trading volume or a repetitive attack pattern is detected.**
 
+<figure><img src="../../.gitbook/assets/image.png" alt="" width="563"><figcaption></figcaption></figure>
+
 #### Best Practice
 
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L569-L578)
@@ -167,6 +169,8 @@ If the minting and redeeming logic's basket modes operate separately, it can cau
 > * **Basket Mode activation should be considered a last resort for maintaining stability and should be automatically deactivated when the pegged asset's stability is restored.**
 >   * **Stability Restoration:** Automatically return to normal mode after [1 hour of continuous stability (less than 0.2%)](../../reference.md#id-24.-ispegged-implementation)<sub>24</sub>.
 
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+
 #### Best Practice
 
 [`HoneyFactory.sol`](https://github.com/wiimdy/bearmoon/blob/c5ff9117fc7b326375881f9061cbf77e1ab18543/Core/src/honey/HoneyFactory.sol#L526-L553)
@@ -242,8 +246,8 @@ This is a threat in terms of user convenience, so it is rated `Informational`.
 
 #### Guideline
 
-> * **When redeeming while Basket Mode is active, the value of the de-pegged asset is assessed by referencing** [**at least 3 oracles**](../../reference.md#id-25.-oracles-used-by-berachain-chainlink-etc)<sub>25</sub> \
->   **(**&#x43;urrently, Berachain references reliable Chainlink oracles along with Pyth and spot oracles.**).**
+> * **When redeeming while Basket Mode is active, the value of the de-pegged asset is assessed by referencing** [**at least 3 oracles**](../../reference.md#id-25.-oracles-used-by-berachain-chainlink-etc)<sub>25</sub>\
+>   &#xNAN;**(**&#x43;urrently, Berachain references reliable Chainlink oracles along with Pyth and spot oracles.**).**
 >   * In this process, only active oracles are referenced (deactivated, emergency-halted oracles are prohibited).
 > * **A clear and simple procedure is needed to notify users that de-pegged assets may be included in the redemption, the valuation criteria for de-pegged assets, and the potential for loss.**
 >   * A [formula-based explanation](../../reference.md#id-26.-calculateloss-formula-reference)<sub>26</sub> of how to calculate the estimated loss from de-pegged assets.
