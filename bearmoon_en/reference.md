@@ -6,7 +6,8 @@ description: 📚 Reference Footnote List
 
 #### 1. history\_buf\_length
 
-EIP-4788 standard's 8191 slot circular buffer, Berachain uses 2-second intervals instead of 12 seconds for faster proof processing
+EIP-4788 standard's 8191 slot circular buffer, Berachain uses 2-second intervals instead of 12 seconds for faster proof processing\
+[https://eips.ethereum.org/EIPS/eip-4788](https://eips.ethereum.org/EIPS/eip-4788)
 
 #### 2. Minimum 4.55 hours (8191 \* 2 seconds)
 
@@ -14,7 +15,8 @@ Minimum waiting time to prevent buffer overwriting, 8 times faster processing cy
 
 #### 3. SSZ.verifyProof
 
-Simple Serialize based Merkle proof verification, transaction automatically fails if an incorrect proposer index is submitted
+Simple Serialize based Merkle proof verification, transaction automatically fails if an incorrect proposer index is submitted\
+[https://ethereum.org/pcm/developers/docs/data-structures-and-encoding/ssz/](https://ethereum.org/pcm/developers/docs/data-structures-and-encoding/ssz/)
 
 #### 4. BeaconDeposit Contract Operator Change Process (Queue/Timelock)
 
@@ -22,15 +24,18 @@ Simple Serialize based Merkle proof verification, transaction automatically fail
 
 #### 5. Voluntary Withdrawal Not Supported
 
-Currently unimplemented, increasing validator dependency; a queue system and 2-day timelock are planned for future introduction
+Currently unimplemented, increasing validator dependency; a queue system and 2-day timelock are planned for future introduction\
+[https://docs.berachain.com/nodes/validator-lifecycle#withdrawn-state](https://docs.berachain.com/nodes/validator-lifecycle#withdrawn-state)
 
 #### 6. ValidatorSetCap, Forced Ejection Mechanism
 
-Automatic ejection when validator count reaches the upper limit due to network stability priority policy, providing a fund recovery path for existing validators
+Automatic ejection when validator count reaches the upper limit due to network stability priority policy, providing a fund recovery path for existing validators\
+[https://docs.berachain.com/nodes/validator-lifecycle#exited-state](https://docs.berachain.com/nodes/validator-lifecycle#exited-state)
 
 #### 7. OZ ReentrancyGuard spec
 
-OpenZeppelin standard re-entrancy prevention library, nonReentrant modifier blocks re-entrant calls during function execution
+OpenZeppelin standard re-entrancy prevention library, nonReentrant modifier blocks re-entrant calls during function execution\
+[https://docs.openzeppelin.com/contracts/4.x/api/security#ReentrancyGuard](https://docs.openzeppelin.com/contracts/4.x/api/security#ReentrancyGuard)
 
 #### 8. Berachain Rewardvault, whitelist
 
@@ -38,7 +43,8 @@ Prevents spam token registration by limiting incentive tokens to a maximum of 3 
 
 #### 9. Precision Vulnerability Case
 
-Cumulative micro-loss issue due to division truncation, recommends using fixed-point math libraries like FixedPointMathLib
+Cumulative micro-loss issue due to division truncation, recommends using fixed-point math libraries like FixedPointMathLib\
+[https://immunebytes.com/blog/precision-loss-vulnerability-in-solidity-a-deep-technical-dive/](https://immunebytes.com/blog/precision-loss-vulnerability-in-solidity-a-deep-technical-dive/)
 
 #### 10. Error Margin 0.01% (Financial System Standard)
 
@@ -62,11 +68,13 @@ Core reward claim function with onlyOperatorOrUser access control and updateRewa
 
 #### 15. OZ access control
 
-OpenZeppelin role-based access control system, checks and balances through separation of Factory Owner (add) and Vault Manager (remove) permissions
+OpenZeppelin role-based access control system, checks and balances through separation of Factory Owner (add) and Vault Manager (remove) permissions\
+[https://docs.openzeppelin.com/contracts/2.x/access-control](https://docs.openzeppelin.com/contracts/2.x/access-control)
 
 #### 16. OZ Initializable.sol - Upgrade Initialization Standard
 
-ERC-20 token standard compliance verification and use of SafeERC20 library for automatic rollback on transfer failure
+ERC-20 token standard compliance verification and use of SafeERC20 library for automatic rollback on transfer failure\
+[https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/proxy/utils/Initializable.sol](https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/proxy/utils/Initializable.sol)
 
 #### 17. 30-day Cooldown Standard
 
@@ -123,7 +131,8 @@ Loss = AssetValueAtPeg × DepegRatio
 
 #### 27. Quadratic Voting
 
-Reduces influence of large holders by calculating voting power based on the square root of BGT holdings, 15% concentration warning system
+Reduces influence of large holders by calculating voting power based on the square root of BGT holdings, 15% concentration warning system\
+[https://en.wikipedia.org/wiki/Quadratic\_voting](https://en.wikipedia.org/wiki/Quadratic_voting)
 
 #### 28. Berachain Timelock (2 days), Guardian Intervention (5-of-9 multisig)
 
@@ -145,15 +154,19 @@ Prevents sybil attacks with 5-minute forum vote snapshots and a 100 BGT minimum 
 
 Minimum 14-day notice period from governance proposal approval to actual implementation, extendable up to 30 days for changes affecting assets
 
+
+
 33. **Liquity Stress Test Case (2021.05.19)**
 
 * Over 300 Troves were liquidated during a 47% ETH price drop ($3,400 → $1,800)
 * The Stability Pool fully absorbed 93.5M LUSD of debt, maintaining system solvency
-* Demonstrated prevention of cascading liquidations by quickly entering and recovering from Recovery Mode
+* Demonstrated prevention of cascading liquidations by quickly entering and recovering from Recovery Mode\
+  [https://www.liquity.org/blog/how-liquity-handled-its-first-big-stress-test](https://www.liquity.org/blog/how-liquity-handled-its-first-big-stress-test)
 
 #### 34. ERC-4626 Inflation Attack Prevention
 
-Bootstrap protection by applying Virtual Shares and a 9-digit decimal offset, forcing a minimum of 69 shares
+Bootstrap protection by applying Virtual Shares and a 9-digit decimal offset, forcing a minimum of 69 shares\
+[https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)
 
 #### 35. Recovery Mode Transition Stability Guarantee
 
@@ -165,7 +178,8 @@ Automatic entry when TCR < CCR, prevents bad loans by blocking collateral withdr
 
 #### 37. Wonderland DAO Governance Vulnerability Case
 
-Founder's undisclosed history of rug pulls damaged governance credibility, proving the need for owner background checks and transparency
+Founder's undisclosed history of rug pulls damaged governance credibility, proving the need for owner background checks and transparency\
+[https://medium.com/@alymarguerite/wonderland-dao-too-good-to-be-true-8832313aff81](https://medium.com/@alymarguerite/wonderland-dao-too-good-to-be-true-8832313aff81)
 
 #### 38. Preventing Owner Privilege Abuse
 
