@@ -4,9 +4,22 @@ icon: bee
 
 # PoL Threat Modeling
 
-[Berachain Threat Model](https://docs.google.com/document/d/1inQ4gaytUc-Br5SaRklU2GIPlDWsIbqL9_L5UzQ-k2U/edit?usp=sharing)
+[Berachain PoL Threat Model Docs](https://docs.google.com/document/d/1inQ4gaytUc-Br5SaRklU2GIPlDWsIbqL9_L5UzQ-k2U/edit?usp=sharing)
 
-## DFD(Data Flow Diagrams)
+On this page, you can find the following:
+
+DFD (Data Flow Diagram)
+
+You can visually review the overall data flow and architecture of the PoL system. This allows for an intuitive understanding of how key entities, such as users and validators, interact with the system.
+
+Threat Modeling
+
+* [`Entity`](pol.md#entity): Defines all entities involved in the system (e.g., Governance, Validators, Users) and describes their respective roles.
+* [`Asset`](pol.md#asset): Lists the core assets within the system that must be protected, such as BGT and LP tokens.
+* [`Entry Point`](pol.md#entry-point): Identifies all paths and interfaces through which external threats can access the system.
+* [`Scenarios`](pol.md#scenarios): Describes possible attack scenarios and potential threats in detail to help preemptively identify the system's security vulnerabilities.
+
+## DFD
 
 <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 

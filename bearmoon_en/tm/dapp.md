@@ -4,7 +4,21 @@ icon: mobile-button
 
 # dApp Threat Modeling
 
-[Berachain dApp Threat Model](https://docs.google.com/document/d/1KbMM6HxdHg6tyFjH-XzKgbhk1LAySoxyB7OPdh6t8g0/edit?usp=sharing)
+[Berachain dApp Threat Model Docs](https://docs.google.com/document/d/1KbMM6HxdHg6tyFjH-XzKgbhk1LAySoxyB7OPdh6t8g0/edit?usp=sharing)
+
+This page provides a comprehensive analysis of how the core DApps within the Berachain ecosystem organically interact and create synergy.
+
+In particular, this page is written from the perspective of a DApp developer. Accordingly, elements in the threat modeling, such as Entity and Asset, have been selected to be practically helpful, focusing on targets that developers must directly define and protect through their code.
+
+On this page, you can find the following:
+
+* DApp Interaction DFD
+  * This is an overall architecture diagram showing how Berachain's main DApps—`BEX`, `Kodiak`, `Beraborrow`, and `Infrared`—exchange data and connect with each other. It provides an intuitive understanding of how a user's assets create new value as they move through each DApp and the synergistic effects that occur between the protocols.
+* Threat Modeling - DApp System-Centric
+  * [`Entity`](dapp.md#entity): Identifies the core smart contracts and Externally Owned Accounts (EOAs) that developers must directly implement and interact with.
+  * [`Asset`](dapp.md#asset): Defines core assets within the contract that developers must directly manage and protect, such as state variables, tokens, and administrative privileges.
+  * [`Entry Point`](dapp.md#entry-point): Identifies all paths through which external attacks can be initiated.
+  * [`Scenarios`](dapp.md#scenarios): Analyzes the system's security vulnerabilities through specific threat scenarios.
 
 ## DFD(Data Flow Diagrams)
 
