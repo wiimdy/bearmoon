@@ -20,7 +20,7 @@ On this page, you can find the following:
   * [`Entry Point`](dapp.md#entry-point): Identifies all paths through which external attacks can be initiated.
   * [`Scenarios`](dapp.md#scenarios): Analyzes the system's security vulnerabilities through specific threat scenarios.
 
-## DFD(Data Flow Diagrams)
+## DFD
 
 <figure><img src="../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
