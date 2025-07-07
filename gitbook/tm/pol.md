@@ -14,7 +14,7 @@ icon: bee
   * [`Entity`](pol.md#entity): 시스템에 관여하는 모든 주체(거버넌스, 밸리데이터, 사용자 등)를 정의하고 각자의 역할을 설명합니다.
   * [`Asset`](pol.md#asset): 시스템 내에서 보호해야 할 BGT, LP 토큰 등 핵심 자산의 목록을 확인할 수 있습니다.
   * [`Entry Point`](pol.md#entry-point): 외부 위협이 시스템 내부로 접근할 수 있는 모든 경로와 인터페이스를 식별합니다.&#x20;
-  * [`Scenarios`](pol.md#scenarios)`:` 발생 가능한 공격 시나리오와 잠재적 위협을 구체적으로 기술하여 시스템의 보안 취약점을 미리 식별할 수 있도록 돕습니다.
+  * [`Scenarios`](pol.md#scenarios): 발생 가능한 공격 시나리오와 잠재적 위협을 구체적으로 기술하여 시스템의 보안 취약점을 미리 식별할 수 있도록 돕습니다.
 
 ## DFD(Data Flow Diagrams)
 
