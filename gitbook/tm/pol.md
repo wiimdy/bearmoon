@@ -4,9 +4,21 @@ icon: bee
 
 # PoL 위협 모델링
 
-[Berachain PoL Threat Model](https://docs.google.com/document/d/1h2JaDamk702OqXVFsZhCITaeuqfYESOLMztK7fe7g-8/edit?usp=sharing)
+[베라체인 PoL 위협 모델 문서](https://docs.google.com/document/d/1h2JaDamk702OqXVFsZhCITaeuqfYESOLMztK7fe7g-8/edit?usp=sharing)
+
+이 페이지에서는 다음 내용을 확인할 수 있습니다.
+
+* DFD (Data Flow Diagram)
+  * PoL 시스템의 전체 데이터 흐름과 아키텍처를 시각적으로 확인할 수 있습니다. 이를 통해 사용자, 밸리데이터 등 주요 주체들이 시스템과 어떻게 상호작용하는지 직관적으로 이해할 수 있습니다.
+* 위협 모델링 (Threat Modeling)
+  * [`Entity`](pol.md#entity): 시스템에 관여하는 모든 주체(거버넌스, 밸리데이터, 사용자 등)를 정의하고 각자의 역할을 설명합니다.
+  * [`Asset`](pol.md#asset): 시스템 내에서 보호해야 할 BGT, LP 토큰 등 핵심 자산의 목록을 확인할 수 있습니다.
+  * [`Entry Point`](pol.md#entry-point): 외부 위협이 시스템 내부로 접근할 수 있는 모든 경로와 인터페이스를 식별합니다.&#x20;
+  * [`Scenarios`](pol.md#scenarios)`:` 발생 가능한 공격 시나리오와 잠재적 위협을 구체적으로 기술하여 시스템의 보안 취약점을 미리 식별할 수 있도록 돕습니다.
 
 ## DFD(Data Flow Diagrams)
+
+이 DFD는 베라체인 시스템 내에서 사용자와 밸리데이터가 PoL 메커니즘을 중심으로 어떻게 상호작용하는지를 시각적으로 표현한 다이어그램입니다.
 
 <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
