@@ -6,11 +6,13 @@ description: 📚 레퍼런스 각주 목록
 
 #### history\_buf\_length
 
-EIP-4788 표준의 8191 슬롯 순환 버퍼, 베라체인은 12초 대신 2초 간격 사용으로 빠른 증명 처리
+EIP-4788 표준의 8191 슬롯 순환 버퍼, 베라체인은 12초 대신 2초 간격 사용으로 빠른 증명 처리\
+[https://eips.ethereum.org/EIPS/eip-4788](https://eips.ethereum.org/EIPS/eip-4788)
 
 #### SSZ.verifyProof
 
-Simple Serialize 기반 Merkle 증명 검증, 잘못된 proposer index 제출 시 트랜잭션 자동 실패 처리
+Simple Serialize 기반 Merkle 증명 검증, 잘못된 proposer index 제출 시 트랜잭션 자동 실패 처리\
+[https://ethereum.org/pcm/developers/docs/data-structures-and-encoding/ssz/](https://ethereum.org/pcm/developers/docs/data-structures-and-encoding/ssz/)
 
 #### 최소 4.55 시간 (8191 \* 2초)
 
@@ -26,11 +28,13 @@ Simple Serialize 기반 Merkle 증명 검증, 잘못된 proposer index 제출 �
 
 #### ValidatorSetCap, 강제 퇴출 메커니즘
 
-네트워크 안정성 우선 정책으로 검증자 수 상한선 도달 시 자동 퇴출, 기존 검증자 자금 회수 경로 제공
+네트워크 안정성 우선 정책으로 검증자 수 상한선 도달 시 자동 퇴출, 기존 검증자 자금 회수 경로 제공\
+[https://docs.berachain.com/nodes/validator-lifecycle#exited-state](https://docs.berachain.com/nodes/validator-lifecycle#exited-state)
 
 #### 자발적 출금 미지원 상태
 
-현재 구현 부재로 검증자 의존성 증가, 향후 queue 시스템과 2일 타임락 도입 예정
+현재 구현 부재로 검증자 의존성 증가, 향후 queue 시스템과 2일 타임락 도입 예정\
+[https://docs.berachain.com/nodes/validator-lifecycle#withdrawn-state](https://docs.berachain.com/nodes/validator-lifecycle#withdrawn-state)
 
 #### RewardVault 컨트랙트 getReward()
 
@@ -38,11 +42,13 @@ Simple Serialize 기반 Merkle 증명 검증, 잘못된 proposer index 제출 �
 
 #### OZ ReentrancyGuard spec
 
-OpenZeppelin 표준 재진입 방지 라이브러리, nonReentrant 수정자로 함수 실행 중 재호출 차단
+OpenZeppelin 표준 재진입 방지 라이브러리, nonReentrant 수정자로 함수 실행 중 재호출 차단\
+[https://docs.openzeppelin.com/contracts/4.x/api/security#ReentrancyGuard](https://docs.openzeppelin.com/contracts/4.x/api/security#ReentrancyGuard)
 
 #### OZ access control
 
-OpenZeppelin 역할 기반 접근 제어 시스템, Factory Owner(추가)와 Vault Manager(제거) 권한 분리로 견제와 균형
+OpenZeppelin 역할 기반 접근 제어 시스템, Factory Owner(추가)와 Vault Manager(제거) 권한 분리로 견제와 균형\
+[https://docs.openzeppelin.com/contracts/2.x/access-control](https://docs.openzeppelin.com/contracts/2.x/access-control)
 
 #### Berachain Rewardvault, whitelist
 
@@ -50,11 +56,13 @@ OpenZeppelin 역할 기반 접근 제어 시스템, Factory Owner(추가)와 Vau
 
 #### OZ Initializable.sol - 업그레이드 초기화 표준
 
-ERC-20 토큰 표준 준수 검증과 SafeERC20 라이브러리 활용으로 전송 실패 시 자동 롤백 처리
+ERC-20 토큰 표준 준수 검증과 SafeERC20 라이브러리 활용으로 전송 실패 시 자동 롤백 처리\
+[https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/proxy/utils/Initializable.sol](https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/proxy/utils/Initializable.sol)
 
 #### 정밀도 취약점 사례
 
-나눗셈 절삭으로 인한 미세 손실 누적 문제, FixedPointMathLib 등 고정소수점 라이브러리 사용 권장
+나눗셈 절삭으로 인한 미세 손실 누적 문제, FixedPointMathLib 등 고정소수점 라이브러리 사용 권장\
+[https://immunebytes.com/blog/precision-loss-vulnerability-in-solidity-a-deep-technical-dive/](https://immunebytes.com/blog/precision-loss-vulnerability-in-solidity-a-deep-technical-dive/)
 
 #### 오차 범위 0.01% (금융 시스템 표준)
 
@@ -123,7 +131,8 @@ Loss = AssetValueAtPeg × DepegRatio
 
 #### Quadratic Voting
 
-BGT 보유량 제곱근 기반 투표권 계산으로 대량 보유자 영향력 축소, 15% 집중도 경고 시스템
+BGT 보유량 제곱근 기반 투표권 계산으로 대량 보유자 영향력 축소, 15% 집중도 경고 시스템\
+[https://en.wikipedia.org/wiki/Quadratic\_voting](https://en.wikipedia.org/wiki/Quadratic_voting)
 
 #### Berachain 타임락(2일), Guardian 개입(5-of-9 multisig)
 
@@ -149,11 +158,13 @@ Uniswap RFC 최소 7일, 전체 프로세스 14일 기준. Compound 제안 간�
 
 * ETH 47% 급락 ($3,400 → $1,800) 상황에서 300+ Trove 청산 발생
 * Stability Pool이 93.5M LUSD 부채를 완전 흡수하여 시스템 건전성 유지
-* Recovery Mode에 빠른 진입/복구로 연쇄 청산 악순환 방지 실증
+* Recovery Mode에 빠른 진입/복구로 연쇄 청산 악순환 방지 실증\
+  [https://www.liquity.org/blog/how-liquity-handled-its-first-big-stress-test](https://www.liquity.org/blog/how-liquity-handled-its-first-big-stress-test)
 
 #### ERC-4626 인플레이션 공격 방지
 
-Virtual Shares와 9자리 decimal offset 적용, 최소 69개 이상 share 강제 설정으로 부트스트랩 보호
+Virtual Shares와 9자리 decimal offset 적용, 최소 69개 이상 share 강제 설정으로 부트스트랩 보호\
+[https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)
 
 #### Recovery Mode 전환 안정성 보장
 
@@ -165,7 +176,8 @@ TCR < CCR 시 자동 진입, 담보 인출 차단과 ICR/TCR 동시 검증으로
 
 #### Wonderland DAO 거버넌스 취약점 사례
 
-DeFi 프로토콜 창립자의 과거 러그풀 이력 미공개로 거버넌스 신뢰성 훼손, Owner 배경 검증과 투명성 확보 필요성 입증
+DeFi 프로토콜 창립자의 과거 러그풀 이력 미공개로 거버넌스 신뢰성 훼손, Owner 배경 검증과 투명성 확보 필요성 입증\
+[https://medium.com/@alymarguerite/wonderland-dao-too-good-to-be-true-8832313aff81](https://medium.com/@alymarguerite/wonderland-dao-too-good-to-be-true-8832313aff81)
 
 #### Owner 권한 남용 방지
 
