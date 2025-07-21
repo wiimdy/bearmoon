@@ -6,7 +6,7 @@ icon: sack-dollar
 
 <table><thead><tr><th width="617.40625">Threat</th><th align="center">Impact</th></tr></thead><tbody><tr><td><a data-mention href="reward.md#id-1">#id-1</a></td><td align="center"><code>Medium</code></td></tr><tr><td><a data-mention href="reward.md#id-2">#id-2</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-3">#id-3</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-4">#id-4</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-5">#id-5</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-6">#id-6</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-7">#id-7</a></td><td align="center"><code>Low</code></td></tr><tr><td><a data-mention href="reward.md#id-8">#id-8</a></td><td align="center"><code>Low</code></td></tr></tbody></table>
 
-PoL Reward Distribution Logic
+[PoL Reward Distribution Logic](https://docs.berachain.com/learn/pol/#pol-lifecycle)
 
 <figure><img src="../../.gitbook/assets/proof-of-liquidity-steps.png" alt=""><figcaption></figcaption></figure>
 
