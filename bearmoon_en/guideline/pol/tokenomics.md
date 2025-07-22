@@ -12,7 +12,7 @@ Berachain Tokenomics
 
 ### Threat 1: Liquidity crisis due to native token shortage during BGT redemption <a href="#id-1-bgt" id="id-1-bgt"></a>
 
-If the target contract has an insufficient amount of native tokens during BGT redemption, some users will not be able to receive their rewards, and their reward claim transactions will be reverted, leading to a liquidity crisis.
+When a user attempts to redeem their acquired $BGT for the native token, $BERA, at a 1:1 ratio, if the target contract has an insufficient amount of $BERA, some users will not be able to receive their rewards, and the transaction will revert.
 
 #### Impact
 
