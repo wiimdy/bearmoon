@@ -413,11 +413,15 @@ During the price inflation phase, they can deposit the same LP as collateral to 
     The attacker temporarily injects ≈ 50K WBERA (approx. $128K) into the iBGT/WBERA v3 pool (liquidity ≈ $6.3M) to raise the price by +10%.
 
     (iBGT/WBERA v3 liquidity source: [dexscreener.com](https://dexscreener.com/berachain/0x12bf773f18cec56f14e7cb91d82984ef5a3148ee))
+
+    <figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 2.  **Over-borrowing Phase**
 
     Using the artificially inflated LP as collateral, they deposit collateral worth $1M to borrow $833K NECT based on Beraborrow's MCR of 120%.
 
     (Beraborrow MCR data source: [beraborrow.gitbook.io](https://beraborrow.gitbook.io/docs/borrowing/collateral-ratio-and-liquidation))
+
+    <figure><img src="../../.gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
 3.  **Price Reversion & Liquidation Trigger**
 
     By withdrawing the attack funds, the pool price reverts to its original state (-10%), reducing the collateral value to $900K. This drops the ICR to 108%, which is below the 120% MCR, triggering immediate liquidation.
